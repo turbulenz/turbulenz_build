@@ -1,0 +1,192 @@
+
+############################################################
+
+# Check which SDK version we have available
+XCODE_SDK_VER ?= 10.5
+ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
+  ifneq (,$(shell xcodebuild -showsdks | grep macosx10.5))
+    _XCODE_SDK_VER := 10.5
+  else
+    ifneq (,$(shell xcodebuild -showsdks | grep macosx10.6))
+      _XCODE_SDK_VER := 10.6
+    endif
+  endif
+
+  $(warning Cant find SDK version $(XCODE_SDK_VER), using $(_XCODE_SDK_VER))
+  XCODE_SDK_VER := $(_XCODE_SDK_VER)
+endif
+
+# Create a variable holding the xcode configuration
+ifeq ($(CONFIG),debug)
+  XCODE_CONFIG := Debug
+else
+  XCODE_CONFIG := Release
+endif
+
+# Mark non-10.5 builds
+
+ifneq ($(XCODE_SDK_VER),10.5)
+  VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
+endif
+
+############################################################
+
+$(call log,MACOSX BUILD CONFIGURATION)
+
+#
+# CXX / CMM FLAGS
+#
+
+CXX := /Developer/usr/bin/llvm-g++-4.2
+CMM := $(CXX)
+
+CXXFLAGSPRE := -x objective-c++ \
+    -arch i386 -fmessage-length=0 -pipe -fexceptions \
+    -fpascal-strings -fasm-blocks \
+    -Wall -Wno-unknown-pragmas \
+    -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
+    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -ftree-vectorize -msse3 -mssse3 \
+    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -fvisibility-inlines-hidden \
+    -fvisibility=hidden \
+    -DXP_MACOSX=1
+
+
+# -fno-rtti
+# -fno-exceptions
+# -fvisibility=hidden
+
+CMMFLAGSPRE := -x objective-c++ \
+    -arch i386 -fmessage-length=0 -pipe \
+    -fpascal-strings -fasm-blocks -fPIC \
+    -Wall -Wno-unknown-pragmas \
+    -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
+    -Wno-undeclared-selector \
+    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -ftree-vectorize -msse3 -mssse3 \
+    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -fvisibility-inlines-hidden \
+    -fvisibility=hidden \
+    -DXP_MACOSX=1
+
+# -fno-exceptions
+# -fno-rtti
+
+CXXFLAGSPOST := \
+    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -c
+
+CMMFLAGSPOST := \
+    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -c
+
+# DEBUG / RELEASE
+
+ifeq ($(CONFIG),debug)
+  CXXFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+  CMMFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+else
+  CXXFLAGSPRE += -g -O3 -DNDEBUG
+  CMMFLAGSPRE += -g -O3 -DNDEBUG
+endif
+
+#
+# LIBS
+#
+
+# ARFLAGSPOST := \
+#     -Xlinker \
+#     --no-demangle \
+#     -framework CoreFoundation \
+#     -framework OpenGL \
+#     -framework Carbon \
+#     -framework AGL \
+#     -framework QuartzCore \
+#     -framework AppKit \
+#     -framework IOKit \
+#     -framework System
+
+AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) /Developer/usr/bin/libtool
+ARFLAGSPRE := -static -arch_only i386 -g
+arout := -o
+ARFLAGSPOST := \
+  -framework CoreFoundation \
+  -framework OpenGL \
+  -framework Carbon \
+  -framework AGL \
+  -framework QuartzCore \
+  -framework AppKit \
+  -framework IOKit \
+  -framework System
+
+libprefix := lib
+libsuffix := .a
+
+#
+# DLL
+#
+
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) /Developer/usr/bin/llvm-g++-4.2
+DLLFLAGSPRE := -dynamiclib -arch i386 -g
+DLLFLAGSPOST := \
+  -framework CoreFoundation \
+  -framework OpenGL \
+  -framework Carbon \
+  -framework AGL \
+  -framework QuartzCore \
+  -framework AppKit \
+  -framework IOKit \
+  -framework System
+
+DLLFLAGS_LIBDIR := -L
+DLLFLAGS_LIB := -l
+
+dllprefix :=
+dllsuffix := .dylib
+
+dll-post = \
+  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
+    in=`otool -D $$$$d | grep -v :`; \
+    bn=`basename $$$$d`; \
+    install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+  done
+
+#
+# APPS
+#
+
+LDFLAGS_LIBDIR := -L
+LDFLAGS_LIB := -l
+
+LD := /Developer/usr/bin/llvm-g++-4.2
+LDFLAGSPRE := \
+    -arch i386 \
+    -g \
+    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
+
+LDFLAGSPOST := \
+    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -dead_strip \
+    -Wl,-search_paths_first \
+    -framework CoreFoundation \
+    -framework OpenGL \
+    -framework Carbon \
+    -framework QuartzCore \
+    -framework AppKit \
+    -framework IOKit \
+    -licucore
+
+#    -Xlinker \
+#    --no-demangle \
+
+#
+# Running
+#
+
+# Use prefix to add all library paths to DYLD_LIBRARY_PATH, so we
+# don't have to keep copying dylibs around during development
+
+_run_prefix = DYLD_LIBRARY_PATH="$(shell echo $(strip $(sort $(foreach e,$($(1)_depextlibs),$($(e)_libdir)))) | sed -e 's/ /:/g')"
+
+############################################################
