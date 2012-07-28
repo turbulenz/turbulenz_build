@@ -541,7 +541,7 @@ define _make_bundle_rule
 	$(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/Contents/MacOS
 	$(CMDPREFIX)cp $(3) $(2)/Contents/MacOS
-	$(CMDPREFIX)./build/scripts/build-infoplist.py \
+	$(CMDPREFIX)$(BUILDDIR)/build-infoplist.py \
       --bundlename '$($(1)_bundlename)' \
       --executable `basename $(3)` \
       --version $($(1)_version) > $(2)/Contents/Info.plist
