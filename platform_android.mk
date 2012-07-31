@@ -17,6 +17,7 @@ ifeq ($(ARCH),armv7a)
     $(ANDROID_NDK)/platforms/$(ANDROID_NDK_PLATFORM)/arch-arm
   ANDROID_NDK_STL_LIBS += \
     $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/libs/armeabi-v7a
+  ANDROID_ARCH_NAME := armeabi-v7a
 endif
 ifeq ($(ARCH),x86)
   ANDROID_NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/x86-4.4.3
@@ -25,6 +26,7 @@ ifeq ($(ARCH),x86)
     $(ANDROID_NDK)/platforms/$(ANDROID_NDK_PLATFORM)/arch-x86
   ANDROID_NDK_STL_LIBS += \
     $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/libs/x86
+  ANDROID_ARCH_NAME := x86
 endif
 ifeq ($(ANDROID_NDK_ARCHDIR),)
   $(error Couldnt determine toolchain for android ARCH $(ARCH))
@@ -88,13 +90,21 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 CXX := $(ANDROID_NDK_TOOLBIN)/$(ANDROID_NDK_TOOLPREFIX)g++
 CXXFLAGSPRE := \
   -fpic -ffunction-sections -funwind-tables -fstack-protector \
-  -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
   -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
   -Wno-unused-parameter -Wno-psabi \
-  -march=armv7-a -mfloat-abi=softfp -mfpu=vfp \
-  -mthumb -fomit-frame-pointer \
-  -fno-strict-aliasing -finline-limit=64 \
+  -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 \
   -DANDROID -DTZ_ANDROID
+
+ifeq ($(ARCH),armv7a)
+  CXXFLAGSPRE += \
+    -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
+    -march=armv7-a -mfloat-abi=softfp -mfpu=vfp -mthumb
+endif
+ifeq ($(ARCH),x86)
+  # TODO :
+  CXXFLAGSPRE += \
+
+endif
 
 CXXFLAGSPOST := \
  $(addprefix -I,$(ANDROID_NDK_STL_INCLUDES) $(ANDROID_NDK_PLATFORM_INCLUDES)) \
@@ -137,9 +147,15 @@ DLLFLAGSPRE := -Wl,-soname,$$(basename $$@) -shared \
 
 DLLFLAGSPOST := \
   $(ANDROID_NDK_STL_LIBS)/libgnustl_static.a \
-  -Wl,--fix-cortex-a8 -Wl,--no-undefined -Wl,-z,noexecstack \
+  -Wl,--no-undefined -Wl,-z,noexecstack \
   -L$(ANDROID_NDK_PLATFORMDIR)/usr/lib \
   -landroid -lEGL -lGLESv2 -ldl -llog -lc -lm
+
+ifeq ($(ARCH),armv7a)
+  DLLFLAGSPOST += \
+    -Wl,--fix-cortex-a8
+endif
+
 # -Wl,--no-whole-archive
 # -Wl,-rpath-link=.
 
