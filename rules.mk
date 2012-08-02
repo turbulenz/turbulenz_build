@@ -196,12 +196,12 @@ define _make_cxx_unity_file
   $($(1)_src) : $($(1)_unity_src)
 	@mkdir -p $($(1)_OBJDIR)
 	echo > $$@
-	for i in $$^ ; do echo \#line 1 \"$$$$i\" >> $$@ ; cat $$$$i >> $$@ ; done
+	for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
 
 endef
 
 $(foreach mod,$(MODULES),\
-  $(if $($(mod)_unity),                               \
+  $(if $(filter 1,$($(mod)_unity)),                   \
     $(eval $(mod)_unity_src := $($(mod)_src)) 	      \
     $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod).cpp) \
     $(eval $(call _make_cxx_unity_file,$(mod)))       \
