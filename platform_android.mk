@@ -65,6 +65,7 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 #
 
 # From NDK_BUILD:
+#
 # /Users/dtebbs/turbulenz/external/android/android-ndk-r8/toolchains/arm-linux-androideabi-4.4.3/prebuilt/darwin-x86/bin/arm-linux-androideabi-g++
 # -MMD -MP -MF
 # /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/objs/turbulenz/__/__/__/src/engine/android/androideventhandler.o.d
@@ -86,30 +87,70 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 # -I/Users/dtebbs/turbulenz/external/android/android-ndk-r8/platforms/android-9/arch-arm/usr/include
 # -c  /Users/dtebbs/turbulenz/build/android/jni/../../../src/engine/android/androideventhandler.cpp
 # -o /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/objs/turbulenz/__/__/__/src/engine/android/androideventhandler.o
+#
+# x86, release
+# /Users/dtebbs/turbulenz/external/android/android-ndk-r8/toolchains/x86-4.4.3/prebuilt/darwin-x86/bin/i686-android-linux-g++
+# -MMD -MP -MF <deps>
+# -ffunction-sections -funwind-tables -fno-exceptions -fno-rtti -O2
+# -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300
+# -I<includes>
+# -DANDROID -DTZ_USE_V8 -DTZ_ANDROID -DTZ_STANDALONE -DFASTCALL=
+# -DTZ_NO_TRACK_REFERENCES
+# -finline-limit=256 -O3 -Wa,--noexecstack   -O2 -DNDEBUG -g -fexceptions
+# -I<includes>
+# -c <cpp>
+# -o <out>
+#
+# x86, debug
+# /Users/dtebbs/turbulenz/external/android/android-ndk-r8/toolchains/x86-4.4.3/prebuilt/darwin-x86/bin/i686-android-linux-g++
+# -MMD -MP -MF <deps>
+# -ffunction-sections -funwind-tables [-fno-exceptions] -fno-rtti -O2
+# -fomit-frame-pointer -fstrict-aliasing -funswitch-loops -finline-limit=300
+# -I<includes>
+# -DANDROID -DTZ_USE_V8 -DTZ_ANDROID -DTZ_STANDALONE -DFASTCALL=
+# -DTZ_NO_TRACK_REFERENCES
+# -finline-limit=256 -O3 -Wa,--noexecstack   -O0 -g -fexceptions
+# -I<includes>
+# -c <cpp>
+# -o <out>
+
+
 
 CXX := $(ANDROID_NDK_TOOLBIN)/$(ANDROID_NDK_TOOLPREFIX)g++
 CXXFLAGSPRE := \
-  -fpic -ffunction-sections -funwind-tables -fstack-protector \
+  -ffunction-sections -funwind-tables -fno-rtti \
+  -fomit-frame-pointer -fstrict-aliasing -funswitch-loops \
+  -finline-limit=256 \
   -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
   -Wno-unused-parameter -Wno-psabi \
-  -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 \
-  -DANDROID -DTZ_ANDROID
+  -DANDROID -DTZ_ANDROID -DTZ_USE_V8
+
+# -fstack-protector
 
 ifeq ($(ARCH),armv7a)
   CXXFLAGSPRE += \
+    -fpic \
     -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
     -march=armv7-a -mfloat-abi=softfp -mfpu=vfp -mthumb
 endif
 ifeq ($(ARCH),x86)
-  # TODO :
   CXXFLAGSPRE += \
-
+    -Wa,--noexecstack
 endif
 
 CXXFLAGSPOST := \
  $(addprefix -I,$(ANDROID_NDK_STL_INCLUDES) $(ANDROID_NDK_PLATFORM_INCLUDES)) \
- -DFASTCALL= -finline-limit=256 -O3 -Wa,--noexecstack -O2 -fexceptions \
- -c
+ -DFASTCALL= -finline-limit=256 -O3 -Wa,--noexecstack -O2 -fexceptions
+
+ifeq ($(CONFIG),debug)
+  CXXFLAGSPOST += \
+    -DDEBUG -D_DEBUG -O0 -g
+endif
+ifeq ($(CONFIG),release)
+  CXXFLAGSPOST += \
+    -DNDEBUG -O2 -g
+endif
+CXXFLAGSPOST += -c
 
 #
 # AR
