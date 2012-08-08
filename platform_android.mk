@@ -35,8 +35,7 @@ ifeq ($(BUILDHOST),macosx)
   NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/darwin-x86/bin
 endif
 ifeq ($(BUILDHOST),linux64)
-  NDK_TOOLBIN := $(error set this) \
-	$(NDK_ARCHDIR)/prebuilt/linux-x86/bin
+  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/linux-x86/bin
 endif
 ifeq ($(NDK_TOOLBIN),)
   $(error Couldnt find toolchain for BUILDHOST $(BUILDHOST))
