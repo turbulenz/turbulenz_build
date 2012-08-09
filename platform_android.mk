@@ -182,7 +182,7 @@ libsuffix := .a
 
 
 DLL := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)gcc
-DLLFLAGSPRE := -Wl,-soname,$$(basename $$@) -shared \
+DLLFLAGSPRE := -Wl,-soname,$$(notdir $$@) -shared \
   --sysroot=$(NDK_PLATFORMDIR) \
 # -nostdlib
 # -Wl,-shared,-Bsymbolic
