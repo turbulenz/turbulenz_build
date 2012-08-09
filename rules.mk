@@ -122,25 +122,27 @@ $(foreach mod,$(MODULES),$(eval \
 
 # calc external lib dirs
 $(foreach mod,$(MODULES),$(eval \
-  $(mod)_ext_libdirs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),$($(e)_libdir)) \
+  $(mod)_ext_libdirs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs), \
+    $($(e)_libdir) \
+  ) \
 ))
 
-# calc external libs
-$(foreach mod,$(MODULES),$(eval \
-  $(mod)_ext_libs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),$($(e)_lib)) \
-))
-
-# calc external lib files
-$(foreach mod,$(MODULES),$(eval \
-  $(mod)_ext_libfiles := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),$($(e)_libfile)) \
+# calc external libs.
+#  <extlib>_lib      values are prefixed with -l
+#  <extlib>_libfiles values are included as-is
+$(foreach mod,$(MODULES),$(eval                         \
+  $(mod)_ext_lib_flags :=                               \
+    $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs), \
+      $(addprefix $(DLLFLAGS_LIB),$($(e)_lib))          \
+      $($(e)_libfile)                                   \
+    )                                                   \
 ))
 
 # calc the full list of external dynamic libs for apps and dlls
 $(foreach b,$(DLLS) $(APPS),\
-  $(eval $(b)_ext_dlls := $(foreach e,$($(b)_extlibs) $($(b)_depextlibs), \
-    $($(e)_dlls) \
-    ) \
-  )\
+  $(eval $(b)_ext_dlls := \
+    $(foreach e,$($(b)_extlibs) $($(b)_depextlibs),$($(e)_dlls)) \
+  ) \
 )
 
 ############################################################
@@ -440,8 +442,7 @@ define _make_dll_rule
       $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $($(1)_OBJECTS) \
       $($(1)_deplibs) \
-      $(addprefix $(DLLFLAGS_LIB),$($(1)_ext_libs)) \
-      $($(1)_ext_libfiles) \
+      $($(1)_ext_lib_flags) \
       $(DLLFLAGSPOST) \
       $($(1)_DLLFLAGSPOST) \
       -o $$@
@@ -483,8 +484,7 @@ define _make_app_rule
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $($(1)_OBJECTS) \
       $($(1)_deplibs) \
-      $(addprefix $(LDFLAGS_LIB),$($(1)_ext_libs)) \
-      $($(1)_ext_libfiles) \
+      $($(1)_ext_lib_flags) \
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
       -o $$@
