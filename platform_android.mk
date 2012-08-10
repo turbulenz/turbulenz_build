@@ -119,7 +119,7 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 CXX := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)g++
 CXXFLAGSPRE := \
   -ffunction-sections -funwind-tables -fno-rtti \
-  -fomit-frame-pointer -fstrict-aliasing -funswitch-loops \
+  -fstrict-aliasing -funswitch-loops \
   -finline-limit=256 \
   -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
   -Wno-unused-parameter -Wno-psabi \
@@ -131,24 +131,33 @@ ifeq ($(ARCH),armv7a)
   CXXFLAGSPRE += \
     -fpic \
     -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
-    -march=armv7-a -mfloat-abi=softfp -mfpu=vfp -mthumb
+    -mthumb
+
+  ifeq ($(TEGRA3),1)
+    CXXFLAGSPRE += -mfpu=neon -mcpu=cortex-a9 -mfloat-abi=softfp
+  else
+    CXXFLAGSPRE += -march=armv7-a -mfloat-abi=softfp -mfpu=vfp
+  endif
+
+# TEGRA3:
+# -mfpu=neon
+# -mcpu=cortex-a9
+# -mfloat-abi=softfp
 endif
+
 ifeq ($(ARCH),x86)
-  CXXFLAGSPRE += \
-    -Wa,--noexecstack
+  CXXFLAGSPRE += -Wa,--noexecstack
 endif
 
 CXXFLAGSPOST := \
  $(addprefix -I,$(NDK_STL_INCLUDES) $(NDK_PLATFORM_INCLUDES)) \
- -DFASTCALL= -finline-limit=256 -O3 -Wa,--noexecstack -O2 -fexceptions
+ -DFASTCALL= -finline-limit=256 -Wa,--noexecstack -fexceptions
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPOST += \
-    -DDEBUG -D_DEBUG -O0 -g
+  CXXFLAGSPOST += -DDEBUG -D_DEBUG -O0 -g
 endif
 ifeq ($(CONFIG),release)
-  CXXFLAGSPOST += \
-    -DNDEBUG -O2 -g
+  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer -O3 -g
 endif
 CXXFLAGSPOST += -c
 
