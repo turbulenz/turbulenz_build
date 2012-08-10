@@ -449,7 +449,6 @@ define _make_dll_rule
 	$(call dll-post,$(1))
 	$($(1)_poststep)
 
-
   $(1) : $($(1)_extlibs) $($(1)_depextlibs)
 
 endef
@@ -488,6 +487,8 @@ define _make_app_rule
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
       -o $$@
+
+  $(1) : $($(1)_extlibs) $($(1)_depextlibs)
 
 endef
 
