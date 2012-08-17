@@ -203,11 +203,11 @@ define _make_cxx_unity_file
 endef
 
 $(foreach mod,$(MODULES),\
-  $(if $(filter 1,$($(mod)_unity)),                   \
-    $(eval $(mod)_unity_src := $($(mod)_src)) 	      \
-    $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod).cpp) \
-    $(eval $(call _make_cxx_unity_file,$(mod)))       \
-  )                                                   \
+  $(if $(filter 1,$($(mod)_unity)),                         \
+    $(eval $(mod)_unity_src := $($(mod)_src)) 	            \
+    $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp) \
+    $(eval $(call _make_cxx_unity_file,$(mod)))             \
+  )                                                         \
 )
 
 $(call log, core_unity_src = $(core_unity_src))
