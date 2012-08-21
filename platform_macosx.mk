@@ -182,13 +182,11 @@ LDFLAGSPOST := \
 #    -Xlinker \
 #    --no-demangle \
 
-#
-# Running
-#
-
-# Use prefix to add all library paths to DYLD_LIBRARY_PATH, so we
-# don't have to keep copying dylibs around during development
-
-_run_prefix = DYLD_LIBRARY_PATH="$(shell echo $(strip $(sort $(foreach e,$($(1)_depextlibs),$($(e)_libdir)))) | sed -e 's/ /:/g')"
+app-post = \
+  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
+    in=`otool -D $$$$d | grep -v :`; \
+    bn=`basename $$$$d`; \
+    install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+  done
 
 ############################################################

@@ -487,6 +487,8 @@ define _make_app_rule
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
       -o $$@
+	$(call app-post,$(1))
+	$($(1)_poststep)
 
   $(1) : $($(1)_extlibs) $($(1)_depextlibs)
 
