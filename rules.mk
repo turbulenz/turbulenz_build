@@ -21,7 +21,7 @@ $(call log,MODULES = $(MODULES))
 # For each dependencies of $(1), recursively calculate their full
 # dependencies.  Then, with the full deep dependencies of our deps
 # calculated, iterate through all dependencies, adding new words on
-# the left to the the deepest dependencies appear on the right (to
+# the left so that the deepest dependencies appear on the right (to
 # satisfy the gcc linker)
 #
 define _calc_fulldeps
@@ -87,13 +87,20 @@ $(call log,javascriptcore_libdir = $(javascriptcore_libdir))
 
 # calc full path of external dlls
 $(foreach ext,$(EXT), \
-  $(eval $(ext)_dlls := $(foreach l,$($(ext)_lib), \
-    $(foreach d,$($(ext)_libdir), \
-      $(wildcard $(d)/lib$(l)$(dllsuffix)*) \
+  $(eval $(ext)_dlls := \
+    $(foreach l,$($(ext)_lib), \
+      $(foreach d,$($(ext)_libdir), \
+        $(wildcard $(d)/lib$(l)$(dllsuffix)*) \
+      ) \
     ) \
-  )) \
+    $(filter %$(dllsuffix),$($(ext)_libfile)) \
+  ) \
 )
 $(call log,javascriptcore_dlls = $(javascriptcore_dlls))
+$(call log,openal_libfile = $(openal_libfile))
+$(call log,dllsuffix = $(dllsuffix))
+$(call log,openal_libfile filtered = $(filter %$(dllsuffix),$(openal_libfile)))
+$(call log,openal_dlls = $(openal_dlls))
 
 # calc <mod>_depincdirs - include dirs from dependencies
 $(foreach mod,$(MODULES),$(eval \
@@ -144,6 +151,7 @@ $(foreach b,$(DLLS) $(APPS),\
     $(foreach e,$($(b)_extlibs) $($(b)_depextlibs),$($(e)_dlls)) \
   ) \
 )
+$(call log,therun_google_ext_dlls = $(therun_google_ext_dlls))
 
 ############################################################
 
@@ -567,6 +575,86 @@ endef
 ifeq ($(TARGET),macosx)
   $(foreach b,$(BUNDLES),$(eval \
     $(call _make_bundle_rule,$(b),$($(b)_bundle),$($(b)_dllfile),$($(b)_copylibs)) \
+  ))
+endif
+
+############################################################
+
+# APKS (android only)
+
+# For each apk, calc the destination and full set of native libs to
+# copy
+$(foreach apk,$(APKS),                                          \
+  $(eval $(apk)_apk_dest := $(BINDIR)/$(apk))                   \
+  $(eval $(apk)_apk_copylibs :=                                 \
+     $($($(apk)_native)_dllfile)                                \
+     $($($(apk)_native)_ext_dlls) )                             \
+  $(eval                                                        \
+     $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0) \
+  )                                                             \
+)
+$(call log,therun_google_apk_dest = $(therun_google_apk_dest))
+$(call log,therun_google_apk_copylibs = $(therun_google_apk_copylibs))
+
+# For each APK, <apk>_apk_fulldeps := \
+#     [ <d>_apk_fulldeps for d in <apk>_deps ]
+
+$(foreach apk,$(APKS),                                          \
+  $(eval $(apk)_apk_fulldeps :=                                 \
+    $(foreach d,$($(apk)_deps),$($(d)_apk_dest) $($(d)_apk_fulldeps)) \
+  )                                                             \
+)
+
+$(call log,therun_google_deps = $(therun_google_deps))
+$(call log,therun_google_apk_fulldeps = $(therun_google_apk_fulldeps))
+
+$(foreach apk,$(APKS),                                          \
+  $(eval $(apk)_apk_depflags :=                                 \
+    $(foreach dp,$($(apk)_apk_fulldeps),--depends $(dp))        \
+  )                                                             \
+)
+$(call log,therun_google_apk_depflags = $(therun_google_apk_depflags))
+
+# Rule to make an APK
+# 1 - apk name
+# 2 - apk location
+# 3 - required dlls
+define _make_apk_rule
+
+  .PHONY : $(1)
+
+  $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
+	@echo [MAKE APK] $(2)
+	$(CMDPREFIX)rm -rf $(2)
+	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
+	@echo "------------------ project -----------------"
+	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
+	  --sdk-version $(ANDROID_SDK_VERSION)          \
+	  --target $(ANDROID_SDK_TARGET)                \
+	  --dest $(2)                                   \
+	  --version $($(1)_version)                     \
+	  --name $(1)                                   \
+	  --package $($(1)_package)                     \
+	  --src $($(1)_srcbase)                         \
+	  $(if $($(1)_library),--library)               \
+	  $(if $($(1)_title),--title $($(1)_title))     \
+	  $(if $($(1)_activity),--activity $($(1)_activity))        \
+	  $(addprefix --permissions ,$($(1)_permissions))           \
+	  $($(1)_apk_depflags)                          \
+	  $($(1)_flags)
+	$(CMDPREFIX)for l in $(3) ; do \
+      echo [CP DLL] $$$$l ; \
+      cp -a $$$$l $(2)/libs/$(ANDROID_ARCH_NAME) ; \
+    done
+	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do echo [CP JAR] $$$$j ; cp -a $$$$j $(2)/libs ; done
+	$(CMDPREFIX)cd $(2) && ant debug
+
+endef
+
+
+ifeq ($(TARGET),android)
+  $(foreach apk,$(APKS),$(eval                                      \
+    $(call _make_apk_rule,$(apk),$($(apk)_apk_dest),$($(apk)_apk_copylibs)) \
   ))
 endif
 

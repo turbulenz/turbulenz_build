@@ -3,6 +3,9 @@
 
 ############################################################
 
+# Language to compile all .cpp files as
+MACOSX_CXX_DEFAULTLANG ?= objective-c++
+
 # Check which SDK version we have available
 XCODE_SDK_VER ?= 10.5
 ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
@@ -42,7 +45,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 CXX := /Developer/usr/bin/llvm-g++-4.2
 CMM := $(CXX)
 
-CXXFLAGSPRE := -x objective-c++ \
+CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -arch i386 -fmessage-length=0 -pipe -fexceptions \
     -fpascal-strings -fasm-blocks \
     -Wall -Wno-unknown-pragmas \
@@ -52,7 +55,8 @@ CXXFLAGSPRE := -x objective-c++ \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
-    -DXP_MACOSX=1
+    -DXP_MACOSX=1 -DMACOSX
+
 
 
 # -fno-rtti

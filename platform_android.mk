@@ -5,6 +5,8 @@
 
 # NDK dir
 
+ANDROID_SDK_TARGET ?= android-16
+ANDROID_SDK_VERSION ?= 8
 ANDROID_NDK ?= external/android/android-ndk-r8b
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.6
@@ -200,7 +202,8 @@ DLLFLAGSPOST := \
   $(NDK_STL_LIBS)/libgnustl_static.a \
   -Wl,--no-undefined -Wl,-z,noexecstack \
   -L$(NDK_PLATFORMDIR)/usr/lib \
-  -landroid -lEGL -lGLESv2 -ldl -llog -lc -lm
+  -ldl -llog -lc -lm
+# -landroid -lEGL -lGLESv2
 
 ifeq ($(ARCH),armv7a)
   DLLFLAGSPOST += \
@@ -225,3 +228,8 @@ LDFLAGSPOST := $(DLLFLAGSPOST)
 LDFLAGS_LIBDIR := $(DLLFLAGS_LIBDIR)
 LDFLAGS_LIB := $(DLLFLAGS_LIB)
 binsuffix := $(dllsuffix)
+
+#
+# OTHER
+#
+MAKE_APK_PROJ := platform/android/scripts/make_android_project.py
