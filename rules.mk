@@ -594,9 +594,13 @@ $(foreach apk,$(APKS),                                          \
   $(eval                                                        \
      $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0) \
   )                                                             \
+  $(eval $(apk)_apk_file :=                                     \
+    $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(CONFIG).apk \
+  )                                                             \
 )
 $(call log,therun_google_apk_dest = $(therun_google_apk_dest))
 $(call log,therun_google_apk_copylibs = $(therun_google_apk_copylibs))
+$(call log,therun_google_apk_file = $(therun_google_apk_file))
 
 # For each APK, <apk>_apk_fulldeps := \
 #     [ <d>_apk_fulldeps for d in <apk>_deps ]
@@ -627,8 +631,10 @@ define _make_apk_rule
 
   $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
-	$(CMDPREFIX)rm -rf $(2)
+	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
+	@echo "------------------ prebuild ----------------"
+	$($(1)_prebuild)
 	@echo "------------------ project -----------------"
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
 	  --sdk-version $(ANDROID_SDK_VERSION)          \
@@ -638,10 +644,12 @@ define _make_apk_rule
 	  --name $(1)                                   \
 	  --package $($(1)_package)                     \
 	  --src $($(1)_srcbase)                         \
+      $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE)) \
+      $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS)) \
 	  $(if $($(1)_library),--library)               \
 	  $(if $($(1)_title),--title $($(1)_title))     \
-	  $(if $($(1)_activity),--activity $($(1)_activity))        \
-	  $(addprefix --permissions ,$($(1)_permissions))           \
+	  $(if $($(1)_activity),--activity $($(1)_activity))          \
+	  $(addprefix --permissions ,$($(1)_permissions))             \
 	  $($(1)_apk_depflags)                          \
 	  $($(1)_flags)
 	$(CMDPREFIX)for l in $(3) ; do \
@@ -649,7 +657,10 @@ define _make_apk_rule
       cp -a $$$$l $(2)/libs/$(ANDROID_ARCH_NAME) ; \
     done
 	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do echo [CP JAR] $$$$j ; cp -a $$$$j $(2)/libs ; done
-	$(CMDPREFIX)cd $(2) && ant debug
+	$(CMDPREFIX)cd $(2) && ant $(CONFIG)
+
+  $(1)_install : $(1)
+	adb install -s -r $($(1)_apk_file)
 
 endef
 
