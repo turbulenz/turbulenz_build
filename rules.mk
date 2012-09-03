@@ -589,6 +589,7 @@ endif
 $(foreach apk,$(APKS),                                          \
   $(eval $(apk)_apk_dest := $(BINDIR)/$(apk))                   \
   $(eval $(apk)_apk_copylibs :=                                 \
+     $($(apk)_nativelibs)                                       \
      $($($(apk)_native)_dllfile)                                \
      $($($(apk)_native)_ext_dlls) )                             \
   $(eval                                                        \
@@ -631,6 +632,7 @@ define _make_apk_rule
 
   $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
+	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
 	$($(1)_prebuild)
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
@@ -647,6 +649,7 @@ define _make_apk_rule
 	  $(if $($(1)_title),--title $($(1)_title))     \
 	  $(if $($(1)_activity),--activity $($(1)_activity))          \
 	  $(addprefix --permissions ,$($(1)_permissions))             \
+      $(if $($(1)_icondir),--icon-dir $($(1)_icondir))            \
 	  $($(1)_apk_depflags)                          \
 	  $($(1)_flags)
 	$(CMDPREFIX)for l in $(3) ; do                  \
@@ -664,7 +667,7 @@ define _make_apk_rule
 	$(CMDPREFIX)cd $(2) && ant $(CONFIG)
 
   $(1)_install : $(1)
-	adb install -s -r $($(1)_apk_file)
+	adb install -r $($(1)_apk_file)
 
 endef
 
