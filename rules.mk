@@ -631,11 +631,8 @@ define _make_apk_rule
 
   $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
-	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
-	@echo "------------------ prebuild ----------------"
 	$($(1)_prebuild)
-	@echo "------------------ project -----------------"
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
 	  --sdk-version $(ANDROID_SDK_VERSION)          \
 	  --target $(ANDROID_SDK_TARGET)                \
@@ -652,11 +649,18 @@ define _make_apk_rule
 	  $(addprefix --permissions ,$($(1)_permissions))             \
 	  $($(1)_apk_depflags)                          \
 	  $($(1)_flags)
-	$(CMDPREFIX)for l in $(3) ; do \
-      echo [CP DLL] $$$$l ; \
-      cp -a $$$$l $(2)/libs/$(ANDROID_ARCH_NAME) ; \
+	$(CMDPREFIX)for l in $(3) ; do                  \
+      dst=$(2)/libs/$(ANDROID_ARCH_NAME)/`basename $$$$l` ;       \
+      if [ $$$$l -nt $$$$dst ] ; then               \
+        echo [CP DLL] $$$$l ; cp -a $$$$l $$$$dst ; \
+      fi ;                                          \
     done
-	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do echo [CP JAR] $$$$j ; cp -a $$$$j $(2)/libs ; done
+	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do      \
+      dst=$(2)/libs/`basename $$$$j` ;              \
+      if [ $$$$j -nt $$$$dst ] ; then               \
+        echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ; \
+      fi ;                                          \
+    done
 	$(CMDPREFIX)cd $(2) && ant $(CONFIG)
 
   $(1)_install : $(1)
