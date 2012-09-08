@@ -13,6 +13,13 @@ NDK_GCC_VER ?= 4.6
 
 # Toolset for which arch
 
+ifeq ($(ARCH),armv5)
+  NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/arm-linux-androideabi-$(NDK_GCC_VER)
+  NDK_TOOLPREFIX := arm-linux-androideabi-
+  NDK_PLATFORMDIR := \
+    $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-arm
+  ANDROID_ARCH_NAME := armeabi
+endif
 ifeq ($(ARCH),armv7a)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/arm-linux-androideabi-$(NDK_GCC_VER)
   NDK_TOOLPREFIX := arm-linux-androideabi-
@@ -129,6 +136,13 @@ CXXFLAGSPRE := \
 
 # -fstack-protector
 
+ifeq ($(ARCH),armv5)
+  CXXFLAGSPRE += \
+    -fpic \
+    -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
+    -mthumb -march=armv5te -mtune=xscale -msoft-float
+endif
+
 ifeq ($(ARCH),armv7a)
   CXXFLAGSPRE += \
     -fpic \
@@ -140,11 +154,6 @@ ifeq ($(ARCH),armv7a)
   else
     CXXFLAGSPRE += -march=armv7-a -mfloat-abi=softfp -mfpu=vfp
   endif
-
-# TEGRA3:
-# -mfpu=neon
-# -mcpu=cortex-a9
-# -mfloat-abi=softfp
 endif
 
 ifeq ($(ARCH),x86)
