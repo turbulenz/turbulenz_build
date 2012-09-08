@@ -80,6 +80,21 @@ ifeq ($(TARGETNAME),)
 endif
 
 ############################################################
+# CONFIG default settings
+############################################################
+
+ifeq ($(CONFIG),release)
+  C_SYMBOLS ?= 0
+  C_OPTIMIZE ?= 1
+endif
+ifeq ($(CONFIG),debug)
+  C_SYMBOLS ?= 1
+  C_OPTIMIZE ?= 0
+endif
+
+############################################################
+# PLATFORM variables
+############################################################
 
 include $(BUILDDIR)/platform_$(TARGET).mk
 

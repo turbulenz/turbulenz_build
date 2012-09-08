@@ -156,10 +156,19 @@ CXXFLAGSPOST := \
  -DFASTCALL= -finline-limit=256 -Wa,--noexecstack -fexceptions
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPOST += -DDEBUG -D_DEBUG -O0 -g
+  CXXFLAGSPOST += -DDEBUG -D_DEBUG -g
 endif
 ifeq ($(CONFIG),release)
-  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer -O3 -g
+  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer
+endif
+
+ifeq ($(C_OPTIMIZE),1)
+  CXXFLAGSPOST += -O3
+else
+  CXXFLAGSPOST += -O0
+endif
+ifeq ($(C_SYMBOLS),1)
+  CXXFLAGSPOST += -g
 endif
 CXXFLAGSPOST += -c
 
