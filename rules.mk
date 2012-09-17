@@ -121,6 +121,7 @@ $(foreach mod,$(MODULES),$(eval \
 $(foreach mod,$(MODULES),$(eval \
   $(mod)_depextlibs := $(foreach d,$($(mod)_fulldeps),$($(d)_extlibs)) \
 ))
+$(call log,npturbulenz_depextlibs = $(npturbulenz_depextlibs))
 
 # calc external include dirs
 $(foreach mod,$(MODULES),$(eval \
@@ -151,7 +152,7 @@ $(foreach b,$(DLLS) $(APPS),\
     $(foreach e,$($(b)_extlibs) $($(b)_depextlibs),$($(e)_dlls)) \
   ) \
 )
-$(call log,therun_google_ext_dlls = $(therun_google_ext_dlls))
+$(call log,npturbulenz_ext_dlls = $(npturbulenz_ext_dlls))
 
 ############################################################
 
@@ -171,6 +172,7 @@ define _copy_external_dll
 
 endef
 
+# 1 - EXT name
 define _null_external_dll
 
   .PHONY : $(1)
@@ -396,6 +398,7 @@ $(foreach lib,$(LIBS),$(eval \
   $(lib)_libfile := $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
 ))
 
+# <mod>_deplibs = all libraries we depend upon
 # depend on the libs for all dependencies
 $(foreach mod,$(MODULES),$(eval \
   $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile)) \
@@ -561,16 +564,6 @@ define _make_bundle_rule
     done
 
   $(1) : $(2)
-
-  $(1)_install :
-	$(CMDPREFIX)$(MAKE) $(1)
-	@echo [COPY BUNDLE] $(2) -\> \~/Library/Internet\ Plug-Ins/`basename $(2)`
-	$(CMDPREFIX)rm -rf ~/Library/Internet\ Plug-Ins/`basename $(2)`
-	$(CMDPREFIX)cp -a $(2) ~/Library/Internet\ Plug-Ins
-
-  $(1)_uninstall :
-	@echo [UNINSTALL BUNDLE] \~/Library/Internet\ Plug-Ins/`basename $(2)`
-	rm -rf ~/Library/Internet\ Plug-Ins/`basename $(2)`
 
 endef
 
