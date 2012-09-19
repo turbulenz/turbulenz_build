@@ -22,7 +22,7 @@ CXX := $(CCACHE) g++
 
 CXXFLAGSPRE := \
     -fmessage-length=0 -pipe \
-    -Wall -Werror \
+    -Wall \
     -Wno-reorder -Wno-trigraphs \
     -fPIC \
     -ftree-vectorize -msse3 -mssse3 \
