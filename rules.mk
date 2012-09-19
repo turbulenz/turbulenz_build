@@ -290,59 +290,23 @@ $(foreach mod,$(MODULES),$(eval \
 $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 
 #
-# For each module, create the dependency file rules
-#
-
-# 1 - mod
-# 2 - srcfile
-# 3 - object file
-# 4 - dep file
-define _make_cxx_depfile_rule
-
-  $(4) : $(2)
-	@mkdir -p $($(1)_DEPDIR)
-	@echo [CXX \(dep\)] \($(1)\) $$(notdir $$<)
-
-	@$(CMDPREFIX:@, )$(CXX) $(CXXFLAGSPRE) $(CXXFLAGS) \
-	  -MM -MF $$@ -MT $(3) -MT $$@ -MP \
-	  $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags) \
-	  $(addprefix -I,$($(1)_incdirs)) \
-	  $(addprefix -I,$($(1)_depincdirs)) \
-	  $(addprefix -I,$($(1)_ext_incdirs)) \
-	  $(CXXFLAGSPOST) $($(call file-flags,$(2))) \
-	  $$<
-
-endef
-
-# 1 - mod
-define _make_depfile_rules
-
-  $(foreach sod,$($(1)_cxx_obj_dep) $($(1)_cmm_obj_dep),$(eval \
-    $(call _make_cxx_depfile_rule,$(1),\
-	                              $(call _getsrc,$(sod)),\
-	                              $(call _getobj,$(sod)),\
-                                  $(call _getdep,$(sod))) \
-  ))
-
-endef
-
-$(foreach mod,$(MODULES),$(eval $(call _make_depfile_rules,$(mod))))
-
-#
-# For each module, create the object build rules
+# For each module, create the object build rules, generating the
+# dependency files as a side-effect of a single run.
 #
 
 # 1 - mod
 # 2 - cxx srcfile
 # 3 - object file
+# 4 - depfile
 define _make_cxx_object_rule
 
   .PRECIOUS : $(3)
 
   $(3) : $(2)
-	@mkdir -p $($(1)_OBJDIR)
+	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX) $(CXXFLAGSPRE) $(CXXFLAGS) \
+	  -MD -MT $4 -MT $$@ -MP \
       $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags) \
       $(addprefix -I,$($(1)_incdirs)) \
       $(addprefix -I,$($(1)_depincdirs)) \
@@ -355,14 +319,16 @@ endef
 # 1 - mod
 # 2 - mm srcfile
 # 3 - object file
+# 4 - depfile
 define _make_cmm_object_rule
 
   .PRECIOUS : $(3)
 
   $(3) : $(2)
-	@mkdir -p $($(1)_OBJDIR)
+	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CMM] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM) $(CMMFLAGSPRE) \
+	  -MD -MT $4 -MT $$@ -MP \
       $($(1)_cxxflags) $($(1)_depcxxflags) \
       $(addprefix -I,$($(1)_incdirs)) \
       $(addprefix -I,$($(1)_depincdirs)) \
@@ -379,10 +345,10 @@ endef
 define _make_object_rules
 
   $(foreach sod,$($(1)_cxx_obj_dep),$(eval \
-    $(call _make_cxx_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod))) \
+    $(call _make_cxx_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
-    $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod))) \
+    $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
 
 endef

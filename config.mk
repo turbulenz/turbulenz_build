@@ -101,8 +101,8 @@ include $(BUILDDIR)/platform_$(TARGET).mk
 ############################################################
 
 ROOTDIR ?= $(realpath .)
-DEPDIR = $(ROOTDIR)/dep/$(TARGET)$(VARIANT)-$(CONFIG)
 OBJDIR = $(ROOTDIR)/obj/$(TARGET)$(VARIANT)-$(CONFIG)
+DEPDIR = $(OBJDIR)
 LIBDIR = $(ROOTDIR)/lib/$(TARGET)$(VARIANT)-$(CONFIG)
 BINDIR = $(ROOTDIR)/bin/$(TARGET)$(VARIANT)-$(CONFIG)
 
