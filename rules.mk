@@ -467,18 +467,15 @@ define _make_app_rule
 	$(call app-post,$(1))
 	$($(1)_poststep)
 
-  $(1) : $($(1)_extlibs) $($(1)_depextlibs)
+  .PHONY : $(1)
+
+  $(1) : $($(1)_extlibs) $($(1)_depextlibs) $($(1)_appfile)
 
 endef
 
 # rule to make app file
 $(foreach app,$(APPS),$(eval \
   $(call _make_app_rule,$(app)) \
-))
-
-# <app> : $(<app>_appfile)
-$(foreach app,$(APPS),$(eval \
-  $(app) : $($(app)_appfile) \
 ))
 
 # <mod>_run rule
@@ -719,10 +716,7 @@ module-defs : $(foreach m,$(MODULES) $(RULES),$($(m)_moduledef))
 # include only those that are relevant to the targets being
 # created
 
-ALLDEPFILES := $(foreach t,$(MAKECMDGOALS),                     \
-                 $($(t)_DEPFILES)                               \
-	             $(foreach d,$($(t)_fulldeps),$($(d)_DEPFILES)) \
-                )
+ALLDEPFILES := $(foreach t,$(MODULES),$($(t)_DEPFILES))
 -include $(sort $(ALLDEPFILES))
 
 ############################################################
