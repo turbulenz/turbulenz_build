@@ -378,6 +378,7 @@ define _make_lib_rule
   $($(1)_libfile) : $($(1)_OBJECTS)
 	@mkdir -p $(LIBDIR)
 	@echo [AR ] $$(notdir $$@)
+	$(CMDPREFIX)rm -f $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
      $(arout) $$@ \
