@@ -7,18 +7,9 @@
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # Check which SDK version we have available
-XCODE_SDK_VER ?= 10.5
+XCODE_SDK_VER ?= 10.6
 ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
-  ifneq (,$(shell xcodebuild -showsdks | grep macosx10.5))
-    _XCODE_SDK_VER := 10.5
-  else
-    ifneq (,$(shell xcodebuild -showsdks | grep macosx10.6))
-      _XCODE_SDK_VER := 10.6
-    endif
-  endif
-
-  $(warning Cant find SDK version $(XCODE_SDK_VER), using $(_XCODE_SDK_VER))
-  XCODE_SDK_VER := $(_XCODE_SDK_VER)
+  $(error Cant find SDK version $(XCODE_SDK_VER))
 endif
 
 # Create a variable holding the xcode configuration
@@ -28,9 +19,9 @@ else
   XCODE_CONFIG := Release
 endif
 
-# Mark non-10.5 builds
+# Mark non-10.6 builds
 
-ifneq ($(XCODE_SDK_VER),10.5)
+ifneq ($(XCODE_SDK_VER),10.6)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
