@@ -353,7 +353,7 @@ define _make_cmm_object_rule
   $(3) : $(2)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CMM] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CMM) $(CMMFLAGSPRE) \
+	$(CMDPREFIX)$(CMM) $(CMMFLAGSPRE) $(CMMFLAGS) \
 	  -MD -MT $4 -MT $$@ -MP \
       $($(1)_cxxflags) $($(1)_depcxxflags) \
       $(addprefix -I,$($(1)_incdirs)) \
