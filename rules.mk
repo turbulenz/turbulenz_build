@@ -200,6 +200,10 @@ $(foreach mod,$(MODULES),$(eval $(mod)_DEPDIR := $(DEPDIR)/$(mod)))
 # rule to create it.
 #
 
+ifeq (1,$(SYNTAX_CHECK_MODE))
+  UNITY := 0
+endif
+
 ifeq ($(UNITY),1)
 
 # 1 - mod
@@ -247,9 +251,9 @@ define _make_cmm_obj_dep_list
   )
 endef
 
-$(foreach mod,$(MODULES), $(eval \
-  $(call _make_cxx_obj_dep_list,$(mod)) \
-	))
+$(foreach mod,$(MODULES),                        \
+  $(eval $(call _make_cxx_obj_dep_list,$(mod)))  \
+)
 
 # only look for .mm's on mac
 
@@ -288,6 +292,28 @@ $(foreach mod,$(MODULES),$(eval \
     $(foreach sod,$($(mod)_cmm_obj_dep),$(call _getdep,$(sod))) \
 ))
 $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
+
+#
+# Function to make a flymake target for a source file
+#
+
+# 1 - flymake src
+# 2 - src_obj_dep list
+define _target_flymake_src
+  _found := $(filter $(1)%,$(2))
+  _file := $(call _getobj,$(_found))
+  $(if $(_file),check-syntax : $(_file))
+  $(if $(_file),$(_file) : .FORCE)
+  $(if $(_file),.FORCE :)
+
+endef
+
+ifeq (1,$(SYNTAX_CHECK_MODE))
+  FLYMAKESRC:=$(abspath $(CHK_SOURCES))
+  $(foreach mod,$(MODULES),\
+    $(eval $(call _target_flymake_src,$(FLYMAKESRC),$($(mod)_cxx_obj_dep) $($(mod)_cmm_obj_dep))) \
+  )
+endif
 
 #
 # For each module, create the object build rules, generating the
