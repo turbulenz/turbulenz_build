@@ -411,6 +411,10 @@ define _make_lib_rule
      $($(1)_OBJECTS) \
       $(ARFLAGSPOST) \
 
+  .PHONY : $(1)
+
+  $(1) : $($(1)_libfile)
+
 endef
 
 # $($(1)_deplibs)
@@ -418,11 +422,6 @@ endef
 
 $(foreach lib,$(LIBS),$(eval \
   $(call _make_lib_rule,$(lib)) \
-))
-
-# lib depends on this target
-$(foreach lib,$(LIBS),$(eval \
-  $(lib) : $($(lib)_libfile) \
 ))
 
 ############################################################
@@ -453,6 +452,7 @@ define _make_dll_rule
 	$(call dll-post,$(1))
 	$($(1)_poststep)
 
+  .PHONY : $(1)
   $(1) : $($(1)_extlibs) $($(1)_depextlibs)
 
 endef
