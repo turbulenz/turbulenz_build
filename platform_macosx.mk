@@ -25,6 +25,14 @@ ifneq ($(XCODE_SDK_VER),10.6)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
+XCODE_SDK_ROOT:=/Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
+ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
+  XCODE_SDK_ROOT:=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform$(XCODE_SDK_ROOT)
+  ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
+    $(error couldnt find SDK dir)
+  endif
+endif
+
 ############################################################
 
 $(call log,MACOSX BUILD CONFIGURATION)
@@ -33,7 +41,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
-CXX := /Developer/usr/bin/llvm-g++-4.2
+CXX := llvm-g++-4.2
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
@@ -41,7 +49,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -fpascal-strings -fasm-blocks \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
-    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -isysroot $(XCODE_SDK_ROOT) \
     -ftree-vectorize -msse3 -mssse3 \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
@@ -60,7 +68,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
-    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
+    -isysroot $(XCODE_SDK_ROOT) \
     -ftree-vectorize -msse3 -mssse3 \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
@@ -71,11 +79,9 @@ CMMFLAGSPRE := -x objective-c++ \
 # -fno-rtti
 
 CXXFLAGSPOST := \
-    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
     -c
 
 CMMFLAGSPOST := \
-    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk \
     -c
 
 # DEBUG / RELEASE
@@ -104,7 +110,7 @@ endif
 #     -framework IOKit \
 #     -framework System
 
-AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) /Developer/usr/bin/libtool
+AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) libtool
 ARFLAGSPRE := -static -arch_only i386 -g
 arout := -o
 ARFLAGSPOST := \
@@ -124,7 +130,7 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) /Developer/usr/bin/llvm-g++-4.2
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) llvm-g++-4.2
 DLLFLAGSPRE := -dynamiclib -arch i386 -g
 DLLFLAGSPOST := \
   -framework CoreFoundation \
@@ -156,11 +162,11 @@ dll-post = \
 LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
-LD := /Developer/usr/bin/llvm-g++-4.2
+LD := llvm-g++-4.2
 LDFLAGSPRE := \
     -arch i386 \
     -g \
-    -isysroot /Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
+    -isysroot $(XCODE_SDK_ROOT)
 
 LDFLAGSPOST := \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
