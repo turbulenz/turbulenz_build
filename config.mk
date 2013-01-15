@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Turbulenz Limited.
+# Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
 ifeq ($(BUILDDIR),"")
@@ -123,8 +123,9 @@ ifneq ($(CMDVERBOSE),1)
   CMDPREFIX:=@
 endif
 
-CP?=cp
-MKDIR?=mkdir -p
+CP ?= $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
+MKDIR ?= $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
+TSC ?= $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
 
 ############################################################
 
