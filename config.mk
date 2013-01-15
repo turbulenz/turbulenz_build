@@ -93,7 +93,7 @@ ifeq ($(CONFIG),debug)
 endif
 
 ############################################################
-# PLATFORM variables
+# Target PLATFORM variables
 ############################################################
 
 include $(BUILDDIR)/platform_$(TARGET).mk
@@ -122,6 +122,9 @@ $(call log,BINDIR=$(BINDIR))
 ifneq ($(CMDVERBOSE),1)
   CMDPREFIX:=@
 endif
+
+CP?=cp
+MKDIR?=mkdir -p
 
 ############################################################
 
