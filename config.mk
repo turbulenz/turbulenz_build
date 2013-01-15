@@ -124,6 +124,7 @@ ifneq ($(CMDVERBOSE),1)
 endif
 
 CP := $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
+CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
 MKDIR := $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
 TSC := $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
 

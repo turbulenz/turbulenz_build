@@ -34,7 +34,7 @@ $(foreach t,$(TSLIBS),\
   $(eval _$(t)_d_ts_src := $(filter %.d.ts,$($(t)_src))) \
   $(eval _$(t)_out_js := $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).js))    \
   $(eval _$(t)_out_d_ts := $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).d.ts)) \
-  $(eval _$(t)_out_copy_d_ts := $(if $(_$(t)_d_ts_src),$(TS_OUTPUT_DIR)/$(notdir $(_$(t)_d_ts_src)))) \
+  $(eval _$(t)_out_copy_d_ts := $(if $(_$(t)_d_ts_src),$(addprefix $(TS_OUTPUT_DIR)/,$(notdir $(_$(t)_d_ts_src))))) \
 )
 
 # Dep files.  Note that we use the _d_ts_src for dependent decl
@@ -86,7 +86,10 @@ define _make_d_ts_copy_rule
 
   $(_$(1)_out_copy_d_ts) : $(_$(1)_d_ts_src)
 	$(MKDIR) $(dir $$@)
-	$(CP) $$^ $$@
+	@echo "[CP   ] $(notdir $$^)"
+	$(CP) $$^ $$(dir $$@)
+
+  jslib : $(1)
 
 endef
 
