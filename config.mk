@@ -123,9 +123,9 @@ ifneq ($(CMDVERBOSE),1)
   CMDPREFIX:=@
 endif
 
-CP ?= $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
-MKDIR ?= $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
-TSC ?= $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
+CP := $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
+MKDIR := $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
+TSC := $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
 
 ############################################################
 

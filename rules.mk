@@ -4,7 +4,7 @@
 # Include the appropriate rules files based on which modules types
 # have been defined.
 
-ifneq (,$(LIBS) $(DLLS) $(APPS))
+ifneq (,$(strip $(LIBS) $(DLLS) $(APPS)))
   include $(BUILDDIR)/rules_c.mk
 endif
 
