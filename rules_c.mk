@@ -5,8 +5,8 @@
 
 all:
 
-MODULES := $(LIBS) $(DLLS) $(APPS)
-$(call log,MODULES = $(MODULES))
+C_MODULES := $(LIBS) $(DLLS) $(APPS)
+$(call log,C_MODULES = $(C_MODULES))
 
 ############################################################
 
@@ -53,28 +53,28 @@ define _calc_fulldeps
 
 endef
 
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(call _calc_fulldeps,$(mod)) \
 ))
 
 
-$(foreach mod,$(MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
+$(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 
 ############################################################
 
 # call full paths of all source files
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_src := $(foreach s,$($(mod)_src),$(realpath $(s))) \
 ))
 $(call log,core_src = $(core_src))
 
 # calc <mod>_headerfile all headers belonging to this module
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_headerfiles := $(foreach i,$($(mod)_incdirs),$(wildcard $(i)/*.h)) \
 ))
 
 # calc full paths of all incdirs and libdirs (including externals)
-$(foreach mod,$(MODULES) $(EXT),$(eval \
+$(foreach mod,$(C_MODULES) $(EXT),$(eval \
   $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
 ))
 $(call log,javascriptcore_incdirs = $(javascriptcore_incdirs))
@@ -103,33 +103,33 @@ $(call log,openal_libfile filtered = $(filter %$(dllsuffix),$(openal_libfile)))
 $(call log,openal_dlls = $(openal_dlls))
 
 # calc <mod>_depincdirs - include dirs from dependencies
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_depincdirs := $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs)) \
 ))
 
 # # calc <mod>_depheaderfiles - include files of dependencies
-# $(foreach mod,$(MODULES),$(eval \
+# $(foreach mod,$(C_MODULES),$(eval \
 #   $(mod)_depheaderfiles := $(foreach d,$($(mod)_fulldeps),$($(d)_headerfiles)) \
 # ))
 
 # calc <mod>_depcxxflags
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
 	$(mod)_depcxxflags := $(foreach d,$($(mod)_fulldeps),$($(d)_cxxflags)) \
 ))
 
 # cal <mod>_depextlibs - libs from dependencies
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_depextlibs := $(foreach d,$($(mod)_fulldeps),$($(d)_extlibs)) \
 ))
 $(call log,npturbulenz_depextlibs = $(npturbulenz_depextlibs))
 
 # calc external include dirs
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_ext_incdirs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),$($(e)_incdirs)) \
 ))
 
 # calc external lib dirs
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_ext_libdirs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs), \
     $($(e)_libdir) \
   ) \
@@ -138,7 +138,7 @@ $(foreach mod,$(MODULES),$(eval \
 # calc external libs.
 #  <extlib>_lib      values are prefixed with -l
 #  <extlib>_libfiles values are included as-is
-$(foreach mod,$(MODULES),$(eval                         \
+$(foreach mod,$(C_MODULES),$(eval                         \
   $(mod)_ext_lib_flags :=                               \
     $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs), \
       $(addprefix $(DLLFLAGS_LIB),$($(e)_lib))          \
@@ -190,10 +190,10 @@ $(foreach e,$(EXT),$(if $($(e)_dlls),  \
 ############################################################
 
 # calc <mod>_OBJDIR
-$(foreach mod,$(MODULES),$(eval $(mod)_OBJDIR := $(OBJDIR)/$(mod)))
+$(foreach mod,$(C_MODULES),$(eval $(mod)_OBJDIR := $(OBJDIR)/$(mod)))
 
 # calc <mod>_DEPDIR
-$(foreach mod,$(MODULES),$(eval $(mod)_DEPDIR := $(DEPDIR)/$(mod)))
+$(foreach mod,$(C_MODULES),$(eval $(mod)_DEPDIR := $(DEPDIR)/$(mod)))
 
 #
 # For unity builds, replace the src list with a single file, and a
@@ -216,7 +216,7 @@ define _make_cxx_unity_file
 
 endef
 
-$(foreach mod,$(MODULES),\
+$(foreach mod,$(C_MODULES),\
   $(if $(filter 1,$($(mod)_unity)),                         \
     $(eval $(mod)_unity_src := $($(mod)_src)) 	            \
     $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp) \
@@ -251,14 +251,14 @@ define _make_cmm_obj_dep_list
   )
 endef
 
-$(foreach mod,$(MODULES),                        \
+$(foreach mod,$(C_MODULES),                        \
   $(eval $(call _make_cxx_obj_dep_list,$(mod)))  \
 )
 
 # only look for .mm's on mac
 
 ifeq ($(TARGET),macosx)
-  $(foreach mod,$(MODULES), $(eval \
+  $(foreach mod,$(C_MODULES), $(eval \
     $(call _make_cmm_obj_dep_list,$(mod)) \
   ))
 endif
@@ -279,14 +279,14 @@ _getdep = $(word 3,$(subst !, ,$(1)))
 # For each modules, calculate the full object list and full depfile list
 #
 
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_OBJECTS := \
     $(foreach sod,$($(mod)_cxx_obj_dep),$(call _getobj,$(sod))) \
     $(foreach sod,$($(mod)_cmm_obj_dep),$(call _getobj,$(sod))) \
 ))
 $(call log,npengine_OBJECTS = $(npengine_OBJECTS))
 
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_DEPFILES := \
     $(foreach sod,$($(mod)_cxx_obj_dep),$(call _getdep,$(sod))) \
     $(foreach sod,$($(mod)_cmm_obj_dep),$(call _getdep,$(sod))) \
@@ -310,7 +310,7 @@ endef
 
 ifeq (1,$(SYNTAX_CHECK_MODE))
   FLYMAKESRC:=$(abspath $(CHK_SOURCES))
-  $(foreach mod,$(MODULES),\
+  $(foreach mod,$(C_MODULES),\
     $(eval $(call _target_flymake_src,$(FLYMAKESRC),$($(mod)_cxx_obj_dep) $($(mod)_cmm_obj_dep))) \
   )
 endif
@@ -379,7 +379,7 @@ define _make_object_rules
 
 endef
 
-$(foreach mod,$(MODULES),$(eval $(call _make_object_rules,$(mod))))
+$(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
 
 ############################################################
 
@@ -392,7 +392,7 @@ $(foreach lib,$(LIBS),$(eval \
 
 # <mod>_deplibs = all libraries we depend upon
 # depend on the libs for all dependencies
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile)) \
 ))
 
@@ -730,7 +730,7 @@ $(foreach m,$(RULES),$(eval \
 ))
 
 .PHONY : module-defs
-module-defs : $(foreach m,$(MODULES) $(RULES),$($(m)_moduledef))
+module-defs : $(foreach m,$(C_MODULES) $(RULES),$($(m)_moduledef))
 
 ############################################################
 
@@ -743,7 +743,7 @@ module-defs : $(foreach m,$(MODULES) $(RULES),$($(m)_moduledef))
 # include only those that are relevant to the targets being
 # created
 
-ALLDEPFILES := $(foreach t,$(MODULES),$($(t)_DEPFILES))
+ALLDEPFILES := $(foreach t,$(C_MODULES),$($(t)_DEPFILES))
 -include $(sort $(ALLDEPFILES))
 
 ############################################################
@@ -751,7 +751,7 @@ ALLDEPFILES := $(foreach t,$(MODULES),$($(t)_DEPFILES))
 # CLEAN
 
 # <mod>_cleanfiles
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(mod)_cleanfiles := $($(mod)_OBJECTS) $($(mod)_OBJDIR) $($(mod)_libfile) \
     $($(mod)_appfile) $($(mod)_DEPFILES) \
 ))
@@ -764,13 +764,13 @@ define _make_clean_rule
 	rm -rf $($(1)_cleanfiles)
 endef
 
-$(foreach mod,$(MODULES),$(eval \
+$(foreach mod,$(C_MODULES),$(eval \
   $(call _make_clean_rule,$(mod)) \
 ))
 
 # clean rule
 .PHONY : clean
-clean : $(foreach mod,$(MODULES),$(mod)_clean)
+clean : $(foreach mod,$(C_MODULES),$(mod)_clean)
 
 .PHONY : depclean
 depclean :
