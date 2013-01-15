@@ -1,7 +1,7 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
-ifeq ($(BUILDDIR),"")
+ifeq ($(BUILDDIR),)
   $(error BUILDDIR not set)
 endif
 
