@@ -32,8 +32,8 @@ syntax_replace = $(subst $(SYNTAX_CHECK_REPLACE),$(SYNTAX_CHECK_WITH),$(1))
 $(foreach t,$(TSLIBS),\
   $(eval _$(t)_ts_src := $(call syntax_replace,$(filter-out %.d.ts,$($(t)_src)))) \
   $(eval _$(t)_d_ts_src := $(filter %.d.ts,$($(t)_src))) \
-  $(eval _$(t)_out_js := $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).js))    \
-  $(eval _$(t)_out_d_ts := $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).d.ts)) \
+  $(eval _$(t)_out_js ?= $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).js))    \
+  $(eval _$(t)_out_d_ts ?= $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).d.ts)) \
   $(eval _$(t)_out_copy_d_ts := $(if $(_$(t)_d_ts_src),$(addprefix $(TS_OUTPUT_DIR)/,$(notdir $(_$(t)_d_ts_src))))) \
 )
 
