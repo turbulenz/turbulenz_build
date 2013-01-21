@@ -99,6 +99,21 @@ $(foreach t,$(TSLIBS),\
   $(if $(_$(t)_d_ts_src),$(eval $(call _make_d_ts_copy_rule,$(t)))) \
 )
 
+# clean rules
+
+.PHONY: clean clean_ts distclean_ts
+
+clean_ts:
+	$(RM) $(foreach t,$(TSLIBS), \
+      $(_$(t)_out_copy_d_ts) $(_$(t)_out_js) $(_$(t)_out_d_ts) \
+    )
+
+distclean_ts:
+	$(RM) $(TS_OUTPUT_DIR)
+
+clean: clean_ts
+
+distclean: distclean_ts
 
 else # ifeq (1,$(TS_MODULAR))
 
@@ -157,5 +172,17 @@ endef
 $(foreach ts_js,$(ts_js_files),$(eval                                        \
   $(call _make_ts_js_rule,$(call _getsrc,$(ts_js)),$(call _getdst,$(ts_js))) \
 ))
+
+.PHONY: clean_ts distclean_ts
+
+clean_ts:
+	$(RM) $(foreach ts_js,$(ts_js_files),$(call _getdst,$(ts_js)))
+
+distclean_ts:
+	$(RM) $(TS_OUTPUT_DIR)
+
+clean: clean_ts
+
+distclean: distclean_ts
 
 endif # else # ifeq (1,$(TS_MODULAR))
