@@ -180,11 +180,12 @@ def main():
     # error
 
     if 0 != tsc_ret:
-        if os.path.exists(outfile):
+        if os.path.exists(outfile) and outfile_updated:
             verbose("REMOVING: %s\n" % outfile)
             os.remove(outfile)
 
-        if (not expect_d_ts_file is None) and os.path.exists(expect_d_ts_file):
+        if (not expect_d_ts_file is None) and \
+                (os.path.exists(expect_d_ts_file) and d_ts_file_updated):
             verbose("REMOVING: %s\n" % expect_d_ts_file)
             os.remove(expect_d_ts_file)
 
