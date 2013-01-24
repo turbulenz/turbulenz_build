@@ -136,6 +136,7 @@ CP := $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
 CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
 MKDIR := $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
+FIND := python $(BUILDDIR)/commands/find.py
 TSC := $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
 
 ############################################################
