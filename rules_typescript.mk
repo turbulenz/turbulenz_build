@@ -41,8 +41,8 @@ $(foreach t,$(TSLIBS),\
 # modules, so that the compiler (and any error messages) reference the
 # source version rather than the copy.
 
-# _dep_d_files := list of files to build against
-# _dep_d_dep_targets := list fo build targets we depend upon
+# _dep_d_files := list of files to avtually build against (.d.ts)
+# _dep_d_dep_targets := list of build targets we depend upon (.ts)
 $(foreach t,$(TSLIBS),\
   $(eval _$(t)_dep_d_files := $(sort         \
     $(foreach d,$($(t)_deps),                \
@@ -50,7 +50,8 @@ $(foreach t,$(TSLIBS),\
     )                                        \
   ))                                         \
   $(eval _$(t)_dep_targets := $(sort         \
-    $(foreach d,$($(t)_deps),$(d) $(_$(d)_dep_targets)) \
+    $(foreach d,$($(t)_deps),                \
+      $(_$(d)_out_js) $(_$(d)_d_ts_src) $(_$(d)_dep_targets)) \
   ))                                         \
 )
 
