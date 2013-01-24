@@ -40,11 +40,17 @@ $(foreach t,$(TSLIBS),\
 # Dep files.  Note that we use the _d_ts_src for dependent decl
 # modules, so that the compiler (and any error messages) reference the
 # source version rather than the copy.
+
+# _dep_d_files := list of files to build against
+# _dep_d_dep_targets := list fo build targets we depend upon
 $(foreach t,$(TSLIBS),\
   $(eval _$(t)_dep_d_files := $(sort         \
     $(foreach d,$($(t)_deps),                \
       $(_$(d)_out_d_ts) $(_$(d)_d_ts_src) $(_$(d)_dep_d_files) \
     )                                        \
+  ))                                         \
+  $(eval _$(t)_dep_targets := $(sort         \
+    $(foreach d,$($(t)_deps),$(d) $(_$(d)_dep_targets)) \
   ))                                         \
 )
 
@@ -54,11 +60,9 @@ define _make_js_rule
 
   .PHONY : $(1)
 
-  $(1) : $(_$(1)_out_js) $(_$(1)_out_d_ts)
+  $(1) : $(_$(1)_out_js)
 
-  $(_$(1)_out_d_ts) : $(_$(1)_out_js)
-
-  $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_d_files)
+  $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets)
 	$(MKDIR) $(dir $(_$(1)_out_js))
 	@echo "[TSC  ] $$@"
 	$(CMDPREFIX)$(TSC) -c -Werror                        \
