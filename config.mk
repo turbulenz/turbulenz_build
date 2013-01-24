@@ -11,6 +11,9 @@ BUILDVERBOSE ?= 0
 CMDVERBOSE ?= 0
 CONFIG ?= release
 
+# Disable all build-in rules
+.SUFFIXES:
+
 #
 # Platform stuff.  Determine the build host
 #
