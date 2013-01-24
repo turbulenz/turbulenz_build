@@ -37,7 +37,8 @@ endif
 
 # Check for unsupported build host
 ifeq ($(BUILDHOST),)
-  $(error Couldnt determine BUILDHOST from uname: $(UNAME))
+  $(warning Couldnt determine BUILDHOST from uname: $(UNAME), assuming win32)
+  BUILDHOST := win32
 endif
 
 # Set TARGET if it hasn't been determined, and based on that, set
@@ -72,6 +73,11 @@ ifeq ($(TARGET),linux32)
   TARGETNAME ?= linux
   ARCH ?= i386
   PKGARCH ?= x86
+endif
+
+ifeq ($(TARGET),win32)
+  TARGETNAME ?= win32
+  ARCH ?= i386
 endif
 
 # unknown
