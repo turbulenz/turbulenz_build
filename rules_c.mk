@@ -63,10 +63,13 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 ############################################################
 
 # call full paths of all source files
-$(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_src := $(foreach s,$($(mod)_src),$(realpath $(s))) \
+$(call log,standalone_src = $(standalone_src))
+$(foreach mod,$(C_MODULES),$(eval                          \
+  $(mod)_src := $(foreach s,$($(mod)_src),                 \
+    $(if $(realpath $(s)),$(realpath $(s)),$(s))           \
+  )                                                        \
 ))
-$(call log,core_src = $(core_src))
+$(call log,standalone_src = $(standalone_src))
 
 # calc <mod>_headerfile all headers belonging to this module
 $(foreach mod,$(C_MODULES),$(eval \
