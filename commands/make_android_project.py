@@ -164,7 +164,8 @@ def copy_file_if_different(src, target):
 #
 #
 #
-def write_manifest(dest, table, permissions, extras, library):
+def write_manifest(dest, table, permissions, intent_filters, meta,
+                   extras, library):
 
     # Create res dir if it doesn't exist
 
@@ -266,6 +267,15 @@ def write_manifest(dest, table, permissions, extras, library):
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>"""
+
+    if intent_filters:
+        with open(intent_filters, "rb") as intent_f:
+            MANIFEST_0 += "\n"
+            MANIFEST_0 += intent_f.read()
+
+    for k,v in meta.items():
+        MANIFEST_0 += """
+            <meta-data android:name="%s" android:value="%s" />""" % (k, v)
 
     MANIFEST_0 += """
         </activity>"""
@@ -474,6 +484,14 @@ def usage():
                         - (optional) e.g. "com.android.vending.CHECK_LICENSE;
                           android.permission.INTERNET"
 
+    --intent-filters <xml file>
+                        - (optional) file with intent filters to add to main
+                          activity
+
+    --meta <key>:<value>
+                        - (optional) add a meta data key-value pair to the
+                          main activity
+
     --depends <project-location>
                         - (optional) Can use multiple times
 
@@ -529,7 +547,18 @@ def main():
     permissions = \
         "android.permission.WAKE_LOCK;android.permission.WRITE_SETTINGS;" + \
         "com.android.vending.CHECK_LICENSE"
+    intent_filters = None
+    meta = {}
     depends = []
+
+    def add_meta(kv):
+        k_v = kv.split(':')
+        if 2 != len(k_v):
+            print "Badly formed meta data: %s" % kv
+            usage()
+            exit(1)
+        print "Saw meta data: KEY: %s, VALUE: %s" % (k_v[0], k_v[1])
+        meta[k_v[0]] = k_v[1]
 
     while len(args):
         arg = args.pop(0)
@@ -555,6 +584,10 @@ def main():
             sdk_version = args.pop(0)
         elif "--permissions" == arg:
             permissions += ";" + args.pop(0)
+        elif "--intent-filters" == arg:
+            intent_filters = args.pop(0)
+        elif "--meta" == arg:
+            add_meta(args.pop(0))
         elif "--depends" == arg:
             depends.append(args.pop(0))
         elif "--icon-dir" == arg:
@@ -652,7 +685,8 @@ def main():
 
     # Write manifest
 
-    write_manifest(dest, table, permissions, extras, library)
+    write_manifest(dest, table, permissions, intent_filters, meta,
+                   extras, library)
 
     # Write ant.properties (dependencies)
 
