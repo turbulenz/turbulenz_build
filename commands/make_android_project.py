@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-# Copyright 2012 oyatsukai.com
+# Copyright 2013 oyatsukai.com
 
 import sys
 import os

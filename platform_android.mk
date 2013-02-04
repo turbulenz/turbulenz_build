@@ -246,8 +246,3 @@ LDFLAGSPOST := $(DLLFLAGSPOST)
 LDFLAGS_LIBDIR := $(DLLFLAGS_LIBDIR)
 LDFLAGS_LIB := $(DLLFLAGS_LIB)
 binsuffix := $(dllsuffix)
-
-#
-# OTHER
-#
-MAKE_APK_PROJ := platform/android/scripts/make_android_project.py

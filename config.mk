@@ -138,6 +138,7 @@ MKDIR := $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
 TSC := $(CMDPREFIX)python $(BUILDDIR)/commands/run_tsc.py
+MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 
 ############################################################
 
