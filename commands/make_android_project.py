@@ -552,13 +552,15 @@ def main():
     depends = []
 
     def add_meta(kv):
-        k_v = kv.split(':')
-        if 2 != len(k_v):
+        colon_idx = kv.find(':')
+        if -1 == colon_idx:
             print "Badly formed meta data: %s" % kv
             usage()
             exit(1)
-        print "Saw meta data: KEY: %s, VALUE: %s" % (k_v[0], k_v[1])
-        meta[k_v[0]] = k_v[1]
+        k = kv[:colon_idx]
+        v = kv[colon_idx+1:]
+        print "Saw meta data: KEY: %s, VALUE: %s" % (k, v)
+        meta[k] = v
 
     while len(args):
         arg = args.pop(0)
@@ -668,7 +670,7 @@ def main():
         '%ACTIVITY_NAME%' : activity,
         '%APP_TITLE%' : title,
         '%ANDROID_SDK_VERSION%' : sdk_version,
-        '%ICON_DIR%' : icon_dir
+        '%ICON_DIR%' : icon_dir or icon_file
         }
 
     verbose("TABLE: ")
