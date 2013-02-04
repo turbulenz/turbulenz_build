@@ -398,6 +398,18 @@ def copy_icon_files(dest, icon_dir):
 #
 #
 #
+def copy_icon_single_file(dest, icon_file):
+    dest = os.path.join(dest, "res", "drawable")
+    mkdir_if_not_exists(dest)
+
+    verbose("[ICON] %s -> %s" % (icon_file, dest))
+
+    copy_file_if_different(icon_file, os.path.join(dest, "icon.png"))
+
+
+#
+#
+#
 def run_android_project_update(dest, name, dependencies, library):
 
     if library:
@@ -509,6 +521,7 @@ def main():
     activity = None
     sdk_version = "8"
     icon_dir = None
+    icon_file = None
     keystore = None
     keyalias = None
     src = None
@@ -546,6 +559,10 @@ def main():
             depends.append(args.pop(0))
         elif "--icon-dir" == arg:
             icon_dir = args.pop(0)
+            icon_file = None
+        elif "--icon-file" == arg:
+            icon_dir = None
+            icon_file = args.pop(0)
         elif "--key-store" == arg:
             keystore = args.pop(0)
         elif "--key-alias" == arg:
@@ -645,6 +662,8 @@ def main():
 
     if icon_dir:
         copy_icon_files(dest, icon_dir)
+    elif icon_file:
+        copy_icon_single_file(dest, icon_file)
 
     # Run 'android update project -p ... --target android-16 -n <name>
     # --library ...'
