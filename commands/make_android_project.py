@@ -420,14 +420,18 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
-def run_android_project_update(dest, name, dependencies, library):
+def run_android_project_update(dest, name, dependencies, sdk_root, library):
+
+    android = "android"
+    if not sdk_root is None:
+        android = sdk_root + "/tools/android"
 
     if library:
-        cmd = 'android update lib-project -p %s -t %s' \
-            % (dest, 'android-16')
+        cmd = '%s update lib-project -p %s -t %s' \
+            % (android, dest, 'android-16')
     else:
-        cmd = 'android update project -p %s -t %s -n %s --subprojects' \
-            % (dest, 'android-16', name)
+        cmd = '%s update project -p %s -t %s -n %s --subprojects' \
+            % (android, dest, 'android-16', name)
         for dep in dependencies:
             rel = os.path.relpath(dep, dest)
             verbose(" '%s' -> '%s'" % (dep, rel))
@@ -531,6 +535,7 @@ def main():
 
     library = False
     dest = None
+    android_sdk_root = None
     version = None
     target = None
     name = None
@@ -570,6 +575,8 @@ def main():
             verbose = _verbose
         if "--dest" == arg:
             dest = args.pop(0)
+        elif "--android-sdk" == arg:
+            android_sdk_root = args.pop(0)
         elif "--version" == arg:
             version = args.pop(0)
         elif "--target" == arg:
@@ -707,7 +714,8 @@ def main():
     global wrote
     if wrote:
         fullname = "%s-%s" % (name, version_name)
-        if not 0 == run_android_project_update(dest, fullname, depends, library):
+        if not 0 == run_android_project_update(dest, fullname, depends,
+                                               android_sdk_root, library):
             return 1
     else:
         print "No project files changed, not running android project update"
