@@ -5,7 +5,7 @@ import subprocess
 import re
 import tempfile
 
-VERBOSE=False
+VERBOSE=True
 def verbose(msg):
     if VERBOSE:
         sys.stderr.write(msg)
@@ -30,6 +30,8 @@ def help():
     print ""
     print "   -Wnone              - Suppress all warning output"
     print ""
+    print "   --tsc <tsc path>    - Call tsc with the given path"
+    print ""
     print "   -filter <pattern>   - Only display warnings matching pattern"
     print ""
 
@@ -41,6 +43,7 @@ def main():
     expect_d_ts_file = None
     dump_output_to_stdout = False
     warning_filter = ""
+    tsc_path = "tsc"
 
     # Parse args
 
@@ -60,6 +63,8 @@ def main():
         elif "--declaration" == a:
             expect_d_ts_file = True
             tsc_args.append(a)
+        elif "--tsc" == a:
+            tsc_path = args.pop(0)
         elif "--filter" == a:
             warning_filter = args.pop(0)
         else:
@@ -98,7 +103,7 @@ def main():
 
     # Run command
 
-    tsc_cmd = "tsc %s" % (" ".join(tsc_args))
+    tsc_cmd = "%s %s" % (tsc_path, " ".join(tsc_args))
 
     verbose("CMD: %s\n" % tsc_cmd)
     p = subprocess.Popen(tsc_cmd, shell=True, stderr=subprocess.PIPE)
