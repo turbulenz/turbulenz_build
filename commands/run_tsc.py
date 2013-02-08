@@ -5,7 +5,7 @@ import subprocess
 import re
 import tempfile
 
-VERBOSE=True
+VERBOSE=False
 def verbose(msg):
     if VERBOSE:
         sys.stderr.write(msg)
