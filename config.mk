@@ -17,7 +17,11 @@ CONFIG ?= release
 #
 # Platform stuff.  Determine the build host
 #
-UNAME := $(shell uname)
+ifeq (sh.exe,$(SHELL))
+  UNAME := win32
+else
+  UNAME := $(shell uname)
+endif
 
 # macosx
 ifeq ($(UNAME),Darwin)
@@ -39,8 +43,12 @@ ifeq ($(UNAME),Linux)
 endif
 
 # Check for unsupported build host
-ifeq ($(BUILDHOST),)
+ifeq ($(UNAME),)
   $(warning Couldnt determine BUILDHOST from uname: $(UNAME), assuming win32)
+  UNAME := win32
+endif
+
+ifeq ($(UNAME),win32)
   BUILDHOST := win32
 endif
 
