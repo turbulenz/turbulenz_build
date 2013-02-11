@@ -91,7 +91,7 @@ define _make_d_ts_copy_rule
   $(1) : $(_$(1)_out_copy_d_ts)
 
   $(_$(1)_out_copy_d_ts) : $(_$(1)_d_ts_src)
-	$(MKDIR) $(dir $$@)
+	$(MKDIR) $$(dir $$@)
 	@echo "[CP   ] $(notdir $$^)"
 	$(CP) $$^ $$(dir $$@)
 
