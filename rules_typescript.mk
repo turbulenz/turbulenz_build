@@ -1,10 +1,41 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
+.SECONDEXPANSION:
+
 TS_MODULAR ?= 1
 CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
+
+############################################################
+# Directory handling
+############################################################
+
+TS_DIRS :=
+
+# 1 - directory name
+_dir_marker = $(foreach d,$(1),$(d).mkdir)
+
+# 1 - directory name
+define _create_mkdir_rule
+
+  $(if $(filter $(1),$(TS_DIRS)),$(error alrady have rule for dir: $1))
+
+  $(call _dir_marker,$(1)) :
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	$(CMDPREFIX)echo directory marker > $$@
+
+  TS_DIRS += $(1)
+endef
+
+# 1 - directory name
+_mkdir_rule =                                  \
+  $(foreach d,$(1),                            \
+    $(if $(filter $(d),$(TS_DIRS)),,           \
+      $(eval $(call _create_mkdir_rule,$(d)))  \
+    )                                          \
+  )
 
 ifeq (1,$(TS_MODULAR))
 
@@ -63,8 +94,10 @@ define _make_js_rule
 
   $(1) : $(_$(1)_out_js)
 
-  $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets)
-	$(MKDIR) $(dir $(_$(1)_out_js))
+  $(call _mkdir_rule,$(dir $(_$(1)_out_js)))
+
+  $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets) \
+   |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $$@"
 	$(CMDPREFIX)$(TSC) -c --failonerror --noresolve      \
       $(if $($(1)_nodecls),,--declaration)               \
@@ -90,8 +123,9 @@ define _make_d_ts_copy_rule
 
   $(1) : $(_$(1)_out_copy_d_ts)
 
-  $(_$(1)_out_copy_d_ts) : $(_$(1)_d_ts_src)
-	$(MKDIR) $$(dir $$@)
+  $(call _mkdir_rule,$(dir $(_$(1)_out_copy_d_ts)))
+
+  $(_$(1)_out_copy_d_ts) : $(_$(1)_d_ts_src) |$(call _dir_marker,$(dir $(_$(1)_out_copy_d_ts)))
 	@echo "[CP   ] $(notdir $$^)"
 	$(CP) $$^ $$(dir $$@)
 
@@ -161,8 +195,9 @@ jslib:
 # 2 - dst
 define _make_ts_js_rule
 
-  $(2) : $(1)
-	@$(MKDIR) $(dir $(2))
+  $(call _mkdir_rule,$(dir $(2)))
+
+  $(2) : $(1) |$(call _dir_marker,$(dir $(2)))
 	$(CMDPREFIX)echo "[TSC    ]" $(1)
 	$(CMDPREFIX)$(TSC) -c --declaration --out $(2:.d.ts=.js) $(1)
 	$(if $(VERIFY_CLOSURE),\

@@ -134,7 +134,7 @@ endif
 
 CP := $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
 CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
-MKDIR := $(CMDPREFIX)python $(BUILDDIR)/commands/mkdir.py
+MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
 TSC := node $(BUILDDIR)/../typescript/0.8.2/tsc.js
