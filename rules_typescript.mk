@@ -41,7 +41,7 @@ $(foreach t,$(TSLIBS),\
 # modules, so that the compiler (and any error messages) reference the
 # source version rather than the copy.
 
-# _dep_d_files := list of files to avtually build against (.d.ts)
+# _dep_d_files := list of files to actually build against (.d.ts)
 # _dep_d_dep_targets := list of build targets we depend upon (.ts)
 $(foreach t,$(TSLIBS),\
   $(eval _$(t)_dep_d_files := $(sort         \
@@ -66,7 +66,7 @@ define _make_js_rule
   $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets)
 	$(MKDIR) $(dir $(_$(1)_out_js))
 	@echo "[TSC  ] $$@"
-	$(CMDPREFIX)$(TSC) -c --failonerror                  \
+	$(CMDPREFIX)$(TSC) -c --failonerror --noresolve      \
       $(if $($(1)_nodecls),,--declaration)               \
       $(if $(CHK_SOURCES),--filter $(CHK_SOURCES))       \
       --out $$@ $(TS_BASE_FILES)                         \
@@ -142,8 +142,9 @@ ifeq (1,$(SYNTAX_CHECK_MODE))
   ts_js_files:=$(foreach ts,$(CHK_SOURCES),$(ts)!-)
 
 else
-  ts_js_files := $(foreach ts,$(filter-out %.d.ts,$(TS_FILES)), \
-    $(ts)!$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.js)) \
+
+  ts_js_files := $(foreach ts,$(filter-out %.d.ts,$(TS_FILES)),   \
+    $(ts)!$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.d.ts)) \
   )
 
 endif
@@ -163,7 +164,7 @@ define _make_ts_js_rule
   $(2) : $(1)
 	@$(MKDIR) $(dir $(2))
 	$(CMDPREFIX)echo "[TSC    ]" $(1)
-	$(CMDPREFIX)$(TSC) --ignoretypeerrors -c --out $(2) $(1)
+	$(CMDPREFIX)$(TSC) -c --declaration --out $(2:.d.ts=.js) $(1)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
     )
