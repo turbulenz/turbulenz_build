@@ -66,7 +66,7 @@ define _make_js_rule
   $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets)
 	$(MKDIR) $(dir $(_$(1)_out_js))
 	@echo "[TSC  ] $$@"
-	$(CMDPREFIX)$(TSC) -c -Werror                        \
+	$(CMDPREFIX)$(TSC) -c --failonerror                  \
       $(if $($(1)_nodecls),,--declaration)               \
       $(if $(CHK_SOURCES),--filter $(CHK_SOURCES))       \
       --out $$@ $(TS_BASE_FILES)                         \
@@ -163,7 +163,7 @@ define _make_ts_js_rule
   $(2) : $(1)
 	@$(MKDIR) $(dir $(2))
 	$(CMDPREFIX)echo "[TSC    ]" $(1)
-	$(CMDPREFIX)$(TSC) -Wnone -c --out $(2) $(1)
+	$(CMDPREFIX)$(TSC) --ignoretypeerrors -c --out $(2) $(1)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
     )
