@@ -17,11 +17,18 @@ CONFIG ?= release
 #
 # Platform stuff.  Determine the build host
 #
-ifeq (sh.exe,$(SHELL))
+_shell_base := $(notdir $(SHELL))
+ifneq (,$(filter sh.exe,$(_shell_base)))
   UNAME := win32
+  # This avoids problems where sh.exe exists in the path, but has
+  # spaces in it.
+  override SHELL := cmd.exe
 else
   UNAME := $(shell uname)
 endif
+
+# $(warning UNAME = $(UNAME))
+# $(warning SHELL = $(SHELL))
 
 # macosx
 ifeq ($(UNAME),Darwin)
