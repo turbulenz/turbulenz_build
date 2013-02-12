@@ -1,41 +1,10 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
-.SECONDEXPANSION:
-
 TS_MODULAR ?= 1
 CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
-
-############################################################
-# Directory handling
-############################################################
-
-TS_DIRS :=
-
-# 1 - directory name
-_dir_marker = $(foreach d,$(1),$(d).mkdir)
-
-# 1 - directory name
-define _create_mkdir_rule
-
-  $(if $(filter $(1),$(TS_DIRS)),$(error alrady have rule for dir: $1))
-
-  $(call _dir_marker,$(1)) :
-	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
-	$(CMDPREFIX)echo directory marker > $$@
-
-  TS_DIRS += $(1)
-endef
-
-# 1 - directory name
-_mkdir_rule =                                  \
-  $(foreach d,$(1),                            \
-    $(if $(filter $(d),$(TS_DIRS)),,           \
-      $(eval $(call _create_mkdir_rule,$(d)))  \
-    )                                          \
-  )
 
 ifeq (1,$(TS_MODULAR))
 

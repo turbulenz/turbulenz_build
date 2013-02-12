@@ -160,3 +160,35 @@ file_flags = CXXFLAGS_$(subst /,_,$(realpath $(1)))
 set_file_flags = $(eval \
   $(call file_flags,$(1)) := $(2) \
 )
+
+############################################################
+# Common rules (building directories, etc)
+############################################################
+
+.SECONDEXPANSION:
+
+_TZ_DIRS :=
+
+# 1 - directory name
+_dir_marker = $(foreach d,$(1),$(d).mkdir)
+
+# 1 - directory name
+define _create_mkdir_rule
+
+  $(if $(filter $(1),$(_TZ_DIRS)),$(error alrady have rule for dir: $1))
+
+  $(call _dir_marker,$(1)) :
+	@echo "[MKDIR] $1"
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	$(CMDPREFIX)echo directory marker > $$@
+
+  _TZ_DIRS += $(1)
+endef
+
+# 1 - directory name
+_mkdir_rule =                                  \
+  $(foreach d,$(1),                            \
+    $(if $(filter $(d),$(_TZ_DIRS)),,          \
+      $(eval $(call _create_mkdir_rule,$(d)))  \
+    )                                          \
+  )
