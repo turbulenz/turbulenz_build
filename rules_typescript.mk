@@ -129,11 +129,18 @@ else # ifeq (1,$(TS_MODULAR))
 #
 # CRUDE BUILD.
 #
-# Build each file in TSLIBS to the output directory.
+# Build each file in TSLIBS to the output directory.  All type errors
+# are ignored unless TS_REFCHECK == 1.
 #
 ############################################################
 
 TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
+
+ifeq (1,$(TS_REFCHECK))
+  TSC_FLAGS := -c --failonerror
+else
+  TSC_FLAGS := -c --noresolve --ignoretypeerrors
+endif
 
 # Override if we are syntax checking
 
@@ -168,7 +175,7 @@ define _make_ts_js_rule
 
   $(2) : $(1) |$(call _dir_marker,$(dir $(2)))
 	$(CMDPREFIX)echo "[TSC    ]" $(1)
-	$(CMDPREFIX)$(TSC) -c --noresolve --ignoretypeerrors --out $(2) $(1)
+	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --out $(2) $(1)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
     )
