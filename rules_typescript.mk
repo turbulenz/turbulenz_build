@@ -147,7 +147,7 @@ ifeq (1,$(SYNTAX_CHECK_MODE))
 else
 
   ts_js_files := $(foreach ts,$(filter-out %.d.ts,$(TS_FILES)),   \
-    $(ts)!$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.d.ts)) \
+    $(ts)!$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.js)) \
   )
 
 endif
@@ -168,7 +168,7 @@ define _make_ts_js_rule
 
   $(2) : $(1) |$(call _dir_marker,$(dir $(2)))
 	$(CMDPREFIX)echo "[TSC    ]" $(1)
-	$(CMDPREFIX)$(TSC) -c --declaration --out $(2:.d.ts=.js) $(1)
+	$(CMDPREFIX)$(TSC) -c --noresolve --ignoretypeerrors --out $(2) $(1)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
     )
