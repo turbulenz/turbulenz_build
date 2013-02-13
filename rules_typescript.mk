@@ -67,12 +67,12 @@ define _make_js_rule
 
   $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets) \
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
-	@echo "[TSC  ] $$@"
+	@echo "[TSC  ] $$< -> $$@"
 	$(CMDPREFIX)$(TSC) -c --failonerror --noresolve      \
       $(if $($(1)_nodecls),,--declaration)               \
       $(if $(CHK_SOURCES),--filter $(CHK_SOURCES))       \
       --out $$@ $(TS_BASE_FILES)                         \
-      $(_$(1)_dep_d_files) $(_$(1)_d_ts_src) $(_$(1)_ts_src)
+      $(_$(1)_dep_d_files) $(_$(1)_d_ts_src) $(abspath $(_$(1)_ts_src))
 
   jslib : $(1)
 
@@ -174,7 +174,7 @@ define _make_ts_js_rule
   $(call _mkdir_rule,$(dir $(2)))
 
   $(2) : $(1) |$(call _dir_marker,$(dir $(2)))
-	$(CMDPREFIX)echo "[TSC    ]" $(1)
+	@echo "[TSC  ] $$< -> $$@"
 	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --out $(2) $(1)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
