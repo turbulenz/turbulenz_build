@@ -2,6 +2,10 @@
 # Released under "Modified BSD License".  See COPYING for full text.
 
 TS_MODULAR ?= 1
+ifeq (1,$(TS_REFCHECK))
+  TS_MODULAR := 0
+endif
+
 CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
@@ -18,6 +22,8 @@ ifeq (1,$(TS_MODULAR))
 # result in a failed build.
 #
 ############################################################
+
+TS_OUTPUT_DIR ?= jslib-modular
 
 # Syntax checking
 ifeq (1,$(SYNTAX_CHECK_MODE))
@@ -134,6 +140,12 @@ else # ifeq (1,$(TS_MODULAR))
 #
 ############################################################
 
+ifeq (1,$(TS_REFCHECK))
+  TS_OUTPUT_DIR ?= jslib-refcheck
+else
+  TS_OUTPUT_DIR ?= jslib
+endif
+
 TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
 
 ifeq (1,$(TS_REFCHECK))
@@ -145,6 +157,7 @@ endif
 # Override if we are syntax checking
 
 ifeq (1,$(SYNTAX_CHECK_MODE))
+
   .PHONY : check-syntax
   check-syntax: -
 
