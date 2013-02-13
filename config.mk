@@ -147,7 +147,7 @@ ifneq ($(CMDVERBOSE),1)
   CMDPREFIX:=@
 endif
 
-CP := $(CMDPREFIX)python $(BUILDDIR)/commands/cp.py
+CP := python $(BUILDDIR)/commands/cp.py
 CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
