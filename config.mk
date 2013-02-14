@@ -18,7 +18,7 @@ CONFIG ?= release
 # Platform stuff.  Determine the build host
 #
 _shell_base := $(notdir $(SHELL))
-ifneq (,$(filter sh.exe,$(_shell_base)))
+ifneq (,$(filter %.exe,$(_shell_base)))
   UNAME := win32
   # This avoids problems where sh.exe exists in the path, but has
   # spaces in it.
