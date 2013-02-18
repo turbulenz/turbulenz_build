@@ -622,8 +622,9 @@ define _make_apk_rule
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
 	$($(1)_prebuild)
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
-	  --sdk-version $(ANDROID_SDK_VERSION)          \
-	  --target $(ANDROID_SDK_TARGET)                \
+	  --sdk-version                                 \
+        $(if $($(1)_sdk_version),$($(1)_sdk_version),$(ANDROID_SDK_VERSION)) \
+	  --target $(if $($(1)_target),$($(1)_target),$(ANDROID_SDK_TARGET) \
 	  --dest $(2)                                   \
 	  --version $($(1)_version)                     \
 	  --name $(1)                                   \
