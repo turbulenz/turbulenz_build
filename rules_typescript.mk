@@ -1,6 +1,13 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
+# Make SYNTAX_CHECK_MODE use non-modular refcheck mode
+
+ifeq (1,$(SYNTAX_CHECK_MODE))
+  TS_MODULAR := 0
+  TS_REFCHECK := 1
+endif
+
 TS_MODULAR ?= 1
 ifeq (1,$(TS_REFCHECK))
   TS_MODULAR := 0
