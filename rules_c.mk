@@ -624,7 +624,7 @@ define _make_apk_rule
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
 	  --sdk-version                                 \
         $(if $($(1)_sdk_version),$($(1)_sdk_version),$(ANDROID_SDK_VERSION)) \
-	  --target $(if $($(1)_target),$($(1)_target),$(ANDROID_SDK_TARGET) \
+	  --target $(if $($(1)_target),$($(1)_target),$(ANDROID_SDK_TARGET)) \
 	  --dest $(2)                                   \
 	  --version $($(1)_version)                     \
 	  --name $(1)                                   \
