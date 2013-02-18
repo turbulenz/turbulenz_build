@@ -90,7 +90,6 @@ MANIFEST_1_MEDIBA = """
 MEDIBA_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
 
-
 MANIFEST_1_CHARTBOOST = """
         <!-- CHARTBOOST BEGIN -->
         <!-- (no longer requires an activity)
@@ -107,6 +106,20 @@ CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.WRITE_EXTERNAL_STORAGE" + \
     ";android.permission.ACCESS_NETWORK_STATE" + \
     ";android.permission.ACCESS_WIFI_STATE"
+
+MANIFEST_1_OPENKIT = """
+        <!-- OPENKIT BEGIN -->
+        <activity
+            android:name="io.openkit.OKLoginActivity"
+            android:theme="@style/Theme.Transparent" />
+        <activity android:name="io.openkit.leaderboards.OKLeaderboardsActivity" />
+        <activity android:name="io.openkit.leaderboards.OKScoresActivity" />
+        <activity android:name="io.openkit.user.OKUserProfileActivity" />
+        <!-- Facebook login activity declaration required by Facebook SDK -->
+        <activity android:name="com.facebook.LoginActivity" />
+        <!-- OPENKIT END -->"""
+
+OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
 
 #
 #
@@ -175,14 +188,15 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     # [ MANIFEST_FRAGMENT, <permissions>, <override main activity> ]
 
     extras_table = {
-        'admob' : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
-        'openfeint' : [ MANIFEST_1_OPENFEINT, OPENFEINT_PERMISSIONS, False ],
-        'zirconia' : [ "", ZIRCONIA_PERMISSIONS, False ],
-        'mobiroo' : [ MANIFEST_1_MOBIROO, MOBIROO_PERMISSIONS, True ],
-        'mmedia' : [ MANIFEST_1_MMEDIA, MMEDIA_PERMISSIONS, False ],
-        'tapit' : [ MANIFEST_1_TAPIT, TAPIT_PERMISSIONS, False ],
-        'mediba' : [ MANIFEST_1_MEDIBA, MEDIBA_PERMISSIONS, False ],
-        'chartboost' : [ MANIFEST_1_CHARTBOOST, CHARTBOOST_PERMISSIONS, False ]
+        'admob'      : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
+        'openfeint'  : [ MANIFEST_1_OPENFEINT, OPENFEINT_PERMISSIONS, False ],
+        'zirconia'   : [ "", ZIRCONIA_PERMISSIONS, False ],
+        'mobiroo'    : [ MANIFEST_1_MOBIROO, MOBIROO_PERMISSIONS, True ],
+        'mmedia'     : [ MANIFEST_1_MMEDIA, MMEDIA_PERMISSIONS, False ],
+        'tapit'      : [ MANIFEST_1_TAPIT, TAPIT_PERMISSIONS, False ],
+        'mediba'     : [ MANIFEST_1_MEDIBA, MEDIBA_PERMISSIONS, False ],
+        'chartboost' : [ MANIFEST_1_CHARTBOOST, CHARTBOOST_PERMISSIONS, False ],
+        'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ]
         }
 
     # icon
@@ -514,13 +528,15 @@ def usage():
 
     --mobiroo           - (optional) include mobiroo entries to manifest
 
-    --mmedia            - (optional) include MillennialMedia manifest entries"
+    --mmedia            - (optional) include MillennialMedia manifest entries
 
-    --tapit             - (optional) include MillennialMedia manifest entries"
+    --tapit             - (optional) include MillennialMedia manifest entries
 
-    --mediba            - (optional) include Medbia manifest entries"
+    --mediba            - (optional) include Medbia manifest entries
 
-    --chartboost        - (optional) include ChartBoost manifest entries"
+    --chartboost        - (optional) include ChartBoost manifest entries
+
+    --openkit           - (openkit) include OpenKit manifest entries
 
   Example:
 
@@ -629,6 +645,8 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
+        elif "--openkit" == arg:
+            extras.append('openkit')
         else:
             print "Error: unknown parameter: '%s'" % arg
             print ""
