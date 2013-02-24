@@ -399,6 +399,16 @@ $(foreach mod,$(C_MODULES),$(eval \
   $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile)) \
 ))
 
+KEEPSYM_PRE := -Wl,-whole-archive
+KEEPSYM_POST := -Wl,-no-whole-archive
+$(foreach mod,$(C_MODULES),$(eval \
+  $(mod)_deplibs_cmdline := $(foreach d,$($(mod)_fulldeps),\
+    $(if $($(d)_keepsymbols), \
+      $(KEEPSYM_PRE) $($(d)_libfile) $(KEEPSYM_POST), \
+      $($(d)_libfile)) \
+  ) \
+))
+
 # each lib depends on the object files for that module
 
 # 1 - mod
@@ -419,9 +429,6 @@ define _make_lib_rule
   $(1) : $($(1)_libfile)
 
 endef
-
-# $($(1)_deplibs)
-# $($(1)_ext_libfiles)
 
 $(foreach lib,$(LIBS),$(eval \
   $(call _make_lib_rule,$(lib)) \
@@ -447,7 +454,7 @@ define _make_dll_rule
       $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
       $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $($(1)_OBJECTS) \
-      $($(1)_deplibs) \
+      $($(1)_deplibs_cmdline) \
       $($(1)_ext_lib_flags) \
       $(DLLFLAGSPOST) \
       $($(1)_DLLFLAGSPOST) \
