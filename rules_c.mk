@@ -395,16 +395,20 @@ $(foreach lib,$(LIBS),$(eval \
 
 # <mod>_deplibs = all libraries we depend upon
 # depend on the libs for all dependencies
-$(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile)) \
-))
+$(foreach mod,$(C_MODULES),                                                 \
+  $(eval $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile))) \
+  $(eval $(mod)_deplibs_cmdline :=                                          \
+    $(foreach d,$($(mod)_fulldeps),                                         \
+      $(if $($(d)_keepsymbols),                                             \
+        $(DLLKEEPSYM_PRE) $($(d)_libfile) $(DLLKEEPSYM_POST),               \
+        $($(d)_libfile))                                                    \
+       ))                                                                   \
+)
 
-KEEPSYM_PRE := -Wl,-whole-archive
-KEEPSYM_POST := -Wl,-no-whole-archive
 $(foreach mod,$(C_MODULES),$(eval \
   $(mod)_deplibs_cmdline := $(foreach d,$($(mod)_fulldeps),\
     $(if $($(d)_keepsymbols), \
-      $(KEEPSYM_PRE) $($(d)_libfile) $(KEEPSYM_POST), \
+      $(DLLKEEPSYM_PRE) $($(d)_libfile) $(DLLKEEPSYM_POST), \
       $($(d)_libfile)) \
   ) \
 ))

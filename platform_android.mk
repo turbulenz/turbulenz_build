@@ -236,6 +236,9 @@ DLLFLAGS_LIB := -l
 dllprefix := lib
 dllsuffix := .so
 
+DLLKEEPSYM_PRE := -Wl,-whole-archive
+DLLKEEPSYM_POST := -Wl,-no-whole-archive
+
 #
 # APPS
 #
