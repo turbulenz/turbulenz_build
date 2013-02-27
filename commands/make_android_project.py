@@ -272,7 +272,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         <activity android:name="%ACTIVITY_NAME%"
                   android:label="%APP_TITLE%"
                   android:screenOrientation="landscape"
-                  android:launchMode="singleInstance"
+                  android:launchMode="singleTask"
                   android:configChanges="orientation"
                   >"""
     if not override_main_activity:
