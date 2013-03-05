@@ -6,7 +6,11 @@
 ifeq (1,$(SYNTAX_CHECK_MODE))
   TS_MODULAR := 0
   TS_REFCHECK := 1
+  ifneq (,$(filter %.ts,$(CHK_SOURCES)))
+    TS_SYNTAX_CHECK := 1
+  endif
 endif
+# $(warning TS_SYNTAX_CHECK = $(TS_SYNTAX_CHECK))
 
 TS_MODULAR ?= 1
 ifeq (1,$(TS_REFCHECK))
@@ -31,14 +35,16 @@ ifeq (1,$(TS_MODULAR))
 ############################################################
 
 TS_OUTPUT_DIR ?= jslib-modular
+TS_SYNTAX_CHECK := 0
 
 # Syntax checking
-ifeq (1,$(SYNTAX_CHECK_MODE))
+ifeq (1,$(TS_SYNTAX_CHECK))
   ifneq (,$(filter %_flymake.ts,$(CHK_SOURCES)))
     SYNTAX_CHECK_REPLACE:=$(CHK_SOURCES:_flymake.ts=.ts)
-	SYNTAX_CHECK_WITH:=$(CHK_SOURCES)
+    SYNTAX_CHECK_WITH:=$(CHK_SOURCES)
   endif
 endif
+
 syntax_replace = $(subst $(SYNTAX_CHECK_REPLACE),$(SYNTAX_CHECK_WITH),$(1))
 
 # Calc .ts and .d.ts src
@@ -91,7 +97,7 @@ define _make_js_rule
 
   # Add the module to the syntax-check deps ?
 
-  ifneq (,$(CHK_SOURCES))
+  ifeq (1,$(TS_SYNTAX_CHECK))
     .PHONY: check-syntax
     check-syntax : $(if $(filter $(CHK_SOURCES),$(call syntax_replace,$($(1)_src))),$(1))
   endif
@@ -163,7 +169,7 @@ endif
 
 # Override if we are syntax checking
 
-ifeq (1,$(SYNTAX_CHECK_MODE))
+ifeq (1,$(TS_SYNTAX_CHECK))
 
   .PHONY : check-syntax
   check-syntax: -
@@ -202,7 +208,9 @@ define _make_ts_js_rule
 
   jslib : $(2)
 
-  check-syntax : $(2)
+  ifeq (1,$(TS_SYNTAX_CHECK))
+    check-syntax : $(2)
+  endif
 
 endef
 

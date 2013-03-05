@@ -8,6 +8,14 @@ all:
 C_MODULES := $(LIBS) $(DLLS) $(APPS)
 $(call log,C_MODULES = $(C_MODULES))
 
+ifeq (1,$(SYNTAX_CHECK_MODE))
+  ifneq (,$(filter %.c,$(CHK_SOURCES))$(filter %.cpp,$(CHK_SOURCES))$(filter %.cpp,$(CHK_SOURCES)))
+    C_SYNTAX_CHECK := 1
+    # $(warning CHK_SOURCES = $(CHK_SOURCES))
+  endif
+endif
+# $(warning C_SYNTAX_CHECK = $(C_SYNTAX_CHECK))
+
 ############################################################
 
 #
@@ -63,12 +71,14 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 ############################################################
 
 # call full paths of all source files
+# ifneq (1,$(C_SYNTAX_CHECK))
 $(call log,standalone_src = $(standalone_src))
 $(foreach mod,$(C_MODULES),$(eval                          \
   $(mod)_src := $(foreach s,$($(mod)_src),                 \
     $(if $(realpath $(s)),$(realpath $(s)),$(s))           \
   )                                                        \
 ))
+# endif
 $(call log,standalone_src = $(standalone_src))
 
 # calc <mod>_headerfile all headers belonging to this module
@@ -203,7 +213,7 @@ $(foreach mod,$(C_MODULES),$(eval $(mod)_DEPDIR := $(DEPDIR)/$(mod)))
 # rule to create it.
 #
 
-ifeq (1,$(SYNTAX_CHECK_MODE))
+ifeq (1,$(C_SYNTAX_CHECK))
   UNITY := 0
 endif
 
@@ -301,21 +311,42 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 #
 
 # 1 - flymake src
-# 2 - src_obj_dep list
+# 2 - module_name
 define _target_flymake_src
-  _found := $(filter $(1)%,$(2))
-  _file := $(call _getobj,$(_found))
-  $(if $(_file),check-syntax : $(_file))
-  $(if $(_file),$(_file) : .FORCE)
-  $(if $(_file),.FORCE :)
+
+  _fm_found += \
+    $(filter $(1)%,$($(2)_cxx_obj_dep) $($(2)_cmm_obj_dep))
 
 endef
 
-ifeq (1,$(SYNTAX_CHECK_MODE))
-  FLYMAKESRC:=$(abspath $(CHK_SOURCES))
+ifeq (1,$(C_SYNTAX_CHECK))
+  FLYMAKESRC:=$(strip $(abspath $(CHK_SOURCES)))
   $(foreach mod,$(C_MODULES),\
-    $(eval $(call _target_flymake_src,$(FLYMAKESRC),$($(mod)_cxx_obj_dep) $($(mod)_cmm_obj_dep))) \
+    $(eval $(call _target_flymake_src,$(FLYMAKESRC),$(mod))) \
   )
+
+  # $(warning _fm_found: $(_fm_found))
+  ifneq (,$(strip $(_fm_found)))
+    $(foreach mod,$(C_MODULES),\
+      $(eval $(mod)_cxx_obj_dep := $(subst $(FLYMAKESRC),$(CHK_SOURCES),$($(mod)_cxx_obj_dep))) \
+      $(eval $(mod)_cmm_obj_dep := $(subst $(FLYMAKESRC),$(CHK_SOURCES),$($(mod)_cmm_obj_dep))) \
+    )
+
+    # $(warning standalone_cxx_obj_dep = $(standalone_cxx_obj_dep))
+    # $(warning standalone_cmm_obj_dep = $(standalone_cmm_obj_dep))
+
+    _obj := $(call _getobj,$(_fm_found))
+
+    .PHONY : $(_obj)
+    check-syntax: $(_obj)
+
+  else
+    ifneq (android,$(TARGET))
+      check-syntax:
+	    $(MAKE) -s CHK_SOURCES=$(CHK_SOURCES) SYNTAX_CHECK_MODE=1 TARGET=android check-syntax
+    endif
+  endif
+
 endif
 
 #
