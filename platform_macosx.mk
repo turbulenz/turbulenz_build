@@ -6,11 +6,7 @@
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
-# Check which SDK version we have available
 XCODE_SDK_VER ?= 10.6
-ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
-  $(error Cant find SDK version $(XCODE_SDK_VER))
-endif
 
 # Create a variable holding the xcode configuration
 ifeq ($(CONFIG),debug)
@@ -25,12 +21,11 @@ ifneq ($(XCODE_SDK_VER),10.6)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
+# Check the known SDK install locations
+
 XCODE_SDK_ROOT:=/Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
 ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
   XCODE_SDK_ROOT:=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform$(XCODE_SDK_ROOT)
-  ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
-    $(error couldnt find SDK dir)
-  endif
 endif
 
 ############################################################
@@ -55,8 +50,6 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX
-
-
 
 # -fno-rtti
 # -fno-exceptions

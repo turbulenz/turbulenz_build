@@ -19,6 +19,28 @@ endif
 ############################################################
 
 #
+# Platform Checks
+#
+# (these checks are performed here so they don't cause terminal errors
+#  for clients who aren't building C++ apps).
+
+ifeq (macosx,$(TARGETNAME))
+
+  # Check which SDK version we have available
+  ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
+    $(error Cant find SDK version $(XCODE_SDK_VER))
+  endif
+
+  # Check the SDK ROOT location
+  ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
+    $(error couldnt find SDK dir)
+  endif
+
+endif
+
+############################################################
+
+#
 # Full deps
 #
 
