@@ -178,7 +178,7 @@ def copy_file_if_different(src, target):
 #
 #
 def write_manifest(dest, table, permissions, intent_filters, meta,
-                   extras, library):
+                   extras, library, resource_strings):
 
     # Create res dir if it doesn't exist
 
@@ -249,9 +249,14 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     res_values_strings_data = \
         replace_tags("""<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">%APP_TITLE%</string>
+    <string name="app_name">%APP_TITLE%</string>""", table)
+    for k, v in resource_strings.iteritems():
+        res_values_strings_data += '\n    <string name="%s">%s</string>' \
+            % (k, v)
+    res_values_strings_data += """
 </resources>
-""", table)
+"""
+
     write_file_if_different(res_values_strings, res_values_strings_data)
 
     # Override main activity?
@@ -502,6 +507,9 @@ def usage():
                         - (optional) e.g. "com.android.vending.CHECK_LICENSE;
                           android.permission.INTERNET"
 
+    --resource-string name,value
+                        - (optional) add a string resource to the APK
+
     --intent-filters <xml file>
                         - (optional) file with intent filters to add to main
                           activity
@@ -571,6 +579,7 @@ def main():
     intent_filters = None
     meta = {}
     depends = []
+    resource_strings = {}
 
     def add_meta(kv):
         colon_idx = kv.find(':')
@@ -609,6 +618,9 @@ def main():
             sdk_version = args.pop(0)
         elif "--permissions" == arg:
             permissions += ";" + args.pop(0)
+        elif "--resource-string" == arg:
+            res_kv = args.pop(0).split(",")
+            resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
         elif "--meta" == arg:
@@ -713,7 +725,7 @@ def main():
     # Write manifest
 
     write_manifest(dest, table, permissions, intent_filters, meta,
-                   extras, library)
+                   extras, library, resource_strings)
 
     # Write ant.properties (dependencies)
 
