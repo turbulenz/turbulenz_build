@@ -115,8 +115,10 @@ MANIFEST_1_OPENKIT = """
         <activity android:name="io.openkit.leaderboards.OKLeaderboardsActivity" />
         <activity android:name="io.openkit.leaderboards.OKScoresActivity" />
         <activity android:name="io.openkit.user.OKUserProfileActivity" />
+        <activity android:name="io.openkit.facebook.LoginActivity" />
         <!-- Facebook login activity declaration required by Facebook SDK -->
         <activity android:name="com.facebook.LoginActivity" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
         <!-- OPENKIT END -->"""
 
 OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
