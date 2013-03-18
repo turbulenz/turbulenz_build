@@ -115,7 +115,7 @@ define _make_d_ts_copy_rule
 
   $(_$(1)_out_copy_d_ts) : $(_$(1)_d_ts_src) |$(call _dir_marker,$(dir $(_$(1)_out_copy_d_ts)))
 	@echo "[CP   ] $(notdir $$^)"
-	$(CP) $$^ $$(dir $$@)
+	$(CMDPREFIX)$(CP) $$^ $$(dir $$@)
 
   jslib : $(1)
 
