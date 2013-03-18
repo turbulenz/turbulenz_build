@@ -172,10 +172,10 @@ endif
 ifeq (1,$(TS_SYNTAX_CHECK))
 
   .PHONY : check-syntax
-  check-syntax: -
+  check-syntax: $(TS_OUTPUT_DIR)/.syntax_check.js
 
-  .PHONY : -
-  ts_js_files:=$(foreach ts,$(CHK_SOURCES),$(ts)!-)
+  .PHONY : $(TS_OUTPUT_DIR)/.syntax_check.js
+  ts_js_files:=$(foreach ts,$(CHK_SOURCES),$(ts)!$(TS_OUTPUT_DIR)/.syntax_check.js)
 
 else
 
