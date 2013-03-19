@@ -10,6 +10,7 @@ endif
 BUILDVERBOSE ?= 0
 CMDVERBOSE ?= 0
 CONFIG ?= release
+VALGRIND ?= 0
 
 # Disable all build-in rules
 .SUFFIXES:
@@ -145,6 +146,10 @@ $(call log,BINDIR=$(BINDIR))
 
 ifneq ($(CMDVERBOSE),1)
   CMDPREFIX:=@
+endif
+
+ifeq ($(VALGRIND),1)
+  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py

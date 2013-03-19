@@ -579,7 +579,7 @@ define _run_app_rule
 
   $(1)_run :
 	$(MAKE) $(1)
-	$(call _run_prefix,$(1)) $($(1)_appfile)
+	$(RUNPREFIX) $(call _run_prefix,$(1)) $($(1)_appfile)
 
 endef
 
