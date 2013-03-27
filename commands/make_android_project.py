@@ -16,30 +16,6 @@ MANIFEST_1_ADMOB = """
 ADMOB_PERMISSIONS = ";android.permission.INTERNET;" + \
     "android.permission.ACCESS_NETWORK_STATE"
 
-MANIFEST_1_OPENFEINT = """
-        <!-- OPENFEINT BEGIN -->
-        <activity android:name="com.openfeint.internal.ui.IntroFlow"
-                  android:label="IntroFlow"
-                  android:configChanges="orientation|keyboardHidden"
-                  android:theme="@android:style/Theme.NoTitleBar"/>
-        <activity android:name="com.openfeint.api.ui.Dashboard"
-                  android:label="Dashboard"
-                  android:configChanges="orientation|keyboardHidden"
-                  android:theme="@android:style/Theme.NoTitleBar"/>
-        <activity android:name="com.openfeint.internal.ui.Settings"
-                  android:label="Settings"
-                  android:configChanges="orientation|keyboardHidden"
-                  android:theme="@android:style/Theme.NoTitleBar"/>
-        <activity android:name="com.openfeint.internal.ui.NativeBrowser"
-                  android:label="NativeBrowser"
-                  android:configChanges="orientation|keyboardHidden"
-                  android:theme="@android:style/Theme.NoTitleBar"/>
-        <!-- OPENFEINT END -->"""
-OPENFEINT_PERMISSIONS = ";android.permission.INTERNET;" + \
-    "android.permission.ACCESS_NETWORK_STATE;" + \
-    "android.permission.WRITE_EXTERNAL_STORAGE;" + \
-    "android.permission.GET_ACCOUNTS"
-
 ZIRCONIA_PERMISSIONS = ";android.permission.READ_PHONE_STATE;" + \
     "android.permission.INTERNET"
 
@@ -191,7 +167,6 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
 
     extras_table = {
         'admob'      : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
-        'openfeint'  : [ MANIFEST_1_OPENFEINT, OPENFEINT_PERMISSIONS, False ],
         'zirconia'   : [ "", ZIRCONIA_PERMISSIONS, False ],
         'mobiroo'    : [ MANIFEST_1_MOBIROO, MOBIROO_PERMISSIONS, True ],
         'mmedia'     : [ MANIFEST_1_MMEDIA, MMEDIA_PERMISSIONS, False ],
@@ -532,8 +507,6 @@ def usage():
 
     --admob             - (optional) include AdMob activity decl
 
-    --openfeint         - (optional) include OpenFeint activity decl
-
     --zirconia          - (optional) include Zirconia permissions
 
     --mobiroo           - (optional) include mobiroo entries to manifest
@@ -653,8 +626,6 @@ def main():
             extras.append('mediba')
         elif "--chartboost" == arg:
             extras.append('chartboost')
-        elif "--openfeint" == arg:
-            extras.append('openfeint')
         elif "--zirconia" == arg:
             extras.append('zirconia')
         elif "--mobiroo" == arg:
