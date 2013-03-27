@@ -649,9 +649,9 @@ $(foreach apk,$(APKS),                                          \
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(CONFIG).apk \
   )                                                             \
 )
-$(call log,therun_google_apk_dest = $(therun_google_apk_dest))
-$(call log,therun_google_apk_copylibs = $(therun_google_apk_copylibs))
-$(call log,therun_google_apk_file = $(therun_google_apk_file))
+$(call log,authtest_apk_dest = $(authtest_apk_dest))
+$(call log,authtest_apk_copylibs = $(authtest_apk_copylibs))
+$(call log,authtest_apk_file = $(authtest_apk_file))
 
 # For each APK, <apk>_apk_fulldeps := \
 #     [ <d>_apk_fulldeps for d in <apk>_deps ]
@@ -719,6 +719,10 @@ define _make_apk_rule
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
+
+  $(1)_run : $(1)_install
+	adb shell am start -a android.intent.action.MAIN \
+      -n $($(1)_package)/$(if $(filter .,$($(1)_activity)),$($(1)_activity),.$($(1)_activity))
 
 endef
 

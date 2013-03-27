@@ -8,7 +8,7 @@
 # Include the appropriate rules files based on which modules types
 # have been defined.
 
-ifneq (,$(strip $(LIBS) $(DLLS) $(APPS)))
+ifneq (,$(strip $(LIBS) $(DLLS) $(APPS) $(APKS)))
   ifneq (win32,$(TARGET))
     include $(BUILDDIR)/rules_c.mk
   endif
