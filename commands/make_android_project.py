@@ -156,7 +156,7 @@ def copy_file_if_different(src, target):
 #
 #
 def write_manifest(dest, table, permissions, intent_filters, meta,
-                   extras, library, resource_strings):
+                   extras, library, resource_strings, options):
 
     # Create res dir if it doesn't exist
 
@@ -253,9 +253,13 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     <application android:label="@string/app_name" %ICON_ATTR%>
         <activity android:name="%ACTIVITY_NAME%"
                   android:label="%APP_TITLE%"
+                  android:launchMode="singleTask" """
+
+    if options['landscape']:
+        MANIFEST_0 += """
                   android:screenOrientation="landscape"
-                  android:launchMode="singleTask"
-                  android:configChanges="orientation"
+                  android:configChanges="orientation" """
+    MANIFEST_0 += """
                   >"""
     if not override_main_activity:
         MANIFEST_0 += """
@@ -412,6 +416,31 @@ def copy_icon_single_file(dest, icon_file):
 
     copy_file_if_different(icon_file, os.path.join(dest, "icon.png"))
 
+#
+#
+#
+def copy_layout_files(dest, layout_files):
+    dest_dir = os.path.join(dest, "res", "layout")
+    mkdir_if_not_exists(dest_dir)
+
+    for l in layout_files:
+        l_base = os.path.split(l)[1]
+        l_dest = os.path.join(dest_dir, l_base)
+        _verbose("[LAYOUT] %s -> %s" % (l, l_dest))
+        copy_file_if_different(l, l_dest)
+
+#
+#
+#
+def copy_drawable_files(dest, drawable_files):
+    dest_dir = os.path.join(dest, "res", "drawable")
+    mkdir_if_not_exists(dest_dir)
+
+    for d in drawable_files:
+        d_base = os.path.split(d)[1]
+        d_dest = os.path.join(dest_dir, d_base)
+        _verbose("[DRAWABLE] %s -> %s" % (d, d_dest))
+        copy_file_if_different(d, d_dest)
 
 #
 #
@@ -505,6 +534,10 @@ def usage():
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
 
+    --layout <file>     - (optional) .xml file to copy to res/layout/
+
+    --drawable <file>   - (optional) .xml file to copy to res/drawable/
+
     --admob             - (optional) include AdMob activity decl
 
     --zirconia          - (optional) include Zirconia permissions
@@ -555,6 +588,11 @@ def main():
     meta = {}
     depends = []
     resource_strings = {}
+    layout_files = []
+    drawable_files = []
+    options = {
+        'landscape': True,
+        }
 
     def add_meta(kv):
         colon_idx = kv.find(':')
@@ -612,6 +650,12 @@ def main():
             keystore = args.pop(0)
         elif "--key-alias" == arg:
             keyalias = args.pop(0)
+        elif "--layout" == arg:
+            layout_files.append(args.pop(0))
+        elif "--drawable" == arg:
+            drawable_files.append(args.pop(0))
+        elif "--no-landscape" == arg:
+            options['landscape'] = False
         elif "--src" == arg:
             src = args.pop(0)
         elif "--library" == arg:
@@ -698,7 +742,7 @@ def main():
     # Write manifest
 
     write_manifest(dest, table, permissions, intent_filters, meta,
-                   extras, library, resource_strings)
+                   extras, library, resource_strings, options)
 
     # Write ant.properties (dependencies)
 
@@ -710,6 +754,16 @@ def main():
         copy_icon_files(dest, icon_dir)
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
+
+    # Copy layout files
+
+    if 0 != len(layout_files):
+        copy_layout_files(dest, layout_files)
+
+    # Copy drawable files
+
+    if 0 != len(drawable_files):
+        copy_drawable_files(dest, drawable_files)
 
     # Run 'android update project -p ... --target android-16 -n <name>
     # --library ...'
