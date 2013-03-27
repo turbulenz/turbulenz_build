@@ -693,7 +693,7 @@ define _make_apk_rule
 	  --version $($(1)_version)                     \
 	  --name $(1)                                   \
 	  --package $($(1)_package)                     \
-	  --src $($(1)_srcbase)                         \
+	  $(if $($(1)_srcbase),--src $($(1)_srcbase))   \
       $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE)) \
       $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS)) \
 	  $(if $($(1)_library),--library)               \
@@ -723,7 +723,7 @@ define _make_apk_rule
   $(1)_run_dot:=$(if $(filter .,$(1)_activity),,.)
   $(1)_run : $(1)_install
 	adb shell am start -a android.intent.action.MAIN \
-      -n $($(1)_package)/$(if $(filter .,$($(1)_activity)),$($(1)_activity),$($(1)_run_dot)$($(1)_activity))
+      -n $($(1)_package)/$$($(1)_run_dot)$($(1)_activity)
 
 endef
 
