@@ -280,6 +280,11 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     MANIFEST_0 += """
         </activity>"""
 
+    for a in options['activity_files']:
+        with open(a, "rb") as a_f:
+            MANIFEST_0 += "\n"
+            MANIFEST_0 += a_f.read()
+
     data += replace_tags(MANIFEST_0, table)
 
     # Extra decls
@@ -520,6 +525,9 @@ def usage():
                         - (optional) file with intent filters to add to main
                           activity
 
+    --activity-decl <xml file>
+                        - (optional) file with an activity in it
+
     --meta <key>:<value>
                         - (optional) add a meta data key-value pair to the
                           main activity
@@ -592,6 +600,7 @@ def main():
     drawable_files = []
     options = {
         'landscape': True,
+        'activity_files': [],
         }
 
     def add_meta(kv):
@@ -636,6 +645,8 @@ def main():
             resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
+        elif "--activity-decl" == arg:
+            options['activity_files'].append(args.pop(0))
         elif "--meta" == arg:
             add_meta(args.pop(0))
         elif "--depends" == arg:
