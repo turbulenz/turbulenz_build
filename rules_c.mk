@@ -716,7 +716,7 @@ define _make_apk_rule
         echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ; \
       fi ;                                          \
     done
-	$(CMDPREFIX)cd $(2) && ant $(CONFIG)
+	$(CMDPREFIX)cd $(2) && ant $(if $(ANDROID_KEY_STORE),$(CONFIG),debug)
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
