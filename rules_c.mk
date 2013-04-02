@@ -726,6 +726,9 @@ define _make_apk_rule
 	adb shell am start -a android.intent.action.MAIN \
       -n $($(1)_package)/$$($(1)_run_dot)$($(1)_activity)
 
+  .PHONY : $(1)_clean
+  $(1)_clean :
+	rm -rf $(2)
 endef
 
 
@@ -844,7 +847,7 @@ $(foreach mod,$(C_MODULES),$(eval \
 
 # clean rule
 .PHONY : clean
-clean : $(foreach mod,$(C_MODULES),$(mod)_clean)
+clean : $(foreach mod,$(C_MODULES) $(APKS),$(mod)_clean)
 
 .PHONY : depclean
 depclean :
