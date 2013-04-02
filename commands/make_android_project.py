@@ -576,6 +576,8 @@ def usage():
 
     --png-asset <file>  - (optional) asset file with .png extension
 
+    --android-sdk       - (optional) root of android SDK (if not in path)
+
     --admob             - (optional) include AdMob activity decl
 
     --zirconia          - (optional) include Zirconia permissions

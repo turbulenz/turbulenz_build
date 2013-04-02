@@ -696,6 +696,7 @@ define _make_apk_rule
 	  $(if $($(1)_srcbase),--src $($(1)_srcbase))   \
       $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE)) \
       $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS)) \
+      $(if $(ANDROID_SDK),--android-sdk $(ANDROID_SDK))           \
 	  $(if $($(1)_library),--library)               \
 	  $(if $($(1)_title),--title $($(1)_title))     \
 	  $(if $($(1)_activity),--activity $($(1)_activity))          \
