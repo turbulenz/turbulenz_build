@@ -450,6 +450,32 @@ def copy_drawable_files(dest, drawable_files):
 #
 #
 #
+def copy_asset_files(dest, asset_files):
+    dest_dir = os.path.join(dest, "assets")
+    mkdir_if_not_exists(dest_dir)
+
+    for a in asset_files:
+        a_base = os.path.split(a)[1]
+        a_dest = os.path.join(dest_dir, a_base)
+        _verbose("[ASSET] %s -> %s" % (a, a_dest))
+        copy_file_if_different(a, a_dest)
+
+#
+#
+#
+def copy_png_asset_files(dest, png_asset_files):
+    dest_dir = os.path.join(dest, "assets")
+    mkdir_if_not_exists(dest_dir)
+
+    for a in png_asset_files:
+        a_base = os.path.split(a)[1]
+        a_dest = os.path.join(dest_dir, a_base + ".png")
+        _verbose("[ASSET] %s -> %s" % (a, a_dest))
+        copy_file_if_different(a, a_dest)
+
+#
+#
+#
 def run_android_project_update(dest, name, dependencies, sdk_root, library):
 
     android = "android"
@@ -546,6 +572,10 @@ def usage():
 
     --drawable <file>   - (optional) .xml file to copy to res/drawable/
 
+    --asset <file>      - (optional) asset file to copy to assets
+
+    --png-asset <file>  - (optional) asset file with .png extension
+
     --admob             - (optional) include AdMob activity decl
 
     --zirconia          - (optional) include Zirconia permissions
@@ -598,6 +628,8 @@ def main():
     resource_strings = {}
     layout_files = []
     drawable_files = []
+    asset_files = []
+    png_asset_files = []
     options = {
         'landscape': True,
         'activity_files': [],
@@ -665,6 +697,10 @@ def main():
             layout_files.append(args.pop(0))
         elif "--drawable" == arg:
             drawable_files.append(args.pop(0))
+        elif "--asset" == arg:
+            asset_files.append(args.pop(0))
+        elif "--png-asset" == arg:
+            png_asset_files.append(args.pop(0))
         elif "--no-landscape" == arg:
             options['landscape'] = False
         elif "--src" == arg:
@@ -775,6 +811,13 @@ def main():
 
     if 0 != len(drawable_files):
         copy_drawable_files(dest, drawable_files)
+
+    # Copy asset files
+
+    if 0 != len(asset_files):
+        copy_asset_files(dest, asset_files)
+    if 0 != len(png_asset_files):
+        copy_png_asset_files(dest, png_asset_files)
 
     # Run 'android update project -p ... --target android-16 -n <name>
     # --library ...'
