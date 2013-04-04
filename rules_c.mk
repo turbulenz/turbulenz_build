@@ -27,7 +27,7 @@ endif
 ifeq (macosx,$(TARGETNAME))
 
   # Check which SDK version we have available
-  ifeq (,$(shell xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
+  ifeq (,$(shell $(MACOSX_XCODE_BIN_PATH)xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
     $(error Cant find SDK version $(XCODE_SDK_VER))
   endif
 

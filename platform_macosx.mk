@@ -3,6 +3,8 @@
 
 ############################################################
 
+MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
@@ -36,7 +38,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
-CXX := llvm-g++-4.2
+CXX := $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
@@ -103,7 +105,7 @@ endif
 #     -framework IOKit \
 #     -framework System
 
-AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) libtool
+AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)libtool
 ARFLAGSPRE := -static -arch_only i386 -g
 arout := -o
 ARFLAGSPOST := \
@@ -123,8 +125,8 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) llvm-g++-4.2
-DLLFLAGSPRE := -dynamiclib -arch i386 -g
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
+DLLFLAGSPRE := -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g
 DLLFLAGSPOST := \
   -framework CoreFoundation \
   -framework OpenGL \
@@ -143,9 +145,9 @@ dllsuffix := .dylib
 
 dll-post = \
   $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
-    in=`otool -D $$$$d | grep -v :`; \
+    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
     bn=`basename $$$$d`; \
-    install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
   done
 
 #
@@ -155,7 +157,7 @@ dll-post = \
 LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
-LD := llvm-g++-4.2
+LD := $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
 LDFLAGSPRE := \
     -arch i386 \
     -g \
@@ -178,9 +180,9 @@ LDFLAGSPOST := \
 
 app-post = \
   $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
-    in=`otool -D $$$$d | grep -v :`; \
+    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
     bn=`basename $$$$d`; \
-    install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
   done
 
 ############################################################
