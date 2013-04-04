@@ -634,6 +634,8 @@ endif
 
 # APKS (android only)
 
+APK_CONFIG := $(if $(ANDROID_KEY_STORE),$(CONFIG),debug)
+
 # For each apk, calc the destination and full set of native libs to
 # copy
 $(foreach apk,$(APKS),                                          \
@@ -646,7 +648,7 @@ $(foreach apk,$(APKS),                                          \
      $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0) \
   )                                                             \
   $(eval $(apk)_apk_file :=                                     \
-    $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(CONFIG).apk \
+    $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
   )                                                             \
 )
 $(call log,authtest_apk_dest = $(authtest_apk_dest))
@@ -716,7 +718,7 @@ define _make_apk_rule
         echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ; \
       fi ;                                          \
     done
-	$(CMDPREFIX)cd $(2) && ant $(if $(ANDROID_KEY_STORE),$(CONFIG),debug)
+	$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG)
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
