@@ -721,7 +721,7 @@ define _make_apk_rule
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
 
-  $(1)_run_dot:=$(if $(filter .,$(1)_activity),,.)
+  $(1)_run_dot:=$(if $(filter com.%,$($(1)_activity)),,.)
   $(1)_run : $(1)_install
 	adb shell am start -a android.intent.action.MAIN \
       -n $($(1)_package)/$$($(1)_run_dot)$($(1)_activity)
