@@ -83,6 +83,19 @@ CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE" + \
     ";android.permission.ACCESS_WIFI_STATE"
 
+MANIFEST_1_TAPFORTAP = """
+        <!-- TAPFORTAP BEGIN -->
+        <activity android:name="com.tapfortap.TapForTapActivity"/>
+        <!-- TAPFORTAP END -->"""
+
+# some of these are optional
+TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" + \
+    ";android.permission.WRITE_EXTERNAL_STORAGE" + \
+    ";android.permission.ACCESS_NETWORK_STATE" + \
+    ";android.permission.ACCESS_WIFI_STATE" + \
+    ";android.permission.READ_PHONE_STATE"
+
+
 MANIFEST_1_OPENKIT = """
         <!-- OPENKIT BEGIN -->
         <activity
@@ -173,6 +186,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         'tapit'      : [ MANIFEST_1_TAPIT, TAPIT_PERMISSIONS, False ],
         'mediba'     : [ MANIFEST_1_MEDIBA, MEDIBA_PERMISSIONS, False ],
         'chartboost' : [ MANIFEST_1_CHARTBOOST, CHARTBOOST_PERMISSIONS, False ],
+        'tapfortap'  : [ MANIFEST_1_TAPFORTAP, TAPFORTAP_PERMISSIONS, False ],
         'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ]
         }
 
@@ -592,6 +606,8 @@ def usage():
 
     --chartboost        - (optional) include ChartBoost manifest entries
 
+    --tapfortap         - (optional) include TapForTap manifest entries
+
     --openkit           - (openkit) include OpenKit manifest entries
 
   Example:
@@ -719,6 +735,8 @@ def main():
             extras.append('mediba')
         elif "--chartboost" == arg:
             extras.append('chartboost')
+        elif "--tapfortap" == arg:
+            extras.append('tapfortap')
         elif "--zirconia" == arg:
             extras.append('zirconia')
         elif "--mobiroo" == arg:
