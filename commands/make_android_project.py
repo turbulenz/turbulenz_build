@@ -406,6 +406,7 @@ def write_ant_properties(dest, dependencies, src, library, keystore, keyalias):
 #
 def copy_icon_files(dest, icon_dir):
     types = [ "hdpi", "mdpi", "ldpi" ]
+    optional_types = [ "xhdpi" ]
 
     # Check for icon files
 
@@ -416,6 +417,10 @@ def copy_icon_files(dest, icon_dir):
             print "ERROR: Failed to find '%s'" % src
             exit(1)
         src_dest[src] = os.path.join(dest, "res", "drawable-%s" % i)
+    for i in optional_types:
+        src = os.path.join(icon_dir, "drawable-%s" % i, "icon.png")
+        if os.path.exists(src):
+            src_dest[src] = os.path.join(dest, "res", "drawable-%s" % i)
 
     for src in src_dest:
         dest = src_dest[src]
