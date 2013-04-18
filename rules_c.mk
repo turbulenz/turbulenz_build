@@ -682,41 +682,50 @@ define _make_apk_rule
 
   .PHONY : $(1)
 
+  # In turn, we generate a project, copy in any native libs, copy in
+  # any .jar files, and finally perform an ant build.  Note we do:
+  #
+  #   [ ! -f $$$$dst ] || [ $$$$l -nt $$$$dst ]
+  #
+  # as a copy condition, since some versions of bash (namely
+  # 4.2.24(1)) are broken and don't deal with missing destination
+  # files as part of -nt.
+
   $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
 	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
 	$($(1)_prebuild)
-	$(CMDPREFIX)$(MAKE_APK_PROJ)                    \
-	  --sdk-version                                 \
+	$(CMDPREFIX)$(MAKE_APK_PROJ)                                             \
+      --sdk-version                                                          \
         $(if $($(1)_sdk_version),$($(1)_sdk_version),$(ANDROID_SDK_VERSION)) \
-	  --target $(if $($(1)_target),$($(1)_target),$(ANDROID_SDK_TARGET)) \
-	  --dest $(2)                                   \
-	  --version $($(1)_version)                     \
-	  --name $(1)                                   \
-	  --package $($(1)_package)                     \
-	  $(if $($(1)_srcbase),--src $($(1)_srcbase))   \
-      $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE)) \
-      $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS)) \
-      $(if $(ANDROID_SDK),--android-sdk $(ANDROID_SDK))           \
-	  $(if $($(1)_library),--library)               \
-	  $(if $($(1)_title),--title $($(1)_title))     \
-	  $(if $($(1)_activity),--activity $($(1)_activity))          \
-	  $(addprefix --permissions ,$($(1)_permissions))             \
-      $(if $($(1)_icondir),--icon-dir $($(1)_icondir))            \
-	  $($(1)_apk_depflags)                          \
-	  $($(1)_flags)
-	$(CMDPREFIX)for l in $(3) ; do                  \
-      dst=$(2)/libs/$(ANDROID_ARCH_NAME)/`basename $$$$l` ;       \
-      if [ $$$$l -nt $$$$dst ] ; then               \
-        echo [CP DLL] $$$$l ; cp -a $$$$l $$$$dst ; \
-      fi ;                                          \
+      --target $(if $($(1)_target),$($(1)_target),$(ANDROID_SDK_TARGET))     \
+      --dest $(2)                                                            \
+      --version $($(1)_version)                                              \
+      --name $(1)                                                            \
+      --package $($(1)_package)                                              \
+      $(if $($(1)_srcbase),--src $($(1)_srcbase))                            \
+      $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE))            \
+      $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS))            \
+      $(if $(ANDROID_SDK),--android-sdk $(ANDROID_SDK))                      \
+      $(if $($(1)_library),--library)                                        \
+      $(if $($(1)_title),--title $($(1)_title))                              \
+      $(if $($(1)_activity),--activity $($(1)_activity))                     \
+      $(addprefix --permissions ,$($(1)_permissions))                        \
+      $(if $($(1)_icondir),--icon-dir $($(1)_icondir))                       \
+      $($(1)_apk_depflags)                                                   \
+      $($(1)_flags)
+	$(CMDPREFIX)for l in $(3) ; do                              \
+      dst=$(2)/libs/$(ANDROID_ARCH_NAME)/`basename $$$$l` ;     \
+      if [ ! -e $$$$dst ] || [ $$$$l -nt $$$$dst ] ; then       \
+        echo [CP DLL] $$$$l ; cp -a $$$$l $$$$dst ;             \
+      fi ;                                                      \
     done
-	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do      \
-      dst=$(2)/libs/`basename $$$$j` ;              \
-      if [ $$$$j -nt $$$$dst ] ; then               \
-        echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ; \
-      fi ;                                          \
+	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do                  \
+      dst=$(2)/libs/`basename $$$$j` ;                          \
+      if [ ! -f $$$$dst ] || [ $$$$j -nt $$$$dst ] ; then       \
+        echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ;             \
+      fi ;                                                      \
     done
 	$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG)
 
