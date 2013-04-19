@@ -264,7 +264,19 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
       android:versionCode="%VERSION_INT%"
       android:versionName="%VERSION_DOT_4%"
       android:installLocation="auto">
-    <application android:label="@string/app_name" %ICON_ATTR%>
+    <application android:label="@string/app_name" %ICON_ATTR%"""
+
+    if options['backup_agent']:
+        class_key = options['backup_agent'].split(',')
+        MANIFEST_0 += """
+                 android:backupAgent=""" + '"%s"' % class_key[0]
+        MANIFEST_0 += """>
+        <meta-data android:name="com.google.android.backup.api_key"
+                   android:value=""" + '"%s" />' % class_key[1]
+    else:
+        MANIFEST_0 += ">"
+
+    MANIFEST_0 += """
         <activity android:name="%ACTIVITY_NAME%"
                   android:label="%APP_TITLE%"
                   android:launchMode="singleTask" """
@@ -273,6 +285,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         MANIFEST_0 += """
                   android:screenOrientation="landscape"
                   android:configChanges="orientation" """
+
     MANIFEST_0 += """
                   >"""
     if not override_main_activity:
@@ -573,6 +586,9 @@ def usage():
     --activity-decl <xml file>
                         - (optional) file with an activity in it
 
+    --backup-agent <class>,<appkey>
+                        - Enable backup agent with the given class and key
+
     --meta <key>:<value>
                         - (optional) add a meta data key-value pair to the
                           main activity
@@ -656,6 +672,7 @@ def main():
     options = {
         'landscape': True,
         'activity_files': [],
+        'backup_agent': None
         }
 
     def add_meta(kv):
@@ -702,6 +719,8 @@ def main():
             intent_filters = args.pop(0)
         elif "--activity-decl" == arg:
             options['activity_files'].append(args.pop(0))
+        elif "--backup-agent" == arg:
+            options['backup_agent'] = args.pop(0)
         elif "--meta" == arg:
             add_meta(args.pop(0))
         elif "--depends" == arg:
