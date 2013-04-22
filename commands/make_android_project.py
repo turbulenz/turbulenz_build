@@ -31,9 +31,9 @@ MANIFEST_1_MOBIROO = """
         <!-- MOBIROO END -->"""
 
 MOBIROO_PERMISSIONS = ";android.permission.INTERNET" + \
-    ";android.permission.READ_PHONE_STATE"             + \
-    ";android.permission.ACCESS_WIFI_STATE"            + \
-    ";android.permission.ACCESS_NETWORK_STATE"         + \
+    ";android.permission.READ_PHONE_STATE"           + \
+    ";android.permission.ACCESS_WIFI_STATE"          + \
+    ";android.permission.ACCESS_NETWORK_STATE"       + \
     ";android.permission.GET_TASKS"
 
 MANIFEST_1_MMEDIA = """
@@ -55,7 +55,7 @@ MANIFEST_1_TAPIT = """
         <activity android:name="com.tapit.sdk.InAppWebView"/>
         <!-- TAPIT END -->"""
 
-TAPIT_PERMISSIONS = ";android.permission.INTERNET" + \
+TAPIT_PERMISSIONS = ";android.permission.INTERNET" \
     ";android.permission.READ_PHONE_STATE"
 
 MANIFEST_1_MEDIBA = """
@@ -89,12 +89,11 @@ MANIFEST_1_TAPFORTAP = """
         <!-- TAPFORTAP END -->"""
 
 # some of these are optional
-TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" + \
-    ";android.permission.WRITE_EXTERNAL_STORAGE" + \
-    ";android.permission.ACCESS_NETWORK_STATE" + \
-    ";android.permission.ACCESS_WIFI_STATE" + \
-    ";android.permission.READ_PHONE_STATE"
-
+TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
+    + ";android.permission.WRITE_EXTERNAL_STORAGE" \
+    + ";android.permission.ACCESS_NETWORK_STATE" \
+    + ";android.permission.ACCESS_WIFI_STATE" \
+ #   + ";android.permission.READ_PHONE_STATE"
 
 MANIFEST_1_OPENKIT = """
         <!-- OPENKIT BEGIN -->
@@ -659,8 +658,10 @@ def main():
     src = None
     extras = []
     permissions = \
-        "android.permission.WAKE_LOCK;android.permission.WRITE_SETTINGS;" + \
-        "com.android.vending.CHECK_LICENSE"
+        "android.permission.WAKE_LOCK" \
+        ";com.android.vending.CHECK_LICENSE" \
+        # ";android.permission.WRITE_SETTINGS"
+
     intent_filters = None
     meta = {}
     depends = []
