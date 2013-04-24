@@ -168,7 +168,7 @@ ifeq ($(CONFIG),debug)
   CXXFLAGSPOST += -DDEBUG -D_DEBUG -g
 endif
 ifeq ($(CONFIG),release)
-  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer
+  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer -ffast-math -ftree-vectorize
 endif
 
 ifeq ($(C_OPTIMIZE),1)
