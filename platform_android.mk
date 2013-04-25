@@ -168,11 +168,11 @@ ifeq ($(CONFIG),debug)
   CXXFLAGSPOST += -DDEBUG -D_DEBUG -g
 endif
 ifeq ($(CONFIG),release)
-  CXXFLAGSPOST += -DNDEBUG -fomit-frame-pointer -ffast-math -ftree-vectorize
+  CXXFLAGSPOST += -DNDEBUG
 endif
 
 ifeq ($(C_OPTIMIZE),1)
-  CXXFLAGSPOST += -O3
+  CXXFLAGSPOST += -O3 -fomit-frame-pointer -ffast-math -ftree-vectorize
 else
   CXXFLAGSPOST += -O0
 endif
