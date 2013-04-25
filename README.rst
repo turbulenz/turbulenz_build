@@ -58,6 +58,19 @@ often specify project dependencies, include paths to dependencies and
 library files to link against by hand, often for each build
 configuration.
 
+Building
+========
+
+Run `make` from the direectory containing your build description file.
+Variables can be set from the command line using `VAR=value`, and
+specific modules can be specified as targets.
+
+Example ::
+
+    make TS_REFCHECK=1 mymod
+
+runs a refcheck (see below) build on the `mymod` modules.
+
 TypeScript
 ==========
 
@@ -133,7 +146,8 @@ Below are some advanced / internal variables.  All optional.
 Configuration Variables
 =======================
 
+`CONFIG`
+
 `TARGET`
 `TARGETNAME`
-
-`CONFIG`
+`BUILDHOST`
