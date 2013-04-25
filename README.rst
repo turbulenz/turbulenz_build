@@ -3,7 +3,7 @@ Introduction
 ============
 
 A build description file uses Make syntax.  It is usually called
-`Makefile` and typically takes the form::
+`Makefile` and typically takes the form ::
 
     BUILDDIR := tzbuild           # Path to the tzbuild directory
     include $(BUILDDIR)/config.mk
@@ -28,7 +28,7 @@ Modules
 
 Modules are just a set of variables describing properties such as the
 location of source code, or depedent modules.  Below is an example of
-a TypeScript module declaration
+a TypeScript module declaration ::
 
     mymod_src := mymod/file1.ts mymod/file2.ts
     mymod_deps := someothermod
