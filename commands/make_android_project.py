@@ -83,10 +83,7 @@ CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE" + \
     ";android.permission.ACCESS_WIFI_STATE"
 
-MANIFEST_1_TAPFORTAP = """
-        <!-- TAPFORTAP BEGIN -->
-        <activity android:name="com.tapfortap.TapForTapActivity"/>
-        <!-- TAPFORTAP END -->"""
+MANIFEST_1_TAPFORTAP = "defined in write_manifest"
 
 # some of these are optional
 TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
@@ -169,6 +166,16 @@ def copy_file_if_different(src, target):
 #
 def write_manifest(dest, table, permissions, intent_filters, meta,
                    extras, library, resource_strings, options):
+
+    MANIFEST_1_TAPFORTAP = """
+        <!-- TAPFORTAP BEGIN -->
+        <activity android:name="com.tapfortap.TapForTapActivity" """
+    if options['landscape']:
+        MANIFEST_1_TAPFORTAP += """
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation" """
+    MANIFEST_1_TAPFORTAP += """/>
+        <!-- TAPFORTAP END -->"""
 
     # Create res dir if it doesn't exist
 
