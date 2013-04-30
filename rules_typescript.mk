@@ -4,8 +4,9 @@
 # Make SYNTAX_CHECK_MODE use non-modular refcheck mode
 
 ifeq (1,$(SYNTAX_CHECK_MODE))
-  TS_MODULAR := 0
-  TS_REFCHECK := 1
+  TS_MODULAR := 1
+  TS_REFCHECK := 0
+  TS_OUTPUT_DIR := .tssyntaxcheck
   ifneq (,$(filter %.ts,$(CHK_SOURCES)))
     TS_SYNTAX_CHECK := 1
   endif
@@ -35,17 +36,21 @@ ifeq (1,$(TS_MODULAR))
 ############################################################
 
 TS_OUTPUT_DIR ?= jslib-modular
-TS_SYNTAX_CHECK := 0
+TS_SYNTAX_CHECK ?= 0
 
 # Syntax checking
+syntax_replace = $(1)
 ifeq (1,$(TS_SYNTAX_CHECK))
   ifneq (,$(filter %_flymake.ts,$(CHK_SOURCES)))
     SYNTAX_CHECK_REPLACE:=$(CHK_SOURCES:_flymake.ts=.ts)
     SYNTAX_CHECK_WITH:=$(CHK_SOURCES)
+    syntax_replace = $(sort \
+      $(subst $(SYNTAX_CHECK_REPLACE),$(SYNTAX_CHECK_WITH),$(1)) \
+    )
   endif
+  TSC_PREFIX := !
+  TSC_POSTFIX := 2>&1 | grep '$(CHK_SOURCES)\:'
 endif
-
-syntax_replace = $(subst $(SYNTAX_CHECK_REPLACE),$(SYNTAX_CHECK_WITH),$(1))
 
 # Calc .ts and .d.ts src
 $(foreach t,$(TSLIBS),\
@@ -87,12 +92,14 @@ define _make_js_rule
   $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets) \
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $(notdir $($(1)_src)) -> $$@"
-	$(CMDPREFIX)$(TSC) -c --failonerror --noresolve      \
+	$(CMDPREFIX) $(TSC_PREFIX)                           \
+      $(TSC) -c --failonerror --noresolve                \
       $(if $($(1)_nodecls),,--declaration)               \
-      $(if $(CHK_SOURCES),--filter $(CHK_SOURCES))       \
       $($(1)_tscflags)                                   \
       --out $$@ $(TS_BASE_FILES)                         \
-      $(_$(1)_dep_d_files) $(_$(1)_d_ts_src) $(abspath $(_$(1)_ts_src))
+      $(_$(1)_dep_d_files) $(_$(1)_d_ts_src)             \
+      $(abspath $(_$(1)_ts_src))                         \
+      $(TSC_POSTFIX)
 
   jslib : $(1)
 
