@@ -468,6 +468,19 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
+def copy_value_files(dest, value_files):
+    dest_dir = os.path.join(dest, "res", "values")
+    mkdir_if_not_exists(dest_dir)
+
+    for v in value_files:
+        v_base = os.path.split(v)[1]
+        v_dest = os.path.join(dest_dir, v_base)
+        _verbose("[VALUE] %s -> %s" % (v, v_dest))
+        copy_file_if_different(v, v_dest)
+
+#
+#
+#
 def copy_layout_files(dest, layout_files):
     dest_dir = os.path.join(dest, "res", "layout")
     mkdir_if_not_exists(dest_dir)
@@ -615,6 +628,8 @@ def usage():
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
 
+    --value <alias>     - (optional) .xml file to copy to res/values/
+
     --layout <file>     - (optional) .xml file to copy to res/layout/
 
     --drawable <file>   - (optional) .xml file to copy to res/drawable/
@@ -680,6 +695,7 @@ def main():
     meta = {}
     depends = []
     resource_strings = {}
+    value_files = []
     layout_files = []
     drawable_files = []
     asset_files = []
@@ -750,6 +766,8 @@ def main():
             keystore = args.pop(0)
         elif "--key-alias" == arg:
             keyalias = args.pop(0)
+        elif "--value" == arg:
+            value_files.append(args.pop(0))
         elif "--layout" == arg:
             layout_files.append(args.pop(0))
         elif "--drawable" == arg:
@@ -862,6 +880,11 @@ def main():
         copy_icon_files(dest, icon_dir)
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
+
+    # Copy value files
+
+    if 0 != len(value_files):
+        copy_value_files(dest, value_files)
 
     # Copy layout files
 
