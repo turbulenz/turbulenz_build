@@ -1,11 +1,13 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
-# Make SYNTAX_CHECK_MODE use non-modular refcheck mode
+# Make SYNTAX_CHECK_MODE use modular mode.  If we use refcheck,
+# renamed x_flymake.ts files can reference other files which include
+# the original x.ts, and we get duplicate symbols.
 
 ifeq (1,$(SYNTAX_CHECK_MODE))
-  TS_MODULAR := 0
-  TS_REFCHECK := 1
+  TS_MODULAR := 1
+  TS_REFCHECK := 0
   ifneq (,$(filter %.ts,$(CHK_SOURCES)))
     TS_SYNTAX_CHECK := 1
   endif
@@ -35,7 +37,7 @@ ifeq (1,$(TS_MODULAR))
 ############################################################
 
 TS_OUTPUT_DIR ?= jslib-modular
-TS_SYNTAX_CHECK := 0
+TS_SYNTAX_CHECK ?= 0
 
 # Syntax checking
 ifeq (1,$(TS_SYNTAX_CHECK))
