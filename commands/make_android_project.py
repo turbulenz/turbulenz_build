@@ -97,14 +97,14 @@ TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
  #   + ";android.permission.READ_PHONE_STATE"
 
 MANIFEST_1_HEYZAP = """
-        <!-- HEYZAP BEGIN -->
-            <receiver android:name="com.heyzap.sdk.PackageAddedReceiver">
-             <intent-filter>
-              <data android:scheme="package"/>
-              <action android:name="android.intent.action.PACKAGE_ADDED"/>
-             </intent-filter>
-            </receiver>
-        <!-- HEYZAP END -->"""
+       <!-- HEYZAP BEGIN -->
+       <receiver android:name="com.heyzap.sdk.PackageAddedReceiver">
+         <intent-filter>
+           <data android:scheme="package" />
+           <action android:name="android.intent.action.PACKAGE_ADDED" />
+         </intent-filter>
+       </receiver>
+       <!-- HEYZAP END -->"""
 
 HEYZAP_PERMISSIONS = ";android.permission.INTERNET" \
     + ";android.permission.ACCESS_NETWORK_STATE"
