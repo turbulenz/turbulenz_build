@@ -97,14 +97,14 @@ TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
  #   + ";android.permission.READ_PHONE_STATE"
 
 MANIFEST_1_HEYZAP = """
-       <!-- HEYZAP BEGIN -->
-       <receiver android:name="com.heyzap.sdk.PackageAddedReceiver">
-         <intent-filter>
-           <data android:scheme="package" />
-           <action android:name="android.intent.action.PACKAGE_ADDED" />
-         </intent-filter>
-       </receiver>
-       <!-- HEYZAP END -->"""
+        <!-- HEYZAP BEGIN -->
+        <receiver android:name="com.heyzap.sdk.PackageAddedReceiver">
+          <intent-filter>
+            <data android:scheme="package" />
+            <action android:name="android.intent.action.PACKAGE_ADDED" />
+          </intent-filter>
+        </receiver>
+        <!-- HEYZAP END -->"""
 
 HEYZAP_PERMISSIONS = ";android.permission.INTERNET" \
     + ";android.permission.ACCESS_NETWORK_STATE"
@@ -124,6 +124,17 @@ MANIFEST_1_OPENKIT = """
         <!-- OPENKIT END -->"""
 
 OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
+
+MANIFEST_1_AMAZON_BILLING = """
+        <receiver android:name = "com.amazon.inapp.purchasing.ResponseReceiver" >
+         <intent-filter>
+          <action
+           android:name="com.amazon.inapp.purchasing.NOTIFY"
+           android:permission="com.amazon.inapp.purchasing.Permission.NOTIFY" />
+         </intent-filter>
+        </receiver>"""
+
+AMAZON_BILLING_PERMISSIONS = ""
 
 #
 #
@@ -213,7 +224,9 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         'chartboost' : [ MANIFEST_1_CHARTBOOST, CHARTBOOST_PERMISSIONS, False ],
         'tapfortap'  : [ MANIFEST_1_TAPFORTAP, TAPFORTAP_PERMISSIONS, False ],
         'heyzap'     : [ MANIFEST_1_HEYZAP, HEYZAP_PERMISSIONS, False ],
-        'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ]
+        'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ],
+        'amazon-billing':
+        [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ]
         }
 
     # icon
@@ -674,7 +687,9 @@ def usage():
 
     --heyzap            - (optional) include HeyZap manifest entries
 
-    --openkit           - (openkit) include OpenKit manifest entries
+    --openkit           - (optional) include OpenKit manifest entries
+
+    --amazon-billing    - (optional) include Amazon Billing manifest entries
 
   Example:
 
@@ -820,6 +835,8 @@ def main():
             extras.append('mobiroo')
         elif "--openkit" == arg:
             extras.append('openkit')
+        elif "--amazon-billing" == arg:
+            extras.append('amazon-billing')
         else:
             print "Error: unknown parameter: '%s'" % arg
             print ""
