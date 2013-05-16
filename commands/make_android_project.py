@@ -126,13 +126,15 @@ MANIFEST_1_OPENKIT = """
 OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
 
 MANIFEST_1_AMAZON_BILLING = """
+        <!-- AMAZON BILLING BEGIN -->
         <receiver android:name = "com.amazon.inapp.purchasing.ResponseReceiver" >
          <intent-filter>
           <action
            android:name="com.amazon.inapp.purchasing.NOTIFY"
            android:permission="com.amazon.inapp.purchasing.Permission.NOTIFY" />
          </intent-filter>
-        </receiver>"""
+        </receiver>
+        <!-- AMAZON BILLING END -->"""
 
 AMAZON_BILLING_PERMISSIONS = ""
 
