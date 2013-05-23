@@ -7,14 +7,18 @@ import subprocess
 
 ############################################################
 
+MANIFEST_1_ANDROIDLICENSE = ""
+
+ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
+
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
         <activity android:name="com.google.ads.AdActivity"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize">
         </activity>
         <!-- ADMOB END -->"""
-ADMOB_PERMISSIONS = ";android.permission.INTERNET;" + \
-    "android.permission.ACCESS_NETWORK_STATE"
+ADMOB_PERMISSIONS = ";android.permission.INTERNET" + \
+    ";android.permission.ACCESS_NETWORK_STATE"
 
 ZIRCONIA_PERMISSIONS = ";android.permission.READ_PHONE_STATE;" + \
     "android.permission.INTERNET"
@@ -185,6 +189,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     # [ MANIFEST_FRAGMENT, <permissions>, <override main activity> ]
 
     extras_table = {
+        'androidlicense':
+        [ MANIFEST_1_ANDROIDLICENSE, ANDROIDLICENSE_PERMISSIONS, False ],
         'admob'      : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
         'zirconia'   : [ "", ZIRCONIA_PERMISSIONS, False ],
         'mobiroo'    : [ MANIFEST_1_MOBIROO, MOBIROO_PERMISSIONS, True ],
@@ -634,6 +640,8 @@ def usage():
 
     --android-sdk       - (optional) root of android SDK (if not in path)
 
+    --android-licensing - (optional) code for android licensing
+
     --admob             - (optional) include AdMob activity decl
 
     --zirconia          - (optional) include Zirconia permissions
@@ -681,7 +689,6 @@ def main():
     extras = []
     permissions = \
         "android.permission.WAKE_LOCK" \
-        ";com.android.vending.CHECK_LICENSE" \
         # ";android.permission.WRITE_SETTINGS"
 
     intent_filters = None
@@ -775,6 +782,8 @@ def main():
             src = args.pop(0)
         elif "--library" == arg:
             library = True
+        elif "--android-licensing" == arg:
+            extras.append("androidlicense")
         elif "--admob" == arg:
             extras.append('admob')
         elif "--mmedia" == arg:

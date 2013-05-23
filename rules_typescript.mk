@@ -1,7 +1,9 @@
 # Copyright (c) 2013 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
-# Make SYNTAX_CHECK_MODE use non-modular refcheck mode
+# Make SYNTAX_CHECK_MODE use modular mode.  If we use refcheck,
+# renamed x_flymake.ts files can reference other files which include
+# the original x.ts, and we get duplicate symbols.
 
 ifeq (1,$(SYNTAX_CHECK_MODE))
   TS_MODULAR := 1
