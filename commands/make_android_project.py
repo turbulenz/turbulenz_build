@@ -118,12 +118,17 @@ MANIFEST_1_OPENKIT = """
         <activity android:name="io.openkit.leaderboards.OKScoresActivity" />
         <activity android:name="io.openkit.user.OKUserProfileActivity" />
         <activity android:name="io.openkit.facebook.LoginActivity" />
-        <!-- Facebook login activity declaration required by Facebook SDK -->
-        <activity android:name="com.facebook.LoginActivity" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
         <!-- OPENKIT END -->"""
 
 OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
+
+MANIFEST_1_FACEBOOK = """
+        <!-- FACEBOOK BEGIN -->
+        <activity android:name="com.facebook.LoginActivity" />
+        <!-- FACEBOOK END -->"""
+
+FACEBOOK_PERMISSIONS = ";android.permission.INTERNET"
 
 MANIFEST_1_AMAZON_BILLING = """
         <!-- AMAZON BILLING BEGIN -->
@@ -227,6 +232,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         'tapfortap'  : [ MANIFEST_1_TAPFORTAP, TAPFORTAP_PERMISSIONS, False ],
         'heyzap'     : [ MANIFEST_1_HEYZAP, HEYZAP_PERMISSIONS, False ],
         'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ],
+        'facebook'   : [ MANIFEST_1_FACEBOOK, FACEBOOK_PERMISSIONS, False ],
         'amazon-billing':
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ]
         }
@@ -693,6 +699,8 @@ def usage():
 
     --amazon-billing    - (optional) include Amazon Billing manifest entries
 
+    --facebook          - (optional) include facebook entries
+
   Example:
 
     make_android_project --dest java --version 3.2.5 --target 'android-16' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
@@ -837,6 +845,9 @@ def main():
             extras.append('mobiroo')
         elif "--openkit" == arg:
             extras.append('openkit')
+            extras.append('facebook')
+        elif "--facebook" == arg:
+            extras.append('facebook')
         elif "--amazon-billing" == arg:
             extras.append('amazon-billing')
         else:
