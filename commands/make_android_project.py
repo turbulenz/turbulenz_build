@@ -126,6 +126,7 @@ OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
 MANIFEST_1_FACEBOOK = """
         <!-- FACEBOOK BEGIN -->
         <activity android:name="com.facebook.LoginActivity" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
         <!-- FACEBOOK END -->"""
 
 FACEBOOK_PERMISSIONS = ";android.permission.INTERNET"
