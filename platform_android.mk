@@ -165,7 +165,7 @@ CXXFLAGSPOST := \
  -DFASTCALL= -finline-limit=256 -Wa,--noexecstack -fexceptions
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPOST += -DDEBUG -D_DEBUG -g
+  CXXFLAGSPOST += -DDEBUG -D_DEBUG
 endif
 ifeq ($(CONFIG),release)
   CXXFLAGSPOST += -DNDEBUG
@@ -192,6 +192,13 @@ ARFLAGSPOST :=
 
 libprefix := lib
 libsuffix := .a
+
+#
+# OBJDUMP
+#
+
+OBJDUMP := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)objdump
+OBJDUMP_DISASS := -S
 
 #
 # DLLS

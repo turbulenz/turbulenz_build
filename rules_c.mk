@@ -396,6 +396,12 @@ define _make_cxx_object_rule
       $(CXXFLAGSPOST) $($(call file_flags,$(2))) \
       $$< -o $$@
 
+  $(3).S : $(3)
+	@echo [DISASS] \($(1)\) $$@
+	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+
+  $(1)_asm : $(3).S
+
 endef
 
 # 1 - mod
@@ -432,6 +438,9 @@ define _make_object_rules
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
     $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
+
+  # Define the phony _asm target for this module
+  .PHONY: $(1)_asm
 
 endef
 
