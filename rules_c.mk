@@ -660,9 +660,9 @@ $(foreach apk,$(APKS),                                          \
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
   )                                                             \
 )
-$(call log,authtest_apk_dest = $(authtest_apk_dest))
-$(call log,authtest_apk_copylibs = $(authtest_apk_copylibs))
-$(call log,authtest_apk_file = $(authtest_apk_file))
+$(call log,android_engine_dest = $(android_engine_dest))
+$(call log,android_engine_copylibs = $(android_engine_copylibs))
+$(call log,android_engine_file = $(android_engine_file))
 
 # For each APK, <apk>_apk_fulldeps := \
 #     [ <d>_apk_fulldeps for d in <apk>_deps ]
