@@ -144,6 +144,17 @@ MANIFEST_1_AMAZON_BILLING = """
 
 AMAZON_BILLING_PERMISSIONS = ""
 
+MANIFEST_1_APPAYABLE = """
+        <!-- APPAYABLE BEGIN -->
+        <service android:name="org.OpenUDID.OpenUDID_service">
+         <intent-filter>
+          <action android:name="org.OpenUDID.GETUDID" />
+         </intent-filter>
+        </service>
+        <!-- APPAYABLE END -->"""
+
+APPAYABLE_PERMISSIONS = ""
+
 #
 #
 #
@@ -235,7 +246,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         'openkit'    : [ MANIFEST_1_OPENKIT, OPENKIT_PERMISSIONS, False ],
         'facebook'   : [ MANIFEST_1_FACEBOOK, FACEBOOK_PERMISSIONS, False ],
         'amazon-billing':
-        [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ]
+        [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
+        'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ]
         }
 
     # icon
@@ -696,6 +708,8 @@ def usage():
 
     --heyzap            - (optional) include HeyZap manifest entries
 
+    --appayable         - (optional) include Appayable manifest entries
+
     --openkit           - (optional) include OpenKit manifest entries
 
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -840,6 +854,8 @@ def main():
             extras.append('tapfortap')
         elif "--heyzap" == arg:
             extras.append('heyzap')
+        elif "--appayable" == arg:
+            extras.append('appayable')
         elif "--zirconia" == arg:
             extras.append('zirconia')
         elif "--mobiroo" == arg:
