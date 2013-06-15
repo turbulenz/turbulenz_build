@@ -14,8 +14,7 @@ ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
         <activity android:name="com.google.ads.AdActivity"
-                  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize">
-        </activity>
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
         <!-- ADMOB END -->"""
 ADMOB_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
