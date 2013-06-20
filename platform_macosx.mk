@@ -3,7 +3,20 @@
 
 ############################################################
 
-MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+ifneq (1,$(MACOSX_IGNORE_OLD_TOOLS))
+  MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+endif
+
+ifneq (,$(MACOSX_XCODE_BIN_PATH))
+  # OLD TOOLS
+  MACOSX_CXX := llvm-g++-4.2
+  CXXFLAGS += -ftree-vectorize
+else
+  # clang
+  MACOSX_CXX := clang
+  CXXFLAGS += -stdlib=libc++
+  MACOSX_LDFLAGS += -lc++
+endif
 
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
@@ -38,7 +51,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
-CXX := $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
+CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
@@ -47,7 +60,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
-    -ftree-vectorize -msse3 -mssse3 \
+    -msse3 -mssse3 \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
@@ -125,7 +138,7 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g
 DLLFLAGSPOST := \
   -framework CoreFoundation \
@@ -157,11 +170,12 @@ dll-post = \
 LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
-LD := $(MACOSX_XCODE_BIN_PATH)llvm-g++-4.2
+LD := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 LDFLAGSPRE := \
     -arch i386 \
     -g \
-    -isysroot $(XCODE_SDK_ROOT)
+    -isysroot $(XCODE_SDK_ROOT) \
+    $(MACOSX_LDFLAGS)
 
 LDFLAGSPOST := \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
