@@ -343,7 +343,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     if options['landscape']:
         MANIFEST_0 += """
                   android:screenOrientation="landscape"
-                  android:configChanges="orientation" """
+                  android:configChanges="orientation|screenSize" """
 
     MANIFEST_0 += """
                   >"""
