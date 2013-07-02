@@ -7,11 +7,10 @@
 
 ANDROID_SDK_TARGET ?= android-16
 ANDROID_SDK_VERSION ?= 8
-ANDROID_NDK ?= external/android/android-ndk-r8b
+ANDROID_NDK ?= external/android/android-ndk-r8e
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.6
-NDK_GCC_HOSTARCH ?= x86
-#NDK_GCC_HOSTARCH ?= x86_64
+NDK_GCC_HOSTARCH ?= x86_64
 
 # Toolset for which arch
 
