@@ -10,6 +10,8 @@ ANDROID_SDK_VERSION ?= 8
 ANDROID_NDK ?= external/android/android-ndk-r8b
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.6
+NDK_GCC_HOSTARCH ?= x86
+#NDK_GCC_HOSTARCH ?= x86_64
 
 # Toolset for which arch
 
@@ -41,10 +43,10 @@ endif
 # Find toolset for this platfom
 
 ifeq ($(BUILDHOST),macosx)
-  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/darwin-x86/bin
+  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/darwin-$(NDK_GCC_HOSTARCH)/bin
 endif
 ifeq ($(BUILDHOST),linux64)
-  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/linux-x86/bin
+  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/linux-$(NDK_GCC_HOSTARCH)/bin
 endif
 ifeq ($(NDK_TOOLBIN),)
   $(error Couldnt find toolchain for BUILDHOST $(BUILDHOST))
