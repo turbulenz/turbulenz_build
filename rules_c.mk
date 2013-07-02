@@ -396,6 +396,12 @@ define _make_cxx_object_rule
       $(CXXFLAGSPOST) $($(call file_flags,$(2))) \
       $$< -o $$@
 
+  $(3).S : $(3)
+	@echo [DISASS] \($(1)\) $$@
+	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+
+  $(1)_asm : $(3).S
+
 endef
 
 # 1 - mod
@@ -432,6 +438,9 @@ define _make_object_rules
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
     $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
+
+  # Define the phony _asm target for this module
+  .PHONY: $(1)_asm
 
 endef
 
@@ -651,9 +660,9 @@ $(foreach apk,$(APKS),                                          \
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
   )                                                             \
 )
-$(call log,authtest_apk_dest = $(authtest_apk_dest))
-$(call log,authtest_apk_copylibs = $(authtest_apk_copylibs))
-$(call log,authtest_apk_file = $(authtest_apk_file))
+$(call log,android_engine_dest = $(android_engine_dest))
+$(call log,android_engine_copylibs = $(android_engine_copylibs))
+$(call log,android_engine_file = $(android_engine_file))
 
 # For each APK, <apk>_apk_fulldeps := \
 #     [ <d>_apk_fulldeps for d in <apk>_deps ]
@@ -727,7 +736,7 @@ define _make_apk_rule
         echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ;             \
       fi ;                                                      \
     done
-	$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG)
+	$(if $($(1)_library),,$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG))
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
