@@ -718,7 +718,7 @@ define _make_apk_rule
       $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS))            \
       $(if $(ANDROID_SDK),--android-sdk $(ANDROID_SDK))                      \
       $(if $($(1)_library),--library)                                        \
-      $(if $($(1)_title),--title $($(1)_title))                              \
+      $(if $($(1)_title),--title "$($(1)_title)")                            \
       $(if $($(1)_activity),--activity $($(1)_activity))                     \
       $(addprefix --permissions ,$($(1)_permissions))                        \
       $(if $($(1)_icondir),--icon-dir $($(1)_icondir))                       \
