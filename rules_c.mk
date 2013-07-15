@@ -173,13 +173,17 @@ $(foreach mod,$(C_MODULES),$(eval \
 # calc external libs.
 #  <extlib>_lib      values are prefixed with -l
 #  <extlib>_libfiles values are included as-is
-$(foreach mod,$(C_MODULES),$(eval                         \
-  $(mod)_ext_lib_flags :=                               \
-    $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs), \
-      $(addprefix $(DLLFLAGS_LIB),$($(e)_lib))          \
-      $($(e)_libfile)                                   \
-    )                                                   \
-))
+$(foreach mod,$(C_MODULES),\
+  $(eval $(mod)_ext_lib_files :=                          \
+    $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),   \
+      $($(e)_libfile)                                     \
+  ))                                                      \
+  $(eval $(mod)_ext_lib_flags :=                          \
+    $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),   \
+      $(addprefix $(DLLFLAGS_LIB),$($(e)_lib))            \
+      $($(e)_libfile)                                     \
+  ))                                                      \
+)
 
 # calc the full list of external dynamic libs for apps and dlls
 $(foreach b,$(DLLS) $(APPS),\
@@ -452,7 +456,7 @@ $(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
 
 # set <lib>_libfile
 $(foreach lib,$(LIBS),$(eval \
-  $(lib)_libfile := $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
+  $(lib)_libfile ?= $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
 ))
 
 # <mod>_deplibs = all libraries we depend upon
@@ -481,7 +485,7 @@ $(foreach mod,$(C_MODULES),$(eval \
 define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
-	@mkdir -p $(LIBDIR)
+	@mkdir -p $$(dir $$@)
 	@echo [AR ] $$(notdir $$@)
 	$(CMDPREFIX)rm -f $$@
 	$(CMDPREFIX)$(AR) \
@@ -512,7 +516,7 @@ $(foreach dll,$(DLLS),$(eval \
 # 1 - mode
 define _make_dll_rule
 
-  $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS)
+  $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
 	@echo [DLL] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
@@ -555,7 +559,7 @@ $(foreach app,$(APPS),$(eval \
 # 1 - mod
 define _make_app_rule
 
-  $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS)
+  $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
 	@echo [LD ] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
