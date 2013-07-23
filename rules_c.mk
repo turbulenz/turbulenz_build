@@ -547,6 +547,9 @@ $(foreach dll,$(DLLS),$(eval \
   $(dll) : $($(dll)_dllfile) \
 ))
 
+# $(warning therun_ext_lib_files = $(therun_ext_lib_files))
+# $(warning therun_ext_lib_flags = $(therun_ext_lib_flags))
+
 ############################################################
 
 # APPLICATIONS
@@ -685,7 +688,7 @@ $(foreach apk,$(APKS),                                          \
     $(foreach dp,$($(apk)_apk_fulldeps),--depends $(dp))        \
   )                                                             \
 )
-$(call log,therun_google_apk_depflags = $(therun_google_apk_depflags))
+# $(warning finalfwy_apk_depflags = $(finalfwy_apk_depflags))
 
 # Rule to make an APK
 # 1 - apk name
