@@ -309,11 +309,15 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
 
     write_file_if_different(res_values_strings, res_values_strings_data)
 
-    # Override main activity?
+    # Override main activity?  This should happen either if the
+    # --no-launcher flag was given, or if one of the extras wants to
+    # be the main activity.
 
-    override_main_activity = False
-    for e in extras:
-        override_main_activity = override_main_activity or extras_table[e][2]
+    override_main_activity = options['nolauncher']
+    if not override_main_activity:
+        for e in extras:
+            override_main_activity = \
+                override_main_activity or extras_table[e][2]
 
     # Write manifest
 
@@ -655,6 +659,9 @@ def usage():
                         - (optional) file with intent filters to add to main
                           activity
 
+    --no-launcher       - Remove the main LAUNCHER intent so that no launcher
+                          icon is created for the app
+
     --activity-decl <xml file>
                         - (optional) file with an activity in it
 
@@ -758,7 +765,8 @@ def main():
     options = {
         'landscape': True,
         'activity_files': [],
-        'backup_agent': None
+        'backup_agent': None,
+        'nolauncher': False
         }
 
     def add_meta(kv):
@@ -803,6 +811,8 @@ def main():
             resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
+        elif "--no-launcher" == arg:
+            options['nolauncher'] = True
         elif "--activity-decl" == arg:
             options['activity_files'].append(args.pop(0))
         elif "--backup-agent" == arg:
