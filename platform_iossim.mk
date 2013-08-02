@@ -21,10 +21,9 @@ CXXFLAGSPRE := -x objective-c++ \
   -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
   "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" \
   "-DIBAction=void)__attribute__((ibaction)" \
-  -Wall \
+  -Wall -Wno-c++11-extensions \
   -isysroot $(XCODE_SIM_SDKROOT) \
   -mios-simulator-version-min=5.0 \
-  -I$(XCODE_SIM_PLATFORM)/usr/include \
   -DTZ_IOS=1
 
 CMMFLAGSPRE := -x objective-c++ \
@@ -74,30 +73,15 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
-DLLFLAGSPRE := -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g
-DLLFLAGSPOST := \
-  -framework CoreFoundation \
-  -framework OpenGL \
-  -framework Carbon \
-  -framework AGL \
-  -framework QuartzCore \
-  -framework AppKit \
-  -framework IOKit \
-  -framework System
-
-DLLFLAGS_LIBDIR := -L
-DLLFLAGS_LIB := -l
+DLL :=
+DLLFLAGSPRE :=
+DLLFLAGSPOST :=
+DLLFLAGS_LIBDIR :=
+DLLFLAGS_LIB :=
 
 dllprefix :=
-dllsuffix := .dylib
-
-dll-post = \
-  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
-    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
-    bn=`basename $$$$d`; \
-    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
-  done
+dllsuffix :=
+dll-post =
 
 #
 # APPS
@@ -105,34 +89,10 @@ dll-post = \
 
 LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
+LD :=
+LDFLAGSPRE :=
+LDFLAGSPOST :=
 
-LD := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
-LDFLAGSPRE := \
-    -arch i386 \
-    -g \
-    -isysroot $(XCODE_SDK_ROOT) \
-    $(MACOSX_LDFLAGS)
-
-LDFLAGSPOST := \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
-    -dead_strip \
-    -Wl,-search_paths_first \
-    -framework CoreFoundation \
-    -framework OpenGL \
-    -framework Carbon \
-    -framework QuartzCore \
-    -framework AppKit \
-    -framework IOKit \
-    -licucore
-
-#    -Xlinker \
-#    --no-demangle \
-
-app-post = \
-  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
-    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
-    bn=`basename $$$$d`; \
-    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
-  done
+app-post =
 
 ############################################################
