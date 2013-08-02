@@ -1,42 +1,138 @@
+# Copyright (c) 2013 Turbulenz Limited.
+# Released under "Modified BSD License".  See COPYING for full text.
 
-    setenv PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+XCODE_ROOT := /Applications/Xcode.app/Contents/Developer
+XCODE_TOOLROOT := $(XCODE_ROOT)/Toolchains/XcodeDefault.xctoolchain
+XCODE_PLATFORMS := $(XCODE_ROOT)/Platforms
 
-DBEUG:
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
-  -x objective-c++ -arch i386 -fmessage-length=0 -Wno-trigraphs -fpascal-strings
-  -O0
-  -Wno-missing-field-initializers -Wno-missing-prototypes -Wreturn-type -Wno-implicit-atomic-properties -Wno-receiver-is-weak \
-  -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wformat -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wno-undeclared-selector -Wno-deprecated-implementations -Wno-arc-abi -Wno-c++11-extensions \
-  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk \
-  -fexceptions -fasm-blocks -Wprotocol -Wdeprecated-declarations -Winvalid-offsetof \
-  -g \
+# SIM
+XCODE_SIM_SDK := iPhoneSimulator6.1.sdk
+XCODE_SIM_PLATFORM := $(XCODE_PLATFORMS)/iPhoneSimulator.platform
+XCODE_SIM_SDKROOT := $(XCODE_SIM_PLATFORM)/Developer/SDKs/$(XCODE_SIM_SDK)
+
+CXX := $(XCODE_TOOLROOT)/usr/bin/clang
+CMM := $(XCODE_TOOLROOT)/usr/bin/clang
+
+CXXFLAGSPRE := -x objective-c++ \
+  -arch i386 \
+  -fmessage-length=0 -fpascal-strings -fexceptions -fasm-blocks \
   -fvisibility=hidden -fvisibility-inlines-hidden \
-  -Wno-sign-conversion -fobjc-abi-version=2 -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" "-DIBAction=void)__attribute__((ibaction)" \
+  -fobjc-abi-version=2 \
+  -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
+  "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" \
+  "-DIBAction=void)__attribute__((ibaction)" \
+  -Wall \
+  -isysroot $(XCODE_SIM_SDKROOT) \
   -mios-simulator-version-min=5.0 \
-  <includes>
-  -DDEBUG
-  -MMD -MT dependencies
-  -MF /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Debug-iphonesimulator/Ejecta.build/Objects-normal/i386/EJFont.d
-  --serialize-diagnostics /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Debug-iphonesimulator/Ejecta.build/Objects-normal/i386/EJFont.dia
-  -c /Users/dtebbs/tmp/ejecta/Source/Ejecta/EJCanvas/2D/EJFont.mm
-  -o /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Debug-iphonesimulator/Ejecta.build/Objects-normal/i386/EJFont.o
+  -I$(XCODE_SIM_PLATFORM)/usr/include \
+  -DTZ_IOS=1
 
-RELEASE:
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-  -x objective-c -arch i386 -fmessage-length=0 -std=c99 -Wno-trigraphs -fpascal-strings
-  -Os \
-  -Wno-missing-field-initializers -Wno-missing-prototypes -Wreturn-type -Wno-implicit-atomic-properties -Wno-receiver-is-weak \
-  -Wformat -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-shorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wno-undeclared-selector -Wno-deprecated-implementations \
-  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk
-  -fexceptions -fasm-blocks -Wprotocol -Wdeprecated-declarations \
-  -g \
-  -fvisibility=hidden \
-  -Wno-sign-conversion -fobjc-abi-version=2 -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" "-DIBAction=void)__attribute__((ibaction)" \
+CMMFLAGSPRE := -x objective-c++ \
+  -arch i386 \
+  -fmessage-length=0 -fpascal-strings -fexceptions -fasm-blocks \
+  -fvisibility=hidden -fvisibility-inlines-hidden \
+  -fobjc-abi-version=2 \
+  -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
+  "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" \
+  "-DIBAction=void)__attribute__((ibaction)" \
+  -Wall \
+  -isysroot $(XCODE_SIM_SDKROOT) \
   -mios-simulator-version-min=5.0 \
-  <includes>
-  -DNS_BLOCK_ASSERTIONS=1 \
-  -MMD -MT dependencies \
-  -MF /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Release-iphonesimulator/Ejecta.build/Objects-normal/i386/EJBindingEjectaCore.d \
-  --serialize-diagnostics /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Release-iphonesimulator/Ejecta.build/Objects-normal/i386/EJBindingEjectaCore.dia \
-  -c /Users/dtebbs/tmp/ejecta/Source/Ejecta/EJBindingEjectaCore.m
-  -o /Users/dtebbs/Library/Developer/Xcode/DerivedData/Ejecta-abjzkyrhuxnmjffqvnaarumhzwrh/Build/Intermediates/Ejecta.build/Release-iphonesimulator/Ejecta.build/Objects-normal/i386/EJBindingEjectaCore.o
+  -DTZ_IOS=1
+
+#  --serialize-diagnostics somefile.dia
+
+CXXFLAGSPOST := \
+    -c
+
+CMMFLAGSPOST := \
+    -c
+
+# DEBUG / RELEASE
+
+ifeq ($(CONFIG),debug)
+  CXXFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+  CMMFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+else
+  CXXFLAGSPRE += -g -O3 -DNDEBUG
+  CMMFLAGSPRE += -g -O3 -DNDEBUG
+endif
+
+#
+# LIBS
+#
+
+AR := $(XCODE_TOOLROOT)/usr/bin/libtool
+ARFLAGSPRE := -static -arch_only i386 -syslibroot $(XCODE_SIM_SDKROOT) -g
+arout := -o
+ARFLAGSPOST :=
+
+libprefix := lib
+libsuffix := .a
+
+#
+# DLL
+#
+
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+DLLFLAGSPRE := -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g
+DLLFLAGSPOST := \
+  -framework CoreFoundation \
+  -framework OpenGL \
+  -framework Carbon \
+  -framework AGL \
+  -framework QuartzCore \
+  -framework AppKit \
+  -framework IOKit \
+  -framework System
+
+DLLFLAGS_LIBDIR := -L
+DLLFLAGS_LIB := -l
+
+dllprefix :=
+dllsuffix := .dylib
+
+dll-post = \
+  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
+    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
+    bn=`basename $$$$d`; \
+    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+  done
+
+#
+# APPS
+#
+
+LDFLAGS_LIBDIR := -L
+LDFLAGS_LIB := -l
+
+LD := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+LDFLAGSPRE := \
+    -arch i386 \
+    -g \
+    -isysroot $(XCODE_SDK_ROOT) \
+    $(MACOSX_LDFLAGS)
+
+LDFLAGSPOST := \
+    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -dead_strip \
+    -Wl,-search_paths_first \
+    -framework CoreFoundation \
+    -framework OpenGL \
+    -framework Carbon \
+    -framework QuartzCore \
+    -framework AppKit \
+    -framework IOKit \
+    -licucore
+
+#    -Xlinker \
+#    --no-demangle \
+
+app-post = \
+  $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
+    in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
+    bn=`basename $$$$d`; \
+    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+  done
+
+############################################################
