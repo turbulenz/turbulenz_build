@@ -612,7 +612,7 @@ def usage():
   Usage:
 
     make_android_project --dest <dest>
-                         --version <X.Y.Z>
+                         --version <X.Y.Z[.W]>
                          --package <com.company.package>
                          --sdk-version <android-8>
                          ....
@@ -628,7 +628,7 @@ def usage():
 
     --dest <dir-name>   - Directory to create project in
 
-    --version <X.Y.Z>
+    --version <X.Y.Z[.W]>
 
     --target <android-target-name>
                         - e.g. 'android-16'
@@ -898,12 +898,14 @@ def main():
 
     # Version stuf
 
-    version_int_list = [ int(i) for i in version.split('.') ] + [ 0 ]
-    if len(version_int_list) != 4:
-        print "Error: version string should be of the form: X.Y.Z"
+    version_int_list = [ int(i) for i in version.split('.') ]
+    if len(version_int_list) < 3:
+        print "Error: version string should be of the form: X.Y.Z[.W]"
         print ""
         usage()
         exit(1)
+    while len(version_int_list) < 4:
+        version_int_list.append(0)
 
     version_int = version_int_list[3] + \
         version_int_list[2] * 100 + \
