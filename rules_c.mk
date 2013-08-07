@@ -290,17 +290,17 @@ $(foreach mod,$(C_MODULES),                        \
   $(eval $(call _make_cxx_obj_dep_list,$(mod)))  \
 )
 
-# only look for .mm's on mac
+# only look for .mm's on mac and ios
 
-ifeq ($(TARGET),macosx)
+ifneq (,macosx ios,$(TARGETNAME))
   $(foreach mod,$(C_MODULES), $(eval \
     $(call _make_cmm_obj_dep_list,$(mod)) \
   ))
 endif
 
-$(call log,npengine_src = $(npengine_src))
-$(call log,npengine_cxx_obj_dep = $(npengine_cxx_obj_dep))
-$(call log,npengine_cmm_obj_dep = $(npengine_cmm_obj_dep))
+$(call log,standalone_src = $(npengine_src))
+$(call log,standalone_cxx_obj_dep = $(npengine_cxx_obj_dep))
+$(call log,standalone_cmm_obj_dep = $(npengine_cmm_obj_dep))
 
 #
 # Functions for getting src, obj and dep files
@@ -517,8 +517,10 @@ define _make_dll_rule
 	@echo [DLL] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
-      $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
-      $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
+      $(if $(DLLFLAGS_LIBDIR), \
+        $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
+        $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
+      ) \
       $($(1)_OBJECTS) \
       $($(1)_deplibs_cmdline) \
       $($(1)_ext_lib_flags) \

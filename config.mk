@@ -100,7 +100,12 @@ ifeq ($(TARGET),win32)
 endif
 
 ifeq ($(TARGET),iossim)
-  TARGETNAME ?= iossim
+  TARGETNAME ?= ios
+  ARCH ?= i386
+endif
+
+ifeq ($(TARGET),ios)
+  TARGETNAME ?= ios
   ARCH ?= i386
 endif
 
