@@ -338,12 +338,11 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     MANIFEST_0 += """
         <activity android:name="%ACTIVITY_NAME%"
                   android:label="%APP_TITLE%"
-                  android:launchMode="singleTask" """
-
+                  android:launchMode="singleTask"
+                  android:configChanges="orientation|screenSize" """
     if options['landscape']:
         MANIFEST_0 += """
-                  android:screenOrientation="sensorLandscape"
-                  android:configChanges="orientation|screenSize" """
+                  android:screenOrientation=""" +'"'+options['landscape']+'"'
 
     MANIFEST_0 += """
                   >"""
@@ -659,7 +658,7 @@ def usage():
                         - (optional) file with an activity in it
 
     --backup-agent <class>,<appkey>
-                        - Enable backup agent with the given class and key
+                        - (optional )Enable backup agent with class and key
 
     --meta <key>:<value>
                         - (optional) add a meta data key-value pair to the
@@ -684,6 +683,8 @@ def usage():
     --asset <file>      - (optional) asset file to copy to assets
 
     --png-asset <file>  - (optional) asset file with .png extension
+
+    --landscape <type>  - (optional) type can be: off, on, sensor(default)
 
     --android-sdk       - (optional) root of android SDK (if not in path)
 
@@ -756,7 +757,7 @@ def main():
     asset_files = []
     png_asset_files = []
     options = {
-        'landscape': True,
+        'landscape': 'sensorLandscape',
         'activity_files': [],
         'backup_agent': None
         }
@@ -832,7 +833,13 @@ def main():
         elif "--png-asset" == arg:
             png_asset_files.append(args.pop(0))
         elif "--no-landscape" == arg:
-            options['landscape'] = False
+            options['landscape'] = None
+        elif "--landscape" == arg:
+            options['landscape'] = {
+                'off': None,
+                'on': 'landscape',
+                'sensor': 'sensorLandscape'
+                }[args.pop(0)]
         elif "--src" == arg:
             src = args.pop(0)
         elif "--library" == arg:
