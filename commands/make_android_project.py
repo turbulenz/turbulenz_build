@@ -912,10 +912,6 @@ def main():
         version_int_list[1] * 10000 + \
         version_int_list[0] * 1000000
     version_dot_4 = ".".join([ str(i) for i in version_int_list])
-    if 0 == version_int_list[3]:
-        version_name = ".".join([ str(i) for i in version_int_list[0:3] ])
-    else:
-        version_name = version_dot_4
 
     # Template table
 
@@ -984,7 +980,7 @@ def main():
 
     global wrote
     if wrote:
-        fullname = "%s-%s" % (name, version_name)
+        fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
                                                android_sdk_root, library):
             return 1
