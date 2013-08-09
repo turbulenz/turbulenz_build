@@ -680,15 +680,15 @@ $(foreach apk,$(APKS),                                          \
   )                                                             \
 )
 
-$(call log,therun_google_deps = $(therun_google_deps))
-$(call log,therun_google_apk_fulldeps = $(therun_google_apk_fulldeps))
+# $(warning android_online_deps = $(android_online_deps))
+# $(warning android_online_apk_fulldeps = $(android_online_apk_fulldeps))
 
 $(foreach apk,$(APKS),                                          \
   $(eval $(apk)_apk_depflags :=                                 \
     $(foreach dp,$($(apk)_apk_fulldeps),--depends $(dp))        \
   )                                                             \
 )
-# $(warning finalfwy_apk_depflags = $(finalfwy_apk_depflags))
+# $(warning android_online_apk_depflags = $(android_online_apk_depflags))
 
 # Rule to make an APK
 # 1 - apk name
@@ -743,7 +743,7 @@ define _make_apk_rule
         echo [CP JAR] $$$$j ; cp -a $$$$j $$$$dst ;             \
       fi ;                                                      \
     done
-	$(if $($(1)_library),,$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG))
+	$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG)
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
