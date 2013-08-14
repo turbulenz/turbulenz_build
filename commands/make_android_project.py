@@ -97,7 +97,7 @@ TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
 
 MANIFEST_1_HEYZAP = """
         <!-- HEYZAP BEGIN -->
-        <receiver android:name="com.heyzap.sdk.PackageAddedReceiver">
+        <receiver android:name="com.heyzap.sdk.ads.PackageAddedReceiver">
           <intent-filter>
             <data android:scheme="package" />
             <action android:name="android.intent.action.PACKAGE_ADDED" />
