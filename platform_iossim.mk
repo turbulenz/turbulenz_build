@@ -39,7 +39,7 @@ CMMFLAGSPRE := -x objective-c++ \
   -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
   "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" \
   "-DIBAction=void)__attribute__((ibaction)" \
-  -Wall \
+  -Wall -Wno-c++11-extensions \
   -isysroot $(XCODE_SIM_SDKROOT) \
   -mios-simulator-version-min=5.0 \
   -DTZ_IOS=1
