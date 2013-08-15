@@ -20,6 +20,7 @@ CMM := $(XCODE_TOOLROOT)/usr/bin/clang
 
 CXXFLAGSPRE := -x objective-c++ \
   -arch i386 \
+  -stdlib=libc++ \
   -fmessage-length=0 -fpascal-strings -fexceptions -fasm-blocks \
   -fvisibility=hidden -fvisibility-inlines-hidden \
   -fobjc-abi-version=2 \
@@ -33,6 +34,7 @@ CXXFLAGSPRE := -x objective-c++ \
 
 CMMFLAGSPRE := -x objective-c++ \
   -arch i386 \
+  -stdlib=libc++ \
   -fmessage-length=0 -fpascal-strings -fexceptions -fasm-blocks \
   -fvisibility=hidden -fvisibility-inlines-hidden \
   -fobjc-abi-version=2 \
