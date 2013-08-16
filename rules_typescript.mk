@@ -95,7 +95,7 @@ define _make_js_rule
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $(notdir $($(1)_src)) -> $$@"
 	$(CMDPREFIX) $(TSC_PREFIX)                           \
-      $(TSC) -c --failonerror --noresolve                \
+      $(TSC) --failonerror --noResolve                   \
       $(if $($(1)_nodecls),,--declaration)               \
       $($(1)_tscflags)                                   \
       --out $$@ $(TS_BASE_FILES)                         \
@@ -172,9 +172,9 @@ endif
 TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
 
 ifeq (1,$(TS_REFCHECK))
-  TSC_FLAGS := -c --failonerror
+  TSC_FLAGS := --failonerror
 else
-  TSC_FLAGS := -c --noresolve --ignoretypeerrors
+  TSC_FLAGS := --noResolve --ignoretypeerrors
 endif
 
 # Override if we are syntax checking
