@@ -99,6 +99,16 @@ ifeq ($(TARGET),win32)
   ARCH ?= i386
 endif
 
+ifeq ($(TARGET),iossim)
+  TARGETNAME := ios
+  ARCH ?= i386
+endif
+
+ifeq ($(TARGET),ios)
+  TARGETNAME := ios
+  ARCH ?= i386
+endif
+
 # unknown
 ifeq ($(TARGETNAME),)
   $(error Couldnt determine TARGETNAME from TARGET: $(TARGET))

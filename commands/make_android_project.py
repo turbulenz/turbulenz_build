@@ -309,11 +309,15 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
 
     write_file_if_different(res_values_strings, res_values_strings_data)
 
-    # Override main activity?
+    # Override main activity?  This should happen either if the
+    # --no-launcher flag was given, or if one of the extras wants to
+    # be the main activity.
 
-    override_main_activity = False
-    for e in extras:
-        override_main_activity = override_main_activity or extras_table[e][2]
+    override_main_activity = options['nolauncher']
+    if not override_main_activity:
+        for e in extras:
+            override_main_activity = \
+                override_main_activity or extras_table[e][2]
 
     # Write manifest
 
@@ -608,7 +612,7 @@ def usage():
   Usage:
 
     make_android_project --dest <dest>
-                         --version <X.Y.Z>
+                         --version <X.Y.Z[.W]>
                          --package <com.company.package>
                          --sdk-version <android-8>
                          ....
@@ -624,7 +628,7 @@ def usage():
 
     --dest <dir-name>   - Directory to create project in
 
-    --version <X.Y.Z>
+    --version <X.Y.Z[.W]>
 
     --target <android-target-name>
                         - e.g. 'android-16'
@@ -654,6 +658,9 @@ def usage():
     --intent-filters <xml file>
                         - (optional) file with intent filters to add to main
                           activity
+
+    --no-launcher       - Remove the main LAUNCHER intent so that no launcher
+                          icon is created for the app
 
     --activity-decl <xml file>
                         - (optional) file with an activity in it
@@ -758,7 +765,8 @@ def main():
     options = {
         'landscape': True,
         'activity_files': [],
-        'backup_agent': None
+        'backup_agent': None,
+        'nolauncher': False
         }
 
     def add_meta(kv):
@@ -803,6 +811,8 @@ def main():
             resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
+        elif "--no-launcher" == arg:
+            options['nolauncher'] = True
         elif "--activity-decl" == arg:
             options['activity_files'].append(args.pop(0))
         elif "--backup-agent" == arg:
@@ -888,22 +898,20 @@ def main():
 
     # Version stuf
 
-    version_int_list = [ int(i) for i in version.split('.') ] + [ 0 ]
-    if len(version_int_list) != 4:
-        print "Error: version string should be of the form: X.Y.Z"
+    version_int_list = [ int(i) for i in version.split('.') ]
+    if len(version_int_list) < 3:
+        print "Error: version string should be of the form: X.Y.Z[.W]"
         print ""
         usage()
         exit(1)
+    while len(version_int_list) < 4:
+        version_int_list.append(0)
 
     version_int = version_int_list[3] + \
         version_int_list[2] * 100 + \
         version_int_list[1] * 10000 + \
         version_int_list[0] * 1000000
     version_dot_4 = ".".join([ str(i) for i in version_int_list])
-    if 0 == version_int_list[3]:
-        version_name = ".".join([ str(i) for i in version_int_list[0:3] ])
-    else:
-        version_name = version_dot_4
 
     # Template table
 
@@ -972,7 +980,7 @@ def main():
 
     global wrote
     if wrote:
-        fullname = "%s-%s" % (name, version_name)
+        fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
                                                android_sdk_root, library):
             return 1
