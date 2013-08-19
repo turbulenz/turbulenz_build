@@ -94,14 +94,14 @@ define _make_js_rule
   $(_$(1)_out_js) : $($(1)_src) $(_$(1)_dep_targets) \
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $(notdir $($(1)_src)) -> $$@"
-	$(CMDPREFIX) $(TSC_PREFIX)                           \
+	$(CMDPREFIX) if ! $(TSC_PREFIX)                      \
       $(TSC) --failonerror --noResolve                   \
       $(if $($(1)_nodecls),,--declaration)               \
       $($(1)_tscflags)                                   \
       --out $$@ $(TS_BASE_FILES)                         \
       $(_$(1)_dep_d_files) $(_$(1)_d_ts_src)             \
       $(abspath $(_$(1)_ts_src))                         \
-      $(TSC_POSTFIX)
+      $(TSC_POSTFIX) ; then rm -f $(_$(1)_out_js) ; FAIL ; fi
 
   jslib : $(1)
 
