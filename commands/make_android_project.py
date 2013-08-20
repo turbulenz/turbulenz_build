@@ -143,6 +143,39 @@ MANIFEST_1_AMAZON_BILLING = """
 
 AMAZON_BILLING_PERMISSIONS = ""
 
+MANIFEST_1_GAMECIRCLE = """
+        <!-- AMAZON GAMECIRCLE BEGINS -->
+        <activity
+             android:name="com.amazon.ags.html5.overlay.GameCircleUserInterface"
+             android:theme="@style/GCOverlay">
+        </activity>
+        <activity
+             android:name="com.amazon.identity.auth.device.authorization.AuthorizationActivity"
+             android:theme="@android:style/Theme.NoDisplay"
+             android:allowTaskReparenting="true"
+             android:launchMode="singleTask">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data
+              android:host="%PACKAGE_NAME%"
+              android:scheme="amzn" />
+          </intent-filter>
+        </activity>
+        <receiver
+          android:name="com.amazon.identity.auth.device.authorization.PackageIntentReceiver"
+          android:enabled="true" >
+          <intent-filter>
+            <action android:name="android.intent.action.PACKAGE_INSTALL" />
+            <action android:name="android.intent.action.PACKAGE_ADDED" />
+            <data android:scheme="package" />
+          </intent-filter>
+        </receiver>
+        <!-- AMAZON GAMECIRCLE ENDS -->"""
+GAMECIRCLE_PERMISSIONS = "android.permission.INTERNET" + \
+    ";android.permission.ACCESS_NETWORK_STATE"
+
 MANIFEST_1_APPAYABLE = """
         <!-- APPAYABLE BEGIN -->
         <service android:name="org.OpenUDID.OpenUDID_service">
@@ -246,6 +279,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         'facebook'   : [ MANIFEST_1_FACEBOOK, FACEBOOK_PERMISSIONS, False ],
         'amazon-billing':
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
+        'gamecircle' : [ MANIFEST_1_GAMECIRCLE, GAMECIRCLE_PERMISSIONS, False ],
         'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ]
         }
 
@@ -375,7 +409,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
     # Extra decls
 
     for e in extras:
-        data += extras_table[e][0]
+        data += replace_tags(extras_table[e][0], table)
 
     # End of activity
 
@@ -714,6 +748,8 @@ def usage():
 
     --amazon-billing    - (optional) include Amazon Billing manifest entries
 
+    --gamecircle        - (optional) include Amazon GameCirlce entries
+
     --facebook          - (optional) include facebook entries
 
   Example:
@@ -873,6 +909,8 @@ def main():
             extras.append('facebook')
         elif "--amazon-billing" == arg:
             extras.append('amazon-billing')
+        elif "--gamecircle" == arg:
+            extras.append('gamecircle')
         else:
             print "Error: unknown parameter: '%s'" % arg
             print ""
