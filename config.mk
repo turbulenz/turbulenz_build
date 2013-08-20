@@ -100,13 +100,15 @@ ifeq ($(TARGET),win32)
 endif
 
 ifeq ($(TARGET),iossim)
-  TARGETNAME := ios
+  # 'iossim' is shorthand for TARGET=ios, ARCH=i386
+  TARGET := ios
   ARCH ?= i386
 endif
 
 ifeq ($(TARGET),ios)
   TARGETNAME := ios
-  ARCH ?= i386
+  ARCH ?= armv7
+  VARIANT:=-$(ARCH)
 endif
 
 # unknown
