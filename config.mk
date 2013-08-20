@@ -101,7 +101,7 @@ endif
 
 ifeq ($(TARGET),iossim)
   # 'iossim' is shorthand for TARGET=ios, ARCH=i386
-  TARGET := ios
+  override TARGET := ios
   ARCH ?= i386
 endif
 
