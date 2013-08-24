@@ -427,6 +427,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
 
     <uses-sdk android:minSdkVersion="%ANDROID_SDK_VERSION%" />"""
 
+    if not options['require-touch']:
+        MANIFEST_2 += """
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />"""
+
     data += replace_tags(MANIFEST_2, table)
 
     # Permissions.  Add extras and remove duplicates
@@ -720,6 +724,8 @@ def usage():
 
     --landscape <type>  - (optional) type can be: off, on, sensor(default)
 
+    --no-touch          - (optional) don't require touch support
+
     --android-sdk       - (optional) root of android SDK (if not in path)
 
     --android-licensing - (optional) code for android licensing
@@ -794,6 +800,7 @@ def main():
     png_asset_files = []
     options = {
         'landscape': 'sensorLandscape',
+        'require-touch': True,
         'activity_files': [],
         'backup_agent': None
         }
@@ -876,6 +883,8 @@ def main():
                 'on': 'landscape',
                 'sensor': 'sensorLandscape'
                 }[args.pop(0)]
+        elif "--no-touch" == arg:
+            options['require-touch'] = False
         elif "--src" == arg:
             src = args.pop(0)
         elif "--library" == arg:
