@@ -173,7 +173,7 @@ MANIFEST_1_GAMECIRCLE = """
           </intent-filter>
         </receiver>
         <!-- AMAZON GAMECIRCLE ENDS -->"""
-GAMECIRCLE_PERMISSIONS = "android.permission.INTERNET" + \
+GAMECIRCLE_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
 
 MANIFEST_1_APPAYABLE = """
