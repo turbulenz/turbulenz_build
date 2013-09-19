@@ -120,7 +120,8 @@ MANIFEST_1_OPENKIT = """
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
         <!-- OPENKIT END -->"""
 
-OPENKIT_PERMISSIONS = ";android.permission.INTERNET"
+OPENKIT_PERMISSIONS = ";android.permission.INTERNET" \
+    + ";android.permission.GET_ACCOUNTS"
 
 MANIFEST_1_FACEBOOK = """
         <!-- FACEBOOK BEGIN -->
