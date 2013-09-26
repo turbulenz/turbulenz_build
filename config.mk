@@ -161,7 +161,7 @@ ifneq ($(CMDVERBOSE),1)
 endif
 
 ifeq ($(VALGRIND),1)
-  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full
+  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full --error-exitcode=15
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
