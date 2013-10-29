@@ -519,67 +519,43 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
+def _copy_files_to_dir(dest, file_list, tag="[FILE]"):
+    mkdir_if_not_exists(dest)
+    for f in file_list:
+        f_base = os.path.split(f)[1]
+        f_dest = os.path.join(dest, f_base)
+        _verbose("%s %s -> %s" % (tag, f, f_dest))
+        copy_file_if_different(f, f_dest)
+
+#
+def copy_xml_files(dest, xml_files):
+    dest_dir = os.path.join(dest, "res", "xml")
+    _copy_files_to_dir(dest_dir, xml_files, "[XML]")
+
+#
 def copy_value_files(dest, value_files):
     dest_dir = os.path.join(dest, "res", "values")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, value_files, "[VALUE]")
 
-    for v in value_files:
-        v_base = os.path.split(v)[1]
-        v_dest = os.path.join(dest_dir, v_base)
-        _verbose("[VALUE] %s -> %s" % (v, v_dest))
-        copy_file_if_different(v, v_dest)
-
-#
-#
 #
 def copy_layout_files(dest, layout_files):
     dest_dir = os.path.join(dest, "res", "layout")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, layout_files, "[LAYOUT]")
 
-    for l in layout_files:
-        l_base = os.path.split(l)[1]
-        l_dest = os.path.join(dest_dir, l_base)
-        _verbose("[LAYOUT] %s -> %s" % (l, l_dest))
-        copy_file_if_different(l, l_dest)
-
-#
-#
 #
 def copy_drawable_files(dest, drawable_files):
     dest_dir = os.path.join(dest, "res", "drawable")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, drawable_files, "[DRAWABLE]")
 
-    for d in drawable_files:
-        d_base = os.path.split(d)[1]
-        d_dest = os.path.join(dest_dir, d_base)
-        _verbose("[DRAWABLE] %s -> %s" % (d, d_dest))
-        copy_file_if_different(d, d_dest)
-
-#
-#
 #
 def copy_asset_files(dest, asset_files):
     dest_dir = os.path.join(dest, "assets")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, assets, "[ASSET]")
 
-    for a in asset_files:
-        a_base = os.path.split(a)[1]
-        a_dest = os.path.join(dest_dir, a_base)
-        _verbose("[ASSET] %s -> %s" % (a, a_dest))
-        copy_file_if_different(a, a_dest)
-
-#
-#
 #
 def copy_png_asset_files(dest, png_asset_files):
     dest_dir = os.path.join(dest, "assets")
-    mkdir_if_not_exists(dest_dir)
-
-    for a in png_asset_files:
-        a_base = os.path.split(a)[1]
-        a_dest = os.path.join(dest_dir, a_base + ".png")
-        _verbose("[ASSET] %s -> %s" % (a, a_dest))
-        copy_file_if_different(a, a_dest)
+    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]")
 
 #
 #
@@ -682,7 +658,9 @@ def usage():
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
 
-    --value <alias>     - (optional) .xml file to copy to res/values/
+    --xml <file>        - (optional) .xml file to copy to res/xml/
+
+    --value <file>      - (optional) .xml file to copy to res/values/
 
     --layout <file>     - (optional) .xml file to copy to res/layout/
 
@@ -757,6 +735,7 @@ def main():
     meta = {}
     depends = []
     resource_strings = {}
+    xml_files = []
     value_files = []
     layout_files = []
     drawable_files = []
@@ -831,6 +810,8 @@ def main():
             keystore = args.pop(0)
         elif "--key-alias" == arg:
             keyalias = args.pop(0)
+        elif "--xml" == arg:
+            xml_files.append(args.pop(0))
         elif "--value" == arg:
             value_files.append(args.pop(0))
         elif "--layout" == arg:
@@ -952,6 +933,11 @@ def main():
         copy_icon_files(dest, icon_dir)
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
+
+    # Copy xml files
+
+    if 0 != len(xml_files):
+        copy_xml_files(dest, xml_files)
 
     # Copy value files
 
