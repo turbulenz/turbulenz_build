@@ -244,7 +244,7 @@ def copy_file_if_different(src, target):
 #
 #
 #
-def write_manifest(dest, table, permissions, intent_filters, meta,
+def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                    extras, library, resource_strings, options):
 
     MANIFEST_1_TAPFORTAP = """
@@ -408,6 +408,12 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
         with open(a, "rb") as a_f:
             MANIFEST_0 += "\n"
             MANIFEST_0 += a_f.read()
+
+    # Meta data in 'activity' tag
+
+    for k,v in app_meta.items():
+        MANIFEST_0 += """
+        <meta-data android:name="%s" android:value="%s" />""" % (k, v)
 
     data += replace_tags(MANIFEST_0, table)
 
@@ -686,6 +692,9 @@ def usage():
                         - (optional) add a meta data key-value pair to the
                           main activity
 
+    --app-meta <key>:<value>
+                        - (optional) add a meta tag to the 'application' tag
+
     --depends <project-location>
                         - (optional) Can use multiple times
 
@@ -777,6 +786,7 @@ def main():
 
     intent_filters = None
     meta = {}
+    app_meta = {}
     depends = []
     resource_strings = {}
     xml_files = []
@@ -793,7 +803,7 @@ def main():
         'nolauncher': False
         }
 
-    def add_meta(kv):
+    def add_meta(kv, meta_map = meta):
         colon_idx = kv.find(':')
         if -1 == colon_idx:
             print "Badly formed meta data: %s" % kv
@@ -802,7 +812,10 @@ def main():
         k = kv[:colon_idx]
         v = kv[colon_idx+1:]
         print "Saw meta data: KEY: %s, VALUE: %s" % (k, v)
-        meta[k] = v
+        meta_map[k] = v
+
+    def add_app_meta(kv):
+        add_meta(kv, app_meta)
 
     while len(args):
         arg = args.pop(0)
@@ -843,6 +856,8 @@ def main():
             options['backup_agent'] = args.pop(0)
         elif "--meta" == arg:
             add_meta(args.pop(0))
+        elif "--app-meta" == arg:
+            add_app_meta(args.pop(0))
         elif "--depends" == arg:
             depends.append(args.pop(0))
         elif "--icon-dir" == arg:
@@ -975,7 +990,7 @@ def main():
 
     # Write manifest
 
-    write_manifest(dest, table, permissions, intent_filters, meta,
+    write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                    extras, library, resource_strings, options)
 
     # Write ant.properties (dependencies)
