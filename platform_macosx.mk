@@ -55,12 +55,13 @@ CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch i386 -fmessage-length=0 -pipe -fexceptions \
+    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
+    -fstrict-aliasing -fno-threadsafe-statics \
+    -ftree-vectorize -msse3 -mssse3 \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
-    -msse3 -mssse3 \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
@@ -71,13 +72,14 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
 # -fvisibility=hidden
 
 CMMFLAGSPRE := -x objective-c++ \
-    -arch i386 -fmessage-length=0 -pipe \
-    -fpascal-strings -fasm-blocks -fPIC \
+    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
+    -fpascal-strings -fasm-blocks \
+    -fstrict-aliasing -fno-threadsafe-statics \
+    -ftree-vectorize -msse3 -mssse3 \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
-    -ftree-vectorize -msse3 -mssse3 \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \

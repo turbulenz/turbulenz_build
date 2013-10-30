@@ -99,6 +99,18 @@ ifeq ($(TARGET),win32)
   ARCH ?= i386
 endif
 
+ifeq ($(TARGET),iossim)
+  # 'iossim' is shorthand for TARGET=ios, ARCH=i386
+  override TARGET := ios
+  ARCH ?= i386
+endif
+
+ifeq ($(TARGET),ios)
+  TARGETNAME := ios
+  ARCH ?= armv7
+  VARIANT:=-$(ARCH)
+endif
+
 # unknown
 ifeq ($(TARGETNAME),)
   $(error Couldnt determine TARGETNAME from TARGET: $(TARGET))
@@ -149,7 +161,7 @@ ifneq ($(CMDVERBOSE),1)
 endif
 
 ifeq ($(VALGRIND),1)
-  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full
+  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full --error-exitcode=15
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
@@ -157,7 +169,7 @@ CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
-TSC ?= node $(BUILDDIR)/../typescript/0.9.0/tsc.js
+TSC ?= node $(BUILDDIR)/../typescript/0.9.1/tsc.js
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 
 ############################################################

@@ -344,11 +344,15 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
 
     write_file_if_different(res_values_strings, res_values_strings_data)
 
-    # Override main activity?
+    # Override main activity?  This should happen either if the
+    # --no-launcher flag was given, or if one of the extras wants to
+    # be the main activity.
 
-    override_main_activity = False
-    for e in extras:
-        override_main_activity = override_main_activity or extras_table[e][2]
+    override_main_activity = options['nolauncher']
+    if not override_main_activity:
+        for e in extras:
+            override_main_activity = \
+                override_main_activity or extras_table[e][2]
 
     # Write manifest
 
@@ -553,67 +557,43 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
+def _copy_files_to_dir(dest, file_list, tag="[FILE]"):
+    mkdir_if_not_exists(dest)
+    for f in file_list:
+        f_base = os.path.split(f)[1]
+        f_dest = os.path.join(dest, f_base)
+        _verbose("%s %s -> %s" % (tag, f, f_dest))
+        copy_file_if_different(f, f_dest)
+
+#
+def copy_xml_files(dest, xml_files):
+    dest_dir = os.path.join(dest, "res", "xml")
+    _copy_files_to_dir(dest_dir, xml_files, "[XML]")
+
+#
 def copy_value_files(dest, value_files):
     dest_dir = os.path.join(dest, "res", "values")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, value_files, "[VALUE]")
 
-    for v in value_files:
-        v_base = os.path.split(v)[1]
-        v_dest = os.path.join(dest_dir, v_base)
-        _verbose("[VALUE] %s -> %s" % (v, v_dest))
-        copy_file_if_different(v, v_dest)
-
-#
-#
 #
 def copy_layout_files(dest, layout_files):
     dest_dir = os.path.join(dest, "res", "layout")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, layout_files, "[LAYOUT]")
 
-    for l in layout_files:
-        l_base = os.path.split(l)[1]
-        l_dest = os.path.join(dest_dir, l_base)
-        _verbose("[LAYOUT] %s -> %s" % (l, l_dest))
-        copy_file_if_different(l, l_dest)
-
-#
-#
 #
 def copy_drawable_files(dest, drawable_files):
     dest_dir = os.path.join(dest, "res", "drawable")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, drawable_files, "[DRAWABLE]")
 
-    for d in drawable_files:
-        d_base = os.path.split(d)[1]
-        d_dest = os.path.join(dest_dir, d_base)
-        _verbose("[DRAWABLE] %s -> %s" % (d, d_dest))
-        copy_file_if_different(d, d_dest)
-
-#
-#
 #
 def copy_asset_files(dest, asset_files):
     dest_dir = os.path.join(dest, "assets")
-    mkdir_if_not_exists(dest_dir)
+    _copy_files_to_dir(dest_dir, assets, "[ASSET]")
 
-    for a in asset_files:
-        a_base = os.path.split(a)[1]
-        a_dest = os.path.join(dest_dir, a_base)
-        _verbose("[ASSET] %s -> %s" % (a, a_dest))
-        copy_file_if_different(a, a_dest)
-
-#
-#
 #
 def copy_png_asset_files(dest, png_asset_files):
     dest_dir = os.path.join(dest, "assets")
-    mkdir_if_not_exists(dest_dir)
-
-    for a in png_asset_files:
-        a_base = os.path.split(a)[1]
-        a_dest = os.path.join(dest_dir, a_base + ".png")
-        _verbose("[ASSET] %s -> %s" % (a, a_dest))
-        copy_file_if_different(a, a_dest)
+    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]")
 
 #
 #
@@ -646,7 +626,7 @@ def usage():
   Usage:
 
     make_android_project --dest <dest>
-                         --version <X.Y.Z>
+                         --version <X.Y.Z[.W]>
                          --package <com.company.package>
                          --sdk-version <android-8>
                          ....
@@ -662,7 +642,7 @@ def usage():
 
     --dest <dir-name>   - Directory to create project in
 
-    --version <X.Y.Z>
+    --version <X.Y.Z[.W]>
 
     --target <android-target-name>
                         - e.g. 'android-16'
@@ -693,6 +673,9 @@ def usage():
                         - (optional) file with intent filters to add to main
                           activity
 
+    --no-launcher       - Remove the main LAUNCHER intent so that no launcher
+                          icon is created for the app
+
     --activity-decl <xml file>
                         - (optional) file with an activity in it
 
@@ -713,7 +696,9 @@ def usage():
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
 
-    --value <alias>     - (optional) .xml file to copy to res/values/
+    --xml <file>        - (optional) .xml file to copy to res/xml/
+
+    --value <file>      - (optional) .xml file to copy to res/values/
 
     --layout <file>     - (optional) .xml file to copy to res/layout/
 
@@ -794,6 +779,7 @@ def main():
     meta = {}
     depends = []
     resource_strings = {}
+    xml_files = []
     value_files = []
     layout_files = []
     drawable_files = []
@@ -803,7 +789,8 @@ def main():
         'landscape': 'sensorLandscape',
         'require-touch': True,
         'activity_files': [],
-        'backup_agent': None
+        'backup_agent': None,
+        'nolauncher': False
         }
 
     def add_meta(kv):
@@ -848,6 +835,8 @@ def main():
             resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
+        elif "--no-launcher" == arg:
+            options['nolauncher'] = True
         elif "--activity-decl" == arg:
             options['activity_files'].append(args.pop(0))
         elif "--backup-agent" == arg:
@@ -866,6 +855,8 @@ def main():
             keystore = args.pop(0)
         elif "--key-alias" == arg:
             keyalias = args.pop(0)
+        elif "--xml" == arg:
+            xml_files.append(args.pop(0))
         elif "--value" == arg:
             value_files.append(args.pop(0))
         elif "--layout" == arg:
@@ -943,22 +934,20 @@ def main():
 
     # Version stuf
 
-    version_int_list = [ int(i) for i in version.split('.') ] + [ 0 ]
-    if len(version_int_list) != 4:
-        print "Error: version string should be of the form: X.Y.Z"
+    version_int_list = [ int(i) for i in version.split('.') ]
+    if len(version_int_list) < 3:
+        print "Error: version string should be of the form: X.Y.Z[.W]"
         print ""
         usage()
         exit(1)
+    while len(version_int_list) < 4:
+        version_int_list.append(0)
 
     version_int = version_int_list[3] + \
         version_int_list[2] * 100 + \
         version_int_list[1] * 10000 + \
         version_int_list[0] * 1000000
     version_dot_4 = ".".join([ str(i) for i in version_int_list])
-    if 0 == version_int_list[3]:
-        version_name = ".".join([ str(i) for i in version_int_list[0:3] ])
-    else:
-        version_name = version_dot_4
 
     # Template table
 
@@ -1000,6 +989,11 @@ def main():
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
 
+    # Copy xml files
+
+    if 0 != len(xml_files):
+        copy_xml_files(dest, xml_files)
+
     # Copy value files
 
     if 0 != len(value_files):
@@ -1027,7 +1021,7 @@ def main():
 
     global wrote
     if wrote:
-        fullname = "%s-%s" % (name, version_name)
+        fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
                                                android_sdk_root, library):
             return 1
