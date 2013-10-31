@@ -11,6 +11,7 @@ ifneq (,$(MACOSX_XCODE_BIN_PATH))
   # OLD TOOLS
   MACOSX_CXX := llvm-g++-4.2
   CXXFLAGS += -ftree-vectorize
+  CMMFLAGS += -ftree-vectorize
 else
   # clang
   MACOSX_CXX := clang
@@ -58,7 +59,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
-    -ftree-vectorize -msse3 -mssse3 \
+    -msse3 -mssse3 \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
@@ -75,7 +76,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
-    -ftree-vectorize -msse3 -mssse3 \
+    -msse3 -mssse3 \
     -Wall -Wno-unknown-pragmas \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
