@@ -375,6 +375,22 @@ def write_manifest(dest, table, permissions, intent_filters, meta,
             MANIFEST_0 += "\n"
             MANIFEST_0 += a_f.read()
 
+    for a in options['launcher_activities']:
+        activity_class = a[0]
+        activity_label = a[1]
+        activity_icon = a[2]
+        MANIFEST_0 += """
+        <activity """
+        MANIFEST_0 += "android:name=\"%s\" android:label=\"%s\" " \
+                      % (activity_class, activity_label)
+        MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon) + """
+                  >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>"""
+
     data += replace_tags(MANIFEST_0, table)
 
     # Extra decls
@@ -622,6 +638,10 @@ def usage():
 
     --activity <class-name>
 
+    --launcher-activity <class-name>,<label>,<icon-file>
+                        - (optional) add a basic decl for a launchable activity
+                          using the given icon.
+
     --sdk-version       - minSdkVersion
 
     --permissions "<perm1>;<perm2>;.."
@@ -642,7 +662,8 @@ def usage():
                         - (optional) file with an activity in it
 
     --backup-agent <class>,<appkey>
-                        - Enable backup agent with the given class and key
+                        - (optional) Enable backup agent with the given class
+                          and key
 
     --meta <key>:<value>
                         - (optional) add a meta data key-value pair to the
@@ -654,6 +675,9 @@ def usage():
     --icon-dir <icon-dir>
                         - (optional) Use drawable-* from <icon-dir>
 
+    --icon-file <icon-file>
+                        - (optional) Use specific file as icon
+
     --key-store <file>  - (optional) Location of keystore
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
@@ -664,7 +688,7 @@ def usage():
 
     --layout <file>     - (optional) .xml file to copy to res/layout/
 
-    --drawable <file>   - (optional) .xml file to copy to res/drawable/
+    --drawable <file>   - (optional) file to copy to res/drawable/
 
     --asset <file>      - (optional) asset file to copy to assets
 
@@ -745,7 +769,8 @@ def main():
         'landscape': True,
         'activity_files': [],
         'backup_agent': None,
-        'nolauncher': False
+        'nolauncher': False,
+        'launcher_activities': [],
         }
 
     def add_meta(kv):
@@ -758,6 +783,21 @@ def main():
         v = kv[colon_idx+1:]
         print "Saw meta data: KEY: %s, VALUE: %s" % (k, v)
         meta[k] = v
+
+    def add_launcher_activity(ai):
+        parts = ai.split(',')
+        if 3 != len(parts):
+            print "Badly formated launcher activity: %s" % ai
+            usage()
+            exit(1)
+
+        a = parts[0]
+        l = parts[1]
+        i = parts[2]
+        drawable_files.append(i)
+
+        i_base = os.path.splitext(os.path.split(i)[1])[0]
+        options['launcher_activities'].append((a,l,i_base))
 
     while len(args):
         arg = args.pop(0)
@@ -781,6 +821,8 @@ def main():
             package = args.pop(0)
         elif "--activity" == arg:
             activity = args.pop(0)
+        elif "--launcher-activity" == arg:
+            add_launcher_activity(args.pop(0))
         elif "--sdk-version" == arg:
             sdk_version = args.pop(0)
         elif "--permissions" == arg:
