@@ -7,7 +7,6 @@ XCODE_PLATFORMS := $(XCODE_ROOT)/Platforms
 
 ifeq (i386,$(ARCH))
   XCODE_PLATFORM := $(XCODE_PLATFORMS)/iPhoneSimulator.platform
-  XCODE_SDK := iPhoneSimulator6.1.sdk
   CXXFLAGSPRE := -mios-simulator-version-min=5.0 \
     -fobjc-abi-version=2 \
     -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
@@ -15,10 +14,10 @@ ifeq (i386,$(ARCH))
     "-DIBAction=void)__attribute__((ibaction)"
 else
   XCODE_PLATFORM := $(XCODE_PLATFORMS)/iPhoneOS.platform
-  XCODE_SDK := iPhoneOS6.1.sdk
   CXXFLAGSPRE := -miphoneos-version-min=5.0
 endif
 
+XCODE_SDK := $(shell ls $(XCODE_PLATFORM)/Developer/SDKs | tail -n 1)
 XCODE_SDKROOT := $(XCODE_PLATFORM)/Developer/SDKs/$(XCODE_SDK)
 
 CXX := $(XCODE_TOOLROOT)/usr/bin/clang
