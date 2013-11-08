@@ -185,8 +185,37 @@ MANIFEST_1_APPAYABLE = """
          </intent-filter>
         </service>
         <!-- APPAYABLE END -->"""
-
 APPAYABLE_PERMISSIONS = ""
+
+MANIFEST_1_PLAYHAVEN = """
+        <!-- PLAYHAVEN BEGIN -->
+        <activity
+             android:name="com.playhaven.src.publishersdk.content.PHContentView"
+             android:theme="@android:style/Theme.Dialog"
+             android:windowSoftInputMode="adjustResize">
+        </activity>
+        <!-- PLAYHAVEN END -->"""
+PLAYHAVEN_PERMISSIONS = ";android.permission.INTERNET" + \
+                        ";android.permission.READ_PHONE_STATE" + \
+                        ";android.permission.ACCESS_NETWORK_STATE"
+
+MANIFEST_1_GREYSTRIPE = """
+        <!-- GREYSTRIPE BEGIN -->
+        <activity
+             android:name="com.greystripe.sdk.GSFullscreenActivity"
+             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
+        <!-- GREYSTRIPE END -->"""
+GREYSTRIPE_PERMISSIONS = PLAYHAVEN_PERMISSIONS
+
+MANIFEST_1_MDOTM = """
+        <!-- MDOTM BEGIN -->
+        <activity
+             android:name="com.mdotm.android.view.MdotMActivity"
+             android:screenOrientation="portrait"
+             android:launchMode="singleTop"/>
+        <!-- MDOTM END -->"""
+MDOTM_PERMISSIONS = GREYSTRIPE_PERMISSIONS
 
 #
 #
@@ -281,7 +310,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         'amazon-billing':
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
         'gamecircle' : [ MANIFEST_1_GAMECIRCLE, GAMECIRCLE_PERMISSIONS, False ],
-        'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ]
+        'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ],
+        'playhaven'  : [ MANIFEST_1_PLAYHAVEN, PLAYHAVEN_PERMISSIONS, False ],
+        'greystripe' : [ MANIFEST_1_GREYSTRIPE, GREYSTRIPE_PERMISSIONS, False ],
+        'mdotm'      : [ MANIFEST_1_MDOTM, MDOTM_PERMISSIONS, False ],
         }
 
     # icon
@@ -725,34 +757,26 @@ def usage():
 
     --android-licensing - (optional) code for android licensing
 
-    --admob             - (optional) include AdMob activity decl
-
+    (External services / publishers)
+    --openkit           - (optional) include OpenKit manifest entries
+    --amazon-billing    - (optional) include Amazon Billing manifest entries
+    --gamecircle        - (optional) include Amazon GameCirlce entries
+    --facebook          - (optional) include facebook entries
     --zirconia          - (optional) include Zirconia permissions
-
     --mobiroo           - (optional) include mobiroo entries to manifest
 
+    (Ad networks)
+    --admob             - (optional) include AdMob activity decl
     --mmedia            - (optional) include MillennialMedia manifest entries
-
     --tapit             - (optional) include MillennialMedia manifest entries
-
     --mediba            - (optional) include Medbia manifest entries
-
     --chartboost        - (optional) include ChartBoost manifest entries
-
     --tapfortap         - (optional) include TapForTap manifest entries
-
     --heyzap            - (optional) include HeyZap manifest entries
-
     --appayable         - (optional) include Appayable manifest entries
-
-    --openkit           - (optional) include OpenKit manifest entries
-
-    --amazon-billing    - (optional) include Amazon Billing manifest entries
-
-    --gamecircle        - (optional) include Amazon GameCirlce entries
-
-    --facebook          - (optional) include facebook entries
-
+    --playhaven         - (optional) include playhaven manifest entries
+    --greystripe        - (optional) include greystripe manifest entries
+    --mdotm             - (optional) include mdotm manifest entries
   Example:
 
     make_android_project --dest java --version 3.2.5 --target 'android-16' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
@@ -914,6 +938,12 @@ def main():
             extras.append('heyzap')
         elif "--appayable" == arg:
             extras.append('appayable')
+        elif "--playhaven" == arg:
+            extras.append('playhaven')
+        elif "--greystripe" == arg:
+            extras.append('greystripe')
+        elif "--mdotm" == arg:
+            extras.append('mdotm')
         elif "--zirconia" == arg:
             extras.append('zirconia')
         elif "--mobiroo" == arg:
