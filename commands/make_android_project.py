@@ -535,11 +535,11 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
-def _copy_files_to_dir(dest, file_list, tag="[FILE]"):
+def _copy_files_to_dir(dest, file_list, tag="[FILE]", ext=""):
     mkdir_if_not_exists(dest)
     for f in file_list:
         f_base = os.path.split(f)[1]
-        f_dest = os.path.join(dest, f_base)
+        f_dest = os.path.join(dest, f_base) + ext
         _verbose("%s %s -> %s" % (tag, f, f_dest))
         copy_file_if_different(f, f_dest)
 
@@ -571,7 +571,7 @@ def copy_asset_files(dest, asset_files):
 #
 def copy_png_asset_files(dest, png_asset_files):
     dest_dir = os.path.join(dest, "assets")
-    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]")
+    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]", ".png")
 
 #
 #
