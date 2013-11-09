@@ -212,7 +212,7 @@ MANIFEST_1_MDOTM = """
         <!-- MDOTM BEGIN -->
         <activity
              android:name="com.mdotm.android.view.MdotMActivity"
-             android:screenOrientation="portrait"
+             android:screenOrientation="landscape"
              android:launchMode="singleTop"/>
         <!-- MDOTM END -->"""
 MDOTM_PERMISSIONS = GREYSTRIPE_PERMISSIONS
