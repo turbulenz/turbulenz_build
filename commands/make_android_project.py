@@ -187,6 +187,28 @@ MANIFEST_1_APPAYABLE = """
         <!-- APPAYABLE END -->"""
 APPAYABLE_PERMISSIONS = ""
 
+MANIFEST_1_ADLOOPER = """
+        <!-- ADLOOPER BEGIN -->
+        <receiver android:name="com.kiwi.ads.service.AdInstallReceiver">
+         <intent-filter>
+          <action android:name="android.intent.action.PACKAGE_ADDED" />
+          <action android:name="android.intent.action.PACKAGE_REMOVED" />
+          <data android:scheme="package" />
+         </intent-filter>
+        </receiver>
+        <receiver
+             android:name="com.kiwi.ads.service.InstallReferrerReceiver"
+             android:exported="true"
+             >
+         <intent-filter>
+          <action android:name="com.android.vending.INSTALL_REFERRER" />
+         </intent-filter>
+        </receiver>
+        <!-- ADLOOPER END -->"""
+ADLOOPER_PERMISSIONS = ";android.permission.INTERNET" + \
+                       ";android.permission.READ_PHONE_STATE" + \
+                       ";android.permission.ACCESS_NETWORK_STATE"
+
 MANIFEST_1_PLAYHAVEN = """
         <!-- PLAYHAVEN BEGIN -->
         <activity
@@ -311,6 +333,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
         'gamecircle' : [ MANIFEST_1_GAMECIRCLE, GAMECIRCLE_PERMISSIONS, False ],
         'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ],
+        'adlooper'   : [ MANIFEST_1_ADLOOPER, ADLOOPER_PERMISSIONS, False ],
         'playhaven'  : [ MANIFEST_1_PLAYHAVEN, PLAYHAVEN_PERMISSIONS, False ],
         'greystripe' : [ MANIFEST_1_GREYSTRIPE, GREYSTRIPE_PERMISSIONS, False ],
         'mdotm'      : [ MANIFEST_1_MDOTM, MDOTM_PERMISSIONS, False ],
@@ -774,6 +797,7 @@ def usage():
     --tapfortap         - (optional) include TapForTap manifest entries
     --heyzap            - (optional) include HeyZap manifest entries
     --appayable         - (optional) include Appayable manifest entries
+    --adlooper          - (optional) include AdLooper manifest entries
     --playhaven         - (optional) include playhaven manifest entries
     --greystripe        - (optional) include greystripe manifest entries
     --mdotm             - (optional) include mdotm manifest entries
@@ -938,6 +962,8 @@ def main():
             extras.append('heyzap')
         elif "--appayable" == arg:
             extras.append('appayable')
+        elif "--adlooper" == arg:
+            extras.append('adlooper')
         elif "--playhaven" == arg:
             extras.append('playhaven')
         elif "--greystripe" == arg:
