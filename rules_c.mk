@@ -269,6 +269,22 @@ $(call log, core_src = $(core_src))
 endif #($(UNITY),1)
 
 #
+# Precopiled headers
+#
+
+# for each module, if _pch is set, we need vars:
+$(foreach mod,$(C_MODULES), \
+  $(if $($(mod)_pch), \
+    $(eval \
+      _$(mod)_pchfile := $($(mod)_OBJDIR)/$(notdir $($(mod)_pch:.h=.h.gch)) \
+    ) \
+    $(eval \
+      _$(mod)_pchdep := $($(mod)_DEPDIR)/$(notdir $($(mod)_pch:.h=.h.d)) \
+    ) \
+  ) \
+)
+
+#
 # For each module, create cxx_obj_dep list
 #
 
@@ -326,7 +342,8 @@ $(foreach mod,$(C_MODULES),$(eval \
 $(call log,npengine_OBJECTS = $(npengine_OBJECTS))
 
 $(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_DEPFILES := \
+  $(mod)_DEPFILES :=                                            \
+    $(_$(mod)_pchdep)                                           \
     $(foreach sod,$($(mod)_cxx_obj_dep),$(call _getdep,$(sod))) \
     $(foreach sod,$($(mod)_cmm_obj_dep),$(call _getdep,$(sod))) \
 ))
@@ -381,6 +398,31 @@ endif
 #
 
 # 1 - mod
+# 2 - .h source file
+# 3 - .h.pch dest file
+# 4 - depfile
+define _make_pch_rule
+
+  .PRECIOUS : $(3)
+
+  $(3) : $(2)
+	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
+	@echo [PCH] \($(1)\) $$(notdir $$@)
+	$(CMDPREFIX)$(CXX)                                             \
+      $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
+      -MD -MT $4 -MT $$@ -MP                                       \
+      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)  \
+      $(addprefix -I,$($(1)_incdirs))                              \
+      $(addprefix -I,$($(1)_depincdirs))                           \
+      $(addprefix -I,$($(1)_ext_incdirs))                          \
+      $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
+      -x c++-header                                                \
+      $$< -o $$@
+
+
+endef
+
+# 1 - mod
 # 2 - cxx srcfile
 # 3 - object file
 # 4 - depfile
@@ -388,16 +430,18 @@ define _make_cxx_object_rule
 
   .PRECIOUS : $(3)
 
-  $(3) : $(2)
+  $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CXX) $(CXXFLAGSPRE) $(CXXFLAGS) \
-	  -MD -MT $4 -MT $$@ -MP \
-      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags) \
-      $(addprefix -I,$($(1)_incdirs)) \
-      $(addprefix -I,$($(1)_depincdirs)) \
-      $(addprefix -I,$($(1)_ext_incdirs)) \
-      $(CXXFLAGSPOST) $($(call file_flags,$(2))) \
+	$(CMDPREFIX)$(CXX)                                             \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
+      $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
+      -MD -MT $4 -MT $$@ -MP                                       \
+      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)  \
+      $(addprefix -I,$($(1)_incdirs))                              \
+      $(addprefix -I,$($(1)_depincdirs))                           \
+      $(addprefix -I,$($(1)_ext_incdirs))                          \
+      $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
       $$< -o $$@
 
   $(3).S : $(3)
@@ -416,16 +460,18 @@ define _make_cmm_object_rule
 
   .PRECIOUS : $(3)
 
-  $(3) : $(2)
+  $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CMM] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CMM) $(CMMFLAGSPRE) $(CMMFLAGS) \
-	  -MD -MT $4 -MT $$@ -MP \
-      $($(1)_cxxflags) $($(1)_depcxxflags) \
-      $(addprefix -I,$($(1)_incdirs)) \
-      $(addprefix -I,$($(1)_depincdirs)) \
-      $(addprefix -I,$($(1)_ext_incdirs)) \
-      $(CMMFLAGSPOST) $($(call file_flags,$(2))) \
+	$(CMDPREFIX)$(CMM)                                             \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
+      $(CMMFLAGSPRE) $(CMMFLAGS)                                   \
+      -MD -MT $4 -MT $$@ -MP                                       \
+      $($(1)_cxxflags) $($(1)_depcxxflags)                         \
+      $(addprefix -I,$($(1)_incdirs))                              \
+      $(addprefix -I,$($(1)_depincdirs))                           \
+      $(addprefix -I,$($(1)_ext_incdirs))                          \
+      $(CMMFLAGSPOST) $($(call file_flags,$(2)))                   \
       $$< -o $$@
 
 endef
@@ -436,9 +482,14 @@ endef
 # 1 - mod
 define _make_object_rules
 
+  $(if $(_$(1)_pchfile), \
+    $(call _make_pch_rule,$(1),$($(1)_pch),$(_$(1)_pchfile),$(_$(mod)_pchdep)) \
+  )
+
   $(foreach sod,$($(1)_cxx_obj_dep),$(eval \
     $(call _make_cxx_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
+
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
     $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
   ))
