@@ -37,8 +37,8 @@ ANDROID_NDK ?= external/android/android-ndk-r9b
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.8
 NDK_CLANG_VER ?= 3.3
+# NDK_HOSTOS ?= darwin
 NDK_HOSTARCH ?= x86_64
-NDK_USE_CLANG ?= 1
 
 # Toolset for which arch
 
@@ -56,6 +56,7 @@ ifeq ($(ARCH),armv7a)
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-arm
   ANDROID_ARCH_NAME := armeabi-v7a
+  NDK_USE_CLANG ?= 1
 endif
 ifeq ($(ARCH),x86)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/x86-$(NDK_GCC_VER)
@@ -71,19 +72,20 @@ endif
 # Find toolset for this platfom
 
 ifeq ($(BUILDHOST),macosx)
-  NDK_TOOLCHAIN := $(NDK_ARCHDIR)/prebuilt/darwin-$(NDK_HOSTARCH)
-  NDK_TOOLBIN := $(NDK_TOOLCHAIN)/bin
-  NDK_CLANG_TOOLCHAIN := \
-    $(ANDROID_NDK)/toolchains/llvm-$(NDK_CLANG_VER)/prebuilt/darwin-$(NDK_HOSTARCH)
-  NDK_CLANG_TOOLBIN := $(NDK_CLANG_TOOLCHAIN)/bin
+  NDK_HOSTOS := darwin
 endif
 ifeq ($(BUILDHOST),linux64)
-  NDK_TOOLCHAIN := $(NDK_ARCHDIR)/prebuilt/linux-$(NDK_HOSTARCH)
-  NDK_TOOLBIN := $(NDK_TOOLCHAIN)/bin
+  NDK_HOSTOS := linux
 endif
-ifeq ($(NDK_TOOLBIN),)
+ifeq ($(NDK_HOSTOS),)
   $(error Couldnt find toolchain for BUILDHOST $(BUILDHOST))
 endif
+
+NDK_TOOLCHAIN := $(NDK_ARCHDIR)/prebuilt/$(NDK_HOSTOS)-$(NDK_HOSTARCH)
+NDK_TOOLBIN := $(NDK_TOOLCHAIN)/bin
+NDK_CLANG_TOOLCHAIN := \
+ $(ANDROID_NDK)/toolchains/llvm-$(NDK_CLANG_VER)/prebuilt/$(NDK_HOSTOS)-$(NDK_HOSTARCH)
+NDK_CLANG_TOOLBIN := $(NDK_CLANG_TOOLCHAIN)/bin
 
 NDK_CLANG_FLAGS += -gcc-toolchain $(NDK_TOOLCHAIN) -no-canonical-prefixes
 
