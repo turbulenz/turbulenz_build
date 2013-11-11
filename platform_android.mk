@@ -3,14 +3,42 @@
 
 ############################################################
 
+# /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolchains/llvm-3.3/prebuilt/darwin-x86_64/bin/clang
+# -MMD -MP -MF ./obj/local/armeabi/objs-debug/hello-jni/hello-jni.o.d
+# -gcc-toolchain /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64
+# -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes
+# -target armv5te-none-linux-androideabi
+# -march=armv5te
+# -mtune=xscale
+# -msoft-float
+# -mthumb
+# -marm
+# -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing
+# -O0 -UNDEBUG
+# -fno-omit-frame-pointer -Ijni
+# -DANDROID
+# -Wa,--noexecstack -Wformat -Werror=format-security
+# -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/platforms/android-3/arch-arm/usr/include -c  jni/hello-jni.c -o ./obj/local/armeabi/objs-debug/hello-jni/hello-jni.o
+
+# /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolchains/llvm-3.3/prebuilt/darwin-x86_64/bin/clang
+# -MMD -MP -MF ./obj/local/armeabi-v7a/objs/helloneon/helloneon.o.d
+# hains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64
+# -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes
+# -gcc-toolchain /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolc
+# -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb
+# -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing
+# -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/sources//android/cpufeatures -Ijni -DANDROID -DHAVE_NEON=1 -Wa,--noexecstack -Wformat -Werror=format-security    -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/platforms/android-4/arch-arm/usr/include -c  jni/helloneon.c -o ./obj/local/armeabi-v7a/objs/helloneon/helloneon.o
+
 # NDK dir
 
-ANDROID_SDK_TARGET ?= android-16
+ANDROID_SDK_TARGET ?= android-15
 ANDROID_SDK_VERSION ?= 8
-ANDROID_NDK ?= external/android/android-ndk-r8e
+ANDROID_NDK ?= external/android/android-ndk-r9b
 NDK_PLATFORM ?= android-9
-NDK_GCC_VER ?= 4.6
-NDK_GCC_HOSTARCH ?= x86_64
+NDK_GCC_VER ?= 4.8
+NDK_CLANG_VER ?= 3.3
+# NDK_HOSTOS ?= darwin
+NDK_HOSTARCH ?= x86_64
 
 # Toolset for which arch
 
@@ -24,9 +52,11 @@ endif
 ifeq ($(ARCH),armv7a)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/arm-linux-androideabi-$(NDK_GCC_VER)
   NDK_TOOLPREFIX := arm-linux-androideabi-
+  NDK_CLANG_FLAGS := -target armv7-none-linux-androideabi
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-arm
   ANDROID_ARCH_NAME := armeabi-v7a
+  NDK_USE_CLANG ?= 1
 endif
 ifeq ($(ARCH),x86)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/x86-$(NDK_GCC_VER)
@@ -42,14 +72,22 @@ endif
 # Find toolset for this platfom
 
 ifeq ($(BUILDHOST),macosx)
-  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/darwin-$(NDK_GCC_HOSTARCH)/bin
+  NDK_HOSTOS := darwin
 endif
 ifeq ($(BUILDHOST),linux64)
-  NDK_TOOLBIN := $(NDK_ARCHDIR)/prebuilt/linux-$(NDK_GCC_HOSTARCH)/bin
+  NDK_HOSTOS := linux
 endif
-ifeq ($(NDK_TOOLBIN),)
+ifeq ($(NDK_HOSTOS),)
   $(error Couldnt find toolchain for BUILDHOST $(BUILDHOST))
 endif
+
+NDK_TOOLCHAIN := $(NDK_ARCHDIR)/prebuilt/$(NDK_HOSTOS)-$(NDK_HOSTARCH)
+NDK_TOOLBIN := $(NDK_TOOLCHAIN)/bin
+NDK_CLANG_TOOLCHAIN := \
+ $(ANDROID_NDK)/toolchains/llvm-$(NDK_CLANG_VER)/prebuilt/$(NDK_HOSTOS)-$(NDK_HOSTARCH)
+NDK_CLANG_TOOLBIN := $(NDK_CLANG_TOOLCHAIN)/bin
+
+NDK_CLANG_FLAGS += -gcc-toolchain $(NDK_TOOLCHAIN) -no-canonical-prefixes
 
 # Some include paths
 
@@ -124,15 +162,18 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 # -c <cpp>
 # -o <out>
 
+ifeq (1,$(NDK_USE_CLANG))
+  CXX := $(NDK_CLANG_TOOLBIN)/clang++
+  CXXFLAGSPOST += $(NDK_CLANG_FLAGS)
+else
+  CXX := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)g++
+  CXXFLAGSPRE += -funswitch-loops -finline-limit=256 -Wno-psabi
+endif
 
-
-CXX := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)g++
-CXXFLAGSPRE := \
-  -ffunction-sections -funwind-tables -fno-rtti \
-  -fstrict-aliasing -funswitch-loops \
-  -finline-limit=256 \
+CXXFLAGSPRE += \
+  -ffunction-sections -funwind-tables -fno-rtti -fstrict-aliasing \
   -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
-  -Wno-unused-parameter -Wno-psabi \
+  -Wno-unused-parameter \
   -DANDROID -DTZ_ANDROID -DTZ_USE_V8
 
 # -fstack-protector
@@ -161,9 +202,9 @@ ifeq ($(ARCH),x86)
   CXXFLAGSPRE += -Wa,--noexecstack
 endif
 
-CXXFLAGSPOST := \
+CXXFLAGSPOST += \
  $(addprefix -I,$(NDK_STL_INCLUDES) $(NDK_PLATFORM_INCLUDES)) \
- -DFASTCALL= -finline-limit=256 -Wa,--noexecstack -fexceptions
+ -DFASTCALL= -Wa,--noexecstack -fexceptions
 
 ifeq ($(CONFIG),debug)
   CXXFLAGSPOST += -DDEBUG -D_DEBUG
@@ -187,7 +228,8 @@ CXXFLAGSPOST += -c
 #
 
 AR := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)ar
-ARFLAGSPRE := cr
+
+ARFLAGSPRE := crs
 arout :=
 ARFLAGSPOST :=
 
@@ -205,26 +247,40 @@ OBJDUMP_DISASS := -S
 # DLLS
 #
 
+# From ndk-build:
 # /Users/dtebbs/turbulenz/external/android/android-ndk-r8/toolchains/arm-linux-androideabi-4.4.3/prebuilt/darwin-x86/bin/arm-linux-androideabi-g++
 # -Wl,-soname,libturbulenz.so -shared
 # --sysroot=/Users/dtebbs/turbulenz/external/android/android-ndk-r8/platforms/android-9/arch-arm
 # <objects>
 # <libs>
-# /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/libopenal.so
-# /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/libtbb.so
-# /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/libwebsockets.a
-# /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/libgnustl_static.a
 # -Wl,--fix-cortex-a8  -Wl,--no-undefined -Wl,-z,noexecstack -L/Users/dtebbs/turbulenz/external/android/android-ndk-r8/platforms/android-9/arch-arm/usr/lib -llog -landroid -lEGL -lGLESv2 -ldl -llog -lc -lm -o /Users/dtebbs/turbulenz/build/android/obj/local/armeabi-v7a/libturbulenz.so
 
+# From ndk-build:
+# /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolchains/llvm-3.3/prebuilt/darwin-x86_64/bin/clang++
+# -Wl,-soname,libhelloneon.so -shared
+# --sysroot=/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/platforms/android-4/arch-arm
+# ./obj/local/armeabi-v7a/objs/helloneon/helloneon.o ./obj/local/armeabi-v7a/objs/helloneon/helloneon-intrinsics.o ./obj/local/armeabi-v7a/libcpufeatures.a
+# -lgcc
+# -gcc-toolchain /Users/dtebbs/turbulenz/external/android/android-ndk-r9b/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64
+# -no-canonical-prefixes
+# -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb
+# -Wl,--fix-cortex-a8  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now
+# -llog -lc -lm -o ./obj/local/armeabi-v7a/libhelloneon.so
 
-DLL := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)gcc
+ifeq (1,$(NDK_USE_CLANG))
+  DLL := $(NDK_CLANG_TOOLBIN)/clang++
+  DLLFLAGSPOST += $(NDK_CLANG_FLAGS)
+else
+  DLL := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)gcc
+  DLLFLAGSPOST :=
+endif
 DLLFLAGSPRE := -shared \
   --sysroot=$(NDK_PLATFORMDIR) \
 # -Wl,-soname,$$(notdir $$@)
 # -nostdlib
 # -Wl,-shared,-Bsymbolic
 
-DLLFLAGSPOST := \
+DLLFLAGSPOST += \
   $(NDK_STL_LIBS)/libgnustl_static.a \
   -Wl,--no-undefined -Wl,-z,noexecstack \
   -L$(NDK_PLATFORMDIR)/usr/lib \

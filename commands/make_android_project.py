@@ -464,6 +464,24 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
             MANIFEST_0 += "\n"
             MANIFEST_0 += a_f.read()
 
+    # Activities for the home screen
+
+    for a in options['launcher_activities']:
+        activity_class = a[0]
+        activity_label = a[1]
+        activity_icon = a[2]
+        MANIFEST_0 += """
+        <activity """
+        MANIFEST_0 += "android:name=\"%s\" android:label=\"%s\" " \
+                      % (activity_class, activity_label)
+        MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon) + """
+                  >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>"""
+
     # Meta data in 'activity' tag
 
     for k,v in app_meta.items():
@@ -618,11 +636,11 @@ def copy_icon_single_file(dest, icon_file):
 #
 #
 #
-def _copy_files_to_dir(dest, file_list, tag="[FILE]"):
+def _copy_files_to_dir(dest, file_list, tag="[FILE]", ext=""):
     mkdir_if_not_exists(dest)
     for f in file_list:
         f_base = os.path.split(f)[1]
-        f_dest = os.path.join(dest, f_base)
+        f_dest = os.path.join(dest, f_base) + ext
         _verbose("%s %s -> %s" % (tag, f, f_dest))
         copy_file_if_different(f, f_dest)
 
@@ -654,7 +672,7 @@ def copy_asset_files(dest, asset_files):
 #
 def copy_png_asset_files(dest, png_asset_files):
     dest_dir = os.path.join(dest, "assets")
-    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]")
+    _copy_files_to_dir(dest_dir, png_asset_files, "[ASSET(PNG)]", ".png")
 
 #
 #
@@ -721,6 +739,10 @@ def usage():
 
     --activity <class-name>
 
+    --launcher-activity <class-name>,<label>,<icon-file>
+                        - (optional) add a basic decl for a launchable activity
+                          using the given icon.
+
     --sdk-version       - minSdkVersion
 
     --permissions "<perm1>;<perm2>;.."
@@ -756,6 +778,9 @@ def usage():
     --icon-dir <icon-dir>
                         - (optional) Use drawable-* from <icon-dir>
 
+    --icon-file <icon-file>
+                        - (optional) Use specific file as icon
+
     --key-store <file>  - (optional) Location of keystore
 
     --key-alias <alias> - (optional) Alias of key in keys store to use
@@ -766,7 +791,7 @@ def usage():
 
     --layout <file>     - (optional) .xml file to copy to res/layout/
 
-    --drawable <file>   - (optional) .xml file to copy to res/drawable/
+    --drawable <file>   - (optional) file to copy to res/drawable/
 
     --asset <file>      - (optional) asset file to copy to assets
 
@@ -848,7 +873,8 @@ def main():
         'require-touch': True,
         'activity_files': [],
         'backup_agent': None,
-        'nolauncher': False
+        'nolauncher': False,
+        'launcher_activities': [],
         }
 
     def add_meta(kv, meta_map = meta):
@@ -864,6 +890,21 @@ def main():
 
     def add_app_meta(kv):
         add_meta(kv, app_meta)
+
+    def add_launcher_activity(ai):
+        parts = ai.split(',')
+        if 3 != len(parts):
+            print "Badly formated launcher activity: %s" % ai
+            usage()
+            exit(1)
+
+        a = parts[0]
+        l = parts[1]
+        i = parts[2]
+        drawable_files.append(i)
+
+        i_base = os.path.splitext(os.path.split(i)[1])[0]
+        options['launcher_activities'].append((a,l,i_base))
 
     while len(args):
         arg = args.pop(0)
@@ -887,6 +928,8 @@ def main():
             package = args.pop(0)
         elif "--activity" == arg:
             activity = args.pop(0)
+        elif "--launcher-activity" == arg:
+            add_launcher_activity(args.pop(0))
         elif "--sdk-version" == arg:
             sdk_version = args.pop(0)
         elif "--permissions" == arg:
