@@ -220,6 +220,10 @@ else
 endif
 ifeq ($(C_SYMBOLS),1)
   CXXFLAGSPOST += -g
+else
+  dll-post = \
+    $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)strip --strip-unneeded \
+    $($(1)_dllfile)
 endif
 CXXFLAGSPOST += -c
 
@@ -229,7 +233,7 @@ CXXFLAGSPOST += -c
 
 AR := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)ar
 
-ARFLAGSPRE := crs
+ARFLAGSPRE := cr
 arout :=
 ARFLAGSPOST :=
 
@@ -274,7 +278,7 @@ else
   DLL := $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)gcc
   DLLFLAGSPOST :=
 endif
-DLLFLAGSPRE := -shared \
+DLLFLAGSPRE += -shared \
   --sysroot=$(NDK_PLATFORMDIR) \
 # -Wl,-soname,$$(notdir $$@)
 # -nostdlib
