@@ -79,6 +79,9 @@ MANIFEST_1_CHARTBOOST = """
                   android:launchMode="singleTop" >
         </activity>
         -->
+        <activity android:name="com.chartboost.sdk.CBImpressionActivity"
+                  android:excludeFromRecents="true"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <!-- CHARTBOOST END -->"""
 
 CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
