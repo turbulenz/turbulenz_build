@@ -588,8 +588,8 @@ $(foreach app,$(APPS),$(eval \
 # 1 - mod
 define _run_app_rule
 
-  $(1)_run :
-	$(MAKE) $(1)
+  .PHONY : $(1)_run
+  $(1)_run : $(1)
 	$(RUNPREFIX) $(call _run_prefix,$(1)) $($(1)_appfile)
 
 endef
