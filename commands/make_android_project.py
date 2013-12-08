@@ -670,7 +670,7 @@ def copy_drawable_files(dest, drawable_files):
 #
 def copy_asset_files(dest, asset_files):
     dest_dir = os.path.join(dest, "assets")
-    _copy_files_to_dir(dest_dir, assets, "[ASSET]")
+    _copy_files_to_dir(dest_dir, asset_files, "[ASSET]")
 
 #
 def copy_png_asset_files(dest, png_asset_files):
