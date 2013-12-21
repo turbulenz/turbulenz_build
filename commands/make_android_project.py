@@ -100,6 +100,10 @@ TAPFORTAP_PERMISSIONS = ";android.permission.INTERNET" \
 
 MANIFEST_1_HEYZAP = """
         <!-- HEYZAP BEGIN -->
+        <activity android:name="com.heyzap.sdk.ads.HeyzapInterstitialActivity"
+                  android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize" />
+        <activity android:name="com.heyzap.sdk.ads.HeyzapVideoActivity"
+                  android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize" />
         <receiver android:name="com.heyzap.sdk.ads.PackageAddedReceiver">
           <intent-filter>
             <data android:scheme="package" />
