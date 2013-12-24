@@ -155,7 +155,7 @@ MANIFEST_1_GAMECIRCLE = """
         <!-- AMAZON GAMECIRCLE BEGINS -->
         <activity
              android:name="com.amazon.ags.html5.overlay.GameCircleUserInterface"
-             android:theme="@style/GCOverlay">
+             android:theme="@style/GCOverlay" android:hardwareAccelerated="false">
         </activity>
         <activity
              android:name="com.amazon.identity.auth.device.authorization.AuthorizationActivity"
@@ -170,6 +170,10 @@ MANIFEST_1_GAMECIRCLE = """
               android:host="%PACKAGE_NAME%"
               android:scheme="amzn" />
           </intent-filter>
+        </activity>
+        <activity
+             android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface" 
+             android:theme="@style/GCAlert" android:hardwareAccelerated="false">
         </activity>
         <receiver
           android:name="com.amazon.identity.auth.device.authorization.PackageIntentReceiver"
