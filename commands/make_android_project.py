@@ -188,6 +188,9 @@ MANIFEST_1_GAMECIRCLE = """
 GAMECIRCLE_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
 
+FLURRY_PERMISSIONS = ";android.permission.INTERNET" \
+    + ";android.permission.ACCESS_NETWORK_STATE"
+
 MANIFEST_1_APPAYABLE = """
         <!-- APPAYABLE BEGIN -->
         <service android:name="org.OpenUDID.OpenUDID_service">
@@ -343,6 +346,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         'amazon-billing':
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
         'gamecircle' : [ MANIFEST_1_GAMECIRCLE, GAMECIRCLE_PERMISSIONS, False ],
+        'flurry'     : [ "", FLURRY_PERMISSIONS, False ],
         'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ],
         'adlooper'   : [ MANIFEST_1_ADLOOPER, ADLOOPER_PERMISSIONS, False ],
         'playhaven'  : [ MANIFEST_1_PLAYHAVEN, PLAYHAVEN_PERMISSIONS, False ],
@@ -820,6 +824,7 @@ def usage():
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
     --gamecircle        - (optional) include Amazon GameCirlce entries
+    --flurry            - (optional) include Flurry permissions
     --facebook          - (optional) include facebook entries
     --zirconia          - (optional) include Zirconia permissions
     --mobiroo           - (optional) include mobiroo entries to manifest
@@ -1037,6 +1042,8 @@ def main():
             extras.append('amazon-billing')
         elif "--gamecircle" == arg:
             extras.append('gamecircle')
+        elif "--flurry" == arg:
+            extras.append('flurry')
         else:
             print "Error: unknown parameter: '%s'" % arg
             print ""
