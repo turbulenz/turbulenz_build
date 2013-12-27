@@ -434,6 +434,9 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
       android:installLocation="auto">
     <application android:label="@string/app_name" %ICON_ATTR%"""
 
+    if options['app-tag-name']:
+        MANIFEST_0 += " android:name=\"%s\"" % options['app-tag-name']
+
     if options['backup_agent']:
         class_key = options['backup_agent'].split(',')
         MANIFEST_0 += """
@@ -905,7 +908,8 @@ def main():
         'backup_agent': None,
         'nolauncher': False,
         'launcher_activities': [],
-        'proguard': None
+        'proguard': None,
+        'app-tag-name': None
         }
 
     def add_meta(kv, meta_map = meta):
@@ -980,6 +984,8 @@ def main():
             add_meta(args.pop(0))
         elif "--app-meta" == arg:
             add_app_meta(args.pop(0))
+        elif "--app-tag-name" == arg:
+            options['app-tag-name'] = args.pop(0)
         elif "--depends" == arg:
             depends.append(args.pop(0))
         elif "--icon-dir" == arg:
