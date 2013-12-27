@@ -434,6 +434,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
       android:installLocation="auto">
     <application android:label="@string/app_name" %ICON_ATTR%"""
 
+    if table['%APPLICATION_NAME%']:
+        MANIFEST_0 += """
+                 android:name=".%APPLICATION_NAME%" """
+
     if options['backup_agent']:
         class_key = options['backup_agent'].split(',')
         MANIFEST_0 += """
@@ -752,6 +756,8 @@ def usage():
     --src <src-dir>
                         - base directory of source files
 
+    --application <class-name>
+
     --activity <class-name>
 
     --launcher-activity <class-name>,<label>,<icon-file>
@@ -861,6 +867,7 @@ def main():
     name = None
     title = None
     package = None
+    application = None
     activity = None
     sdk_version = "8"
     icon_dir = None
@@ -942,6 +949,8 @@ def main():
             title = args.pop(0)
         elif "--package" == arg:
             package = args.pop(0)
+        elif "--application" == arg:
+            application = args.pop(0)
         elif "--activity" == arg:
             activity = args.pop(0)
         elif "--launcher-activity" == arg:
@@ -1087,6 +1096,7 @@ def main():
         '%PACKAGE_NAME%' : package,
         '%VERSION_INT%' : version_int,
         '%VERSION_DOT_4%' : version_dot_4,
+        '%APPLICATION_NAME%' : application,
         '%ACTIVITY_NAME%' : activity,
         '%APP_TITLE%' : title,
         '%ANDROID_SDK_VERSION%' : sdk_version,
