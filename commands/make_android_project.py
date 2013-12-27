@@ -172,7 +172,7 @@ MANIFEST_1_GAMECIRCLE = """
           </intent-filter>
         </activity>
         <activity
-             android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface" 
+             android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface"
              android:theme="@style/GCAlert" android:hardwareAccelerated="false">
         </activity>
         <receiver
@@ -434,8 +434,6 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
       android:installLocation="auto">
     <application android:label="@string/app_name" %ICON_ATTR%"""
 
-    if options['app-tag-name']:
-        MANIFEST_0 += " android:name=\"%s\"" % options['app-tag-name']
     if table['%APPLICATION_NAME%']:
         MANIFEST_0 += """
                  android:name=".%APPLICATION_NAME%" """
@@ -771,8 +769,6 @@ def usage():
     --src <src-dir>
                         - base directory of source files
 
-    --application <class-name>
-
     --activity <class-name>
 
     --launcher-activity <class-name>,<label>,<icon-file>
@@ -807,6 +803,9 @@ def usage():
 
     --app-meta <key>:<value>
                         - (optional) add a meta tag to the 'application' tag
+
+    --app-tag-name <classname>
+                        - (optional) name to use in application tag
 
     --depends <project-location>
                         - (optional) Can use multiple times
@@ -884,7 +883,7 @@ def main():
     name = None
     title = None
     package = None
-    application = None
+    application_name = None
     activity = None
     sdk_version = "8"
     icon_dir = None
@@ -915,8 +914,7 @@ def main():
         'backup_agent': None,
         'nolauncher': False,
         'launcher_activities': [],
-        'proguard': None,
-        'app-tag-name': None
+        'proguard': None
         }
 
     def add_meta(kv, meta_map = meta):
@@ -968,8 +966,8 @@ def main():
             title = args.pop(0)
         elif "--package" == arg:
             package = args.pop(0)
-        elif "--application" == arg:
-            application = args.pop(0)
+        elif "--app-tag-name" == arg:
+            application_name = args.pop(0)
         elif "--activity" == arg:
             activity = args.pop(0)
         elif "--launcher-activity" == arg:
@@ -993,8 +991,6 @@ def main():
             add_meta(args.pop(0))
         elif "--app-meta" == arg:
             add_app_meta(args.pop(0))
-        elif "--app-tag-name" == arg:
-            options['app-tag-name'] = args.pop(0)
         elif "--depends" == arg:
             depends.append(args.pop(0))
         elif "--icon-dir" == arg:
@@ -1119,7 +1115,7 @@ def main():
         '%PACKAGE_NAME%' : package,
         '%VERSION_INT%' : version_int,
         '%VERSION_DOT_4%' : version_dot_4,
-        '%APPLICATION_NAME%' : application,
+        '%APPLICATION_NAME%' : application_name,
         '%ACTIVITY_NAME%' : activity,
         '%APP_TITLE%' : title,
         '%ANDROID_SDK_VERSION%' : sdk_version,
