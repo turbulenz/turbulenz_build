@@ -567,7 +567,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
 #
 #
 #
-def write_ant_properties(dest, dependencies, src, library, keystore, keyalias):
+def write_ant_properties(dest, dependencies, src, library, keystore, keyalias,
+                         options):
 
     ant_properties_name = os.path.join(dest, "ant.properties")
     verbose("ant.properties: %s" % ant_properties_name)
@@ -592,6 +593,17 @@ def write_ant_properties(dest, dependencies, src, library, keystore, keyalias):
         verbose(" '%s' -> '%s'" % (dep, rel))
         data += "android.library.reference.%d=%s\n" % (i, rel)
         i = i + 1
+
+    # Proguard
+
+    proguard_file = options['proguard']
+    if proguard_file:
+        verbose("PROGUARD: %s" % proguard_file)
+        proguard_rel = os.path.relpath(proguard_file, dest)
+        verbose("PROGUARD: rel: %s" % proguard_rel)
+        data += \
+            "proguard.config=${sdk.dir}/tools/proguard/proguard-android.txt:%s\n"\
+            % proguard_rel
 
     # Key info
 
@@ -820,6 +832,8 @@ def usage():
 
     --android-licensing - (optional) code for android licensing
 
+    --proguard <file>   - (optional) enable proguard using given file
+
     (External services / publishers)
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -891,6 +905,7 @@ def main():
         'backup_agent': None,
         'nolauncher': False,
         'launcher_activities': [],
+        'proguard': None
         }
 
     def add_meta(kv, meta_map = meta):
@@ -1005,6 +1020,8 @@ def main():
             library = True
         elif "--android-licensing" == arg:
             extras.append("androidlicense")
+        elif "--proguard" == arg:
+            options['proguard'] = args.pop(0)
         elif "--admob" == arg:
             extras.append('admob')
         elif "--mmedia" == arg:
@@ -1112,7 +1129,8 @@ def main():
 
     # Write ant.properties (dependencies)
 
-    write_ant_properties(dest, depends, src, library, keystore, keyalias)
+    write_ant_properties(dest, depends, src, library, keystore, keyalias,
+                         options)
 
     # Copy icon file
 
