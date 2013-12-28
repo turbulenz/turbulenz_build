@@ -191,6 +191,18 @@ GAMECIRCLE_PERMISSIONS = ";android.permission.INTERNET" + \
 FLURRY_PERMISSIONS = ";android.permission.INTERNET" \
     + ";android.permission.ACCESS_NETWORK_STATE"
 
+MANIFEST_1_NATIVECRASHHANDLER = """
+        <!-- NATIVECRASHHANDLER BEGIN -->
+        <activity
+             android:name="com.github.nativehandler.NativeCrashActivity"
+             android:configChanges="keyboard|keyboardHidden|orientation"
+             android:exported="false"
+             android:process=":CrashHandler"
+             android:stateNotNeeded="true"
+             android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        </activity>
+        <!-- NATIVECRASHHANDLER END -->"""
+
 MANIFEST_1_APPAYABLE = """
         <!-- APPAYABLE BEGIN -->
         <service android:name="org.OpenUDID.OpenUDID_service">
@@ -347,6 +359,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         [ MANIFEST_1_AMAZON_BILLING, AMAZON_BILLING_PERMISSIONS, False ],
         'gamecircle' : [ MANIFEST_1_GAMECIRCLE, GAMECIRCLE_PERMISSIONS, False ],
         'flurry'     : [ "", FLURRY_PERMISSIONS, False ],
+        'nativecrashhandler' : [ MANIFEST_1_NATIVECRASHHANDLER, "", False ],
         'appayable'  : [ MANIFEST_1_APPAYABLE, APPAYABLE_PERMISSIONS, False ],
         'adlooper'   : [ MANIFEST_1_ADLOOPER, ADLOOPER_PERMISSIONS, False ],
         'playhaven'  : [ MANIFEST_1_PLAYHAVEN, PLAYHAVEN_PERMISSIONS, False ],
@@ -847,6 +860,7 @@ def usage():
     --amazon-billing    - (optional) include Amazon Billing manifest entries
     --gamecircle        - (optional) include Amazon GameCirlce entries
     --flurry            - (optional) include Flurry permissions
+    --nativecrashhandler- (optional) include NativeCrashHandler manifest entries
     --facebook          - (optional) include facebook entries
     --zirconia          - (optional) include Zirconia permissions
     --mobiroo           - (optional) include mobiroo entries to manifest
@@ -1072,6 +1086,8 @@ def main():
             extras.append('gamecircle')
         elif "--flurry" == arg:
             extras.append('flurry')
+        elif "--nativecrashhandler" == arg:
+            extras.append('nativecrashhandler')
         else:
             print "Error: unknown parameter: '%s'" % arg
             print ""
