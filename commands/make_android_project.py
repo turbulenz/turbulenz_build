@@ -521,6 +521,17 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         MANIFEST_0 += """
         <meta-data android:name="%s" android:value="%s" />""" % (k, v)
 
+    # Our install referrer filter takes priority over any later ones
+
+    referrer_listener = options['install-referrer']
+    if referrer_listener:
+        MANIFEST_0 += """
+        <receiver android:name="%s" android:exported="true">
+           <intent-filter>
+               <action android:name="com.android.vending.INSTALL_REFERRER" />
+           </intent-filter>
+        </receiver>""" % referrer_listener
+
     data += replace_tags(MANIFEST_0, table)
 
     # Extra decls
@@ -528,7 +539,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
     for e in extras:
         data += replace_tags(extras_table[e][0], table)
 
-    # End of activity
+    # End of application
 
     MANIFEST_2 = """
     </application>
@@ -801,6 +812,10 @@ def usage():
                         - (optional) file with intent filters to add to main
                           activity
 
+    --install-referrer <class-name>
+                        - Add an intent filter to the manifest to send
+                          INSTALL_REFERRER to the given class
+
     --no-launcher       - Remove the main LAUNCHER intent so that no launcher
                           icon is created for the app
 
@@ -928,7 +943,8 @@ def main():
         'backup_agent': None,
         'nolauncher': False,
         'launcher_activities': [],
-        'proguard': None
+        'proguard': None,
+        'install-referrer': None,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -995,6 +1011,8 @@ def main():
             resource_strings[res_kv[0]] = res_kv[1]
         elif "--intent-filters" == arg:
             intent_filters = args.pop(0)
+        elif "--install-referrer" == arg:
+            options['install-referrer'] = args.pop(0)
         elif "--no-launcher" == arg:
             options['nolauncher'] = True
         elif "--activity-decl" == arg:
