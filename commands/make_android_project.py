@@ -265,6 +265,22 @@ MANIFEST_1_MDOTM = """
         <!-- MDOTM END -->"""
 MDOTM_PERMISSIONS = GREYSTRIPE_PERMISSIONS
 
+# Expansion Pack Stuff
+
+MANIFEST_1_EXPANSION = """
+        <!-- Expansion Pack BEGIN -->
+        <service android:name="com.oyatsukai.core.expansionservice" />
+        <receiver android:name="com.oyatsukai.core.expansionalarmreceiver" />
+        <!-- Expansion Pack END -->"""
+
+EXPANSION_PERMISSIONS = \
+    ";com.android.vending.CHECK_LICENSE" + \
+    ";android.permission.INTERNET" + \
+    ";android.permission.WAKE_LOCK" + \
+    ";android.permission.ACCESS_NETWORK_STATE" + \
+    ";android.permission.ACCESS_WIFI_STATE" + \
+    ";android.permission.WRITE_EXTERNAL_STORAGE"
+
 #
 #
 #
@@ -365,6 +381,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         'playhaven'  : [ MANIFEST_1_PLAYHAVEN, PLAYHAVEN_PERMISSIONS, False ],
         'greystripe' : [ MANIFEST_1_GREYSTRIPE, GREYSTRIPE_PERMISSIONS, False ],
         'mdotm'      : [ MANIFEST_1_MDOTM, MDOTM_PERMISSIONS, False ],
+        'expansion'  : [ MANIFEST_1_EXPANSION, EXPANSION_PERMISSIONS, False ],
         }
 
     # icon
@@ -870,6 +887,8 @@ def usage():
 
     --proguard <file>   - (optional) enable proguard using given file
 
+    --expansion         - enable manifest entries for expansion files
+
     (External services / publishers)
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -1065,6 +1084,8 @@ def main():
             extras.append("androidlicense")
         elif "--proguard" == arg:
             options['proguard'] = args.pop(0)
+        elif "--expansion" == arg:
+            extras.append('expansion')
         elif "--admob" == arg:
             extras.append('admob')
         elif "--mmedia" == arg:
