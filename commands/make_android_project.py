@@ -1237,7 +1237,7 @@ def main():
     # --library ...'
 
     global wrote
-    if wrote:
+    if wrote or not os.path.exists(os.path.join(dest, "build.xml")):
         fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
                                                android_sdk_root, library):
