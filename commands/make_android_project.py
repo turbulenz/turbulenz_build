@@ -483,7 +483,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         <activity android:name="%ACTIVITY_NAME%"
                   android:label="%APP_TITLE%"
                   android:launchMode="singleTask"
-                  android:configChanges="orientation|screenSize" """
+                  android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation|uiMode|touchscreen|smallestScreenSize" """
     if options['landscape']:
         MANIFEST_0 += """
                   android:screenOrientation=""" +'"'+options['landscape']+'"'
