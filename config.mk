@@ -73,29 +73,29 @@ ifeq ($(TARGET),)
 endif
 
 ifeq ($(TARGET),macosx)
-  TARGETNAME ?= macosx
+  TARGETNAME := macosx
   ARCH ?= i386
 endif
 
 ifeq ($(TARGET),android)
-  TARGETNAME ?= android
+  TARGETNAME := android
   ARCH ?= armv7a
 endif
 
 ifeq ($(TARGET),linux64)
-  TARGETNAME ?= linux
+  TARGETNAME := linux
   ARCH ?= x86_64
   PKGARCH ?= amd64
 endif
 
 ifeq ($(TARGET),linux32)
-  TARGETNAME ?= linux
+  TARGETNAME := linux
   ARCH ?= i386
   PKGARCH ?= x86
 endif
 
 ifeq ($(TARGET),win32)
-  TARGETNAME ?= win32
+  TARGETNAME := win32
   ARCH ?= i386
 endif
 
