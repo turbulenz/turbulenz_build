@@ -33,7 +33,7 @@
 
 ANDROID_SDK_TARGET ?= android-15
 ANDROID_SDK_VERSION ?= 8
-ANDROID_NDK ?= external/android/android-ndk-r9b
+ANDROID_NDK ?= external/android/android-ndk-r9d
 ANDROID_SDK ?= external/android/android-sdk-$(BUILDHOST)
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.8
