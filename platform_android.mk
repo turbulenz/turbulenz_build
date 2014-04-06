@@ -62,9 +62,11 @@ endif
 ifeq ($(ARCH),x86)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/x86-$(NDK_GCC_VER)
   NDK_TOOLPREFIX := i686-linux-android-
+  NDK_CLANG_FLAGS := -target i686-none-linux-android
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-x86
   ANDROID_ARCH_NAME := x86
+  NDK_USE_CLANG ?= 0
 endif
 ifeq ($(NDK_ARCHDIR),)
   $(error Couldnt determine toolchain for android ARCH $(ARCH))
@@ -216,6 +218,15 @@ endif
 
 ifeq ($(C_OPTIMIZE),1)
   CXXFLAGSPOST += -O3 -fomit-frame-pointer -ffast-math -ftree-vectorize
+
+  # WORKAROUND: gcc 4.8 targeting x86
+  ifeq (4.8,$(NDK_GCC_VER))
+    ifeq (x86,$(ARCH))
+      ifneq (1,$(NDK_USE_CLANG))
+        CXXFLAGSPOST += -fno-tree-vectorize
+      endif
+    endif
+  endif
 else
   CXXFLAGSPOST += -O0
 endif
