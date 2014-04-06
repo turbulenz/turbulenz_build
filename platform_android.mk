@@ -37,7 +37,7 @@ ANDROID_NDK ?= external/android/android-ndk-r9d
 ANDROID_SDK ?= external/android/android-sdk-$(BUILDHOST)
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.8
-NDK_CLANG_VER ?= 3.3
+NDK_CLANG_VER ?= 3.4
 # NDK_HOSTOS ?= darwin
 NDK_HOSTARCH ?= x86_64
 
