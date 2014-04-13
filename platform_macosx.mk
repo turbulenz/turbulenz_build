@@ -17,6 +17,7 @@ else
   MACOSX_CXX := clang
   CXXFLAGS += -stdlib=libc++
   MACOSX_LDFLAGS += -lc++
+  MACOSX_DLLFLAGS += -lc++
 endif
 
 # Language to compile all .cpp files as
@@ -60,7 +61,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas \
+    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
@@ -77,7 +78,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas \
+    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
@@ -142,7 +143,8 @@ libsuffix := .a
 #
 
 DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
-DLLFLAGSPRE := -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g
+DLLFLAGSPRE := \
+  -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g $(MACOSX_DLLFLAGS)
 DLLFLAGSPOST := \
   -framework CoreFoundation \
   -framework OpenGL \
