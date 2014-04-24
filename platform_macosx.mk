@@ -3,9 +3,9 @@
 
 ############################################################
 
-ifneq (1,$(MACOSX_IGNORE_OLD_TOOLS))
-  MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
-endif
+# ifneq (1,$(MACOSX_IGNORE_OLD_TOOLS))
+#   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+# endif
 
 ifneq (,$(MACOSX_XCODE_BIN_PATH))
   # OLD TOOLS
@@ -15,7 +15,7 @@ ifneq (,$(MACOSX_XCODE_BIN_PATH))
 else
   # clang
   MACOSX_CXX := clang
-  CXXFLAGS += -stdlib=libc++
+  CXXFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
   MACOSX_LDFLAGS += -lc++
   MACOSX_DLLFLAGS += -lc++
 endif
@@ -23,7 +23,7 @@ endif
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
-XCODE_SDK_VER ?= 10.6
+XCODE_SDK_VER ?= 10.9
 
 # Create a variable holding the xcode configuration
 ifeq ($(CONFIG),debug)
@@ -34,15 +34,15 @@ endif
 
 # Mark non-10.6 builds
 
-ifneq ($(XCODE_SDK_VER),10.6)
+ifneq ($(XCODE_SDK_VER),10.9)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
 # Check the known SDK install locations
 
-XCODE_SDK_ROOT:=/Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
+XCODE_SDK_ROOT:=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
 ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
-  XCODE_SDK_ROOT:=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform$(XCODE_SDK_ROOT)
+  XCODE_SDK_ROOT:=/Developer/SDKs/MacOSX$(XCODE_SDK_VER).sdk
 endif
 
 ############################################################
@@ -67,7 +67,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
-    -DXP_MACOSX=1 -DMACOSX
+    -DXP_MACOSX=1 -DMACOSX=1
 
 # -fno-rtti
 # -fno-exceptions
@@ -85,7 +85,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -mmacosx-version-min=$(XCODE_SDK_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
-    -DXP_MACOSX=1
+    -DXP_MACOSX=1 -DMACOSX=1
 
 # -fno-exceptions
 # -fno-rtti
