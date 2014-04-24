@@ -3,9 +3,9 @@
 
 ############################################################
 
-# ifneq (1,$(MACOSX_IGNORE_OLD_TOOLS))
-#   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
-# endif
+ifeq (1,$(MACOSX_USE_OLD_TOOLS))
+  MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+endif
 
 ifneq (,$(MACOSX_XCODE_BIN_PATH))
   # OLD TOOLS
@@ -25,14 +25,7 @@ MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 XCODE_SDK_VER ?= 10.9
 
-# Create a variable holding the xcode configuration
-ifeq ($(CONFIG),debug)
-  XCODE_CONFIG := Debug
-else
-  XCODE_CONFIG := Release
-endif
-
-# Mark non-10.6 builds
+# Mark builds that are linked against the non-default SDKs
 
 ifneq ($(XCODE_SDK_VER),10.9)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
