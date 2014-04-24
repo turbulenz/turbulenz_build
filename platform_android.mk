@@ -239,6 +239,8 @@ else
 endif
 CXXFLAGSPOST += -c
 
+PCHFLAGS := -x c++-header
+
 #
 # AR
 #

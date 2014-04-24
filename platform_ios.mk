@@ -48,6 +48,8 @@ else
   CMMFLAGSPRE += -g -O3 -DNDEBUG
 endif
 
+PCHFLAGS := -x objective-c++-header
+
 #
 # LIBS
 #

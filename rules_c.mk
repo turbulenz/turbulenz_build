@@ -416,7 +416,7 @@ define _make_pch_rule
       $(addprefix -I,$($(1)_depincdirs))                           \
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
-      -x c++-header                                                \
+      $(PCHFLAGS)                                                  \
       $$< -o $$@
 
 

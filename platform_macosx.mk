@@ -96,6 +96,8 @@ CXXFLAGSPOST := \
 CMMFLAGSPOST := \
     -c
 
+PCHFLAGS := -x objective-c++-header
+
 # DEBUG / RELEASE
 
 ifeq ($(CONFIG),debug)
