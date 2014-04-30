@@ -105,6 +105,14 @@ define _make_js_rule
 
   jslib : $(1)
 
+  # tslint rule
+
+  .PHONY: _tslint_$(1)
+  _tslint_$(1) :
+	tslint $(if $(TSLINT_CONFIG),-c $(TSLINT_CONFIG),) -f $($(1)_src)
+
+  tslint : _tslint_$(1)
+
   # Add the module to the syntax-check deps ?
 
   ifeq (1,$(TS_SYNTAX_CHECK))
@@ -135,6 +143,10 @@ $(foreach t,$(TSLIBS),\
   $(if $(_$(t)_ts_src),$(eval $(call _make_js_rule,$(t)))) \
   $(if $(_$(t)_d_ts_src),$(eval $(call _make_d_ts_copy_rule,$(t)))) \
 )
+
+# tslint rules (defined in _make_js_rule)
+
+.PHONY: tslint
 
 # clean rules
 
