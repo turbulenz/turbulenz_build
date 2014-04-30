@@ -16,6 +16,7 @@ else
   # clang
   MACOSX_CXX := clang
   CXXFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
+  CMMFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
   MACOSX_LDFLAGS += -lc++
   MACOSX_DLLFLAGS += -lc++
 endif
