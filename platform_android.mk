@@ -29,15 +29,19 @@
 # -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing
 # -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/sources//android/cpufeatures -Ijni -DANDROID -DHAVE_NEON=1 -Wa,--noexecstack -Wformat -Werror=format-security    -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/platforms/android-4/arch-arm/usr/include -c  jni/helloneon.c -o ./obj/local/armeabi-v7a/objs/helloneon/helloneon.o
 
+android_build_host := $(BUILDHOST)
+ifeq (linux64,$(BUILDHOST))
+  android_build_host := linux_x86
+endif
+ifeq (linux32,$(BUILDHOST))
+  android_build_host := linux_x86
+endif
+
 # SDK Settings
 
 ANDROID_SDK_TARGET ?= android-15
 ANDROID_SDK_VERSION ?= 8
-ifeq (linux,$(TARGETNAME))
-  ANDROID_SDK ?= $(ANDROID_SDK_PATH)/android-sdk-linux_x86
-else
-  ANDROID_SDK ?= $(ANDROID_SDK_PATH)/android-sdk-macosx
-endif
+ANDROID_SDK ?= $(ANDROID_SDK_PATH)/android-sdk-$(android_build_host)
 
 # NDK dir
 
