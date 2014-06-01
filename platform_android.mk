@@ -29,6 +29,20 @@
 # -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing
 # -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/sources//android/cpufeatures -Ijni -DANDROID -DHAVE_NEON=1 -Wa,--noexecstack -Wformat -Werror=format-security    -I/Users/dtebbs/turbulenz/external/android/android-ndk-r9b/platforms/android-4/arch-arm/usr/include -c  jni/helloneon.c -o ./obj/local/armeabi-v7a/objs/helloneon/helloneon.o
 
+############################################################
+# Util Functions
+############################################################
+
+# 1 - tzbuild arch (armv7a, x86, etc)
+_android_arch_name = $(strip					\
+  $(if $(filter armv5,$(1)),armeabi,			\
+    $(if $(filter armv7a,$(1)),armeabi-v7a,		\
+      $(1)										\
+    )											\
+  ))
+
+############################################################
+
 # NDK dir
 
 ANDROID_SDK_TARGET ?= android-15
@@ -43,12 +57,13 @@ NDK_HOSTARCH ?= x86_64
 
 # Toolset for which arch
 
+ANDROID_ARCH_NAME := $(call _android_arch_name,$(ARCH))
+
 ifeq ($(ARCH),armv5)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/arm-linux-androideabi-$(NDK_GCC_VER)
   NDK_TOOLPREFIX := arm-linux-androideabi-
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-arm
-  ANDROID_ARCH_NAME := armeabi
 endif
 ifeq ($(ARCH),armv7a)
   NDK_ARCHDIR := $(ANDROID_NDK)/toolchains/arm-linux-androideabi-$(NDK_GCC_VER)
@@ -56,7 +71,6 @@ ifeq ($(ARCH),armv7a)
   NDK_CLANG_FLAGS := -target armv7-none-linux-androideabi
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-arm
-  ANDROID_ARCH_NAME := armeabi-v7a
   NDK_USE_CLANG ?= 1
 endif
 ifeq ($(ARCH),x86)
@@ -65,7 +79,6 @@ ifeq ($(ARCH),x86)
   NDK_CLANG_FLAGS := -target i686-none-linux-android
   NDK_PLATFORMDIR := \
     $(ANDROID_NDK)/platforms/$(NDK_PLATFORM)/arch-x86
-  ANDROID_ARCH_NAME := x86
   NDK_USE_CLANG ?= 0
 endif
 ifeq ($(NDK_ARCHDIR),)

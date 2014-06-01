@@ -707,18 +707,17 @@ APK_CONFIG := $(if $(ANDROID_KEY_STORE),$(CONFIG),debug)
 
 # For each apk, calc the destination and full set of native libs to
 # copy
-$(foreach apk,$(APKS),                                          \
-  $(eval $(apk)_apk_dest := $(BINDIR)/$(apk))                   \
-  $(eval $(apk)_apk_copylibs :=                                 \
-     $($(apk)_nativelibs)                                       \
-     $($($(apk)_native)_dllfile)                                \
-     $($($(apk)_native)_ext_dlls) )                             \
-  $(eval                                                        \
-     $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0) \
-  )                                                             \
-  $(eval $(apk)_apk_file :=                                     \
+$(foreach apk,$(APKS),														\
+  $(eval $(apk)_apk_dest := $(BINOUTDIR)/$(apk))							\
+  $(eval																	\
+     $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0)		\
+  )																			\
+  $(eval $(apk)_apk_file :=													\
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
-  )                                                             \
+  )																			\
+  $(eval																	\
+    $(apk)_archs := $(if $($(apk)_archs),$($(apk)_archs),$(ARCH))			\
+  )																			\
 )
 $(call log,android_engine_dest = $(android_engine_dest))
 $(call log,android_engine_copylibs = $(android_engine_copylibs))
@@ -743,10 +742,24 @@ $(foreach apk,$(APKS),                                          \
 )
 # $(warning android_online_apk_depflags = $(android_online_apk_depflags))
 
+# Rule to make native apps for APK
+# 1 - apk name
+# 2 - apk location
+# 3 - arch
+define _make_apk_native_rule
+
+  .PHONY : _$(1)_make_$(3)_native_libs
+  _$(1)_make_$(3)_native_libs :
+	$(MAKE) ARCH=$(3) $($(1)_native)                   \
+      BINDIR=$(2)/libs/$(call _android_arch_name,$(3))
+
+  $(1) : _$(1)_make_$(3)_native_libs
+
+endef
+
 # Rule to make an APK
 # 1 - apk name
 # 2 - apk location
-# 3 - required dlls
 define _make_apk_rule
 
   .PHONY : $(1)
@@ -760,7 +773,7 @@ define _make_apk_rule
   # 4.2.24(1)) are broken and don't deal with missing destination
   # files as part of -nt.
 
-  $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
+  $(1) : $($(1)_deps) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
 	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
@@ -784,12 +797,6 @@ define _make_apk_rule
       $(if $($(1)_icondir),--icon-dir $($(1)_icondir))                       \
       $($(1)_apk_depflags)                                                   \
       $($(1)_flags)
-	$(CMDPREFIX)for l in $(3) ; do                              \
-      dst=$(2)/libs/$(ANDROID_ARCH_NAME)/`basename $$$$l` ;     \
-      if [ ! -e $$$$dst ] || [ $$$$l -nt $$$$dst ] ; then       \
-        echo [CP DLL] $$$$l ; cp -a $$$$l $$$$dst ;             \
-      fi ;                                                      \
-    done
 	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do                  \
       dst=$(2)/libs/`basename $$$$j` ;                          \
       if [ ! -f $$$$dst ] || [ $$$$j -nt $$$$dst ] ; then       \
@@ -813,9 +820,17 @@ endef
 
 
 ifeq ($(TARGET),android)
-  $(foreach apk,$(APKS),$(eval                                      \
-    $(call _make_apk_rule,$(apk),$($(apk)_apk_dest),$($(apk)_apk_copylibs)) \
-  ))
+
+  # Rules to build the native libs for each arch into the correct
+  # location, followed by the APK itself.
+
+  $(foreach apk,$(APKS),													\
+    $(if $($(apk)_native), $(foreach arch,$($(apk)_archs),                  \
+      $(eval $(call _make_apk_native_rule,$(apk),$($(apk)_apk_dest),$(arch))) \
+    ))																		\
+    $(eval $(call _make_apk_rule,$(apk),$($(apk)_apk_dest)))                \
+  )
+
 endif
 
 ############################################################
