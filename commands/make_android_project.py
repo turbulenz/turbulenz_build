@@ -215,6 +215,7 @@ APPAYABLE_PERMISSIONS = ""
 
 MANIFEST_1_ADLOOPER = """
         <!-- ADLOOPER BEGIN -->
+        <!-- (OLD) -->
         <receiver android:name="com.kiwi.ads.service.AdInstallReceiver">
          <intent-filter>
           <action android:name="android.intent.action.PACKAGE_ADDED" />
@@ -230,10 +231,51 @@ MANIFEST_1_ADLOOPER = """
           <action android:name="com.android.vending.INSTALL_REFERRER" />
          </intent-filter>
         </receiver>
+        <!-- (OLD END) -->
+
+        <!-- (FROM PLAYHAVEN) -->
+        <activity
+            android:name=".view.FullScreen"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+            <!-- Support FullScreen.createIntent -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- Support Uri.parse -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="playhaven" android:host="localhost" android:pathPattern="/full" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="com.playhaven.android.push.PushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="com.playhaven.android" />
+            </intent-filter>
+        </receiver>
+        <!-- (FROM PLAYHAVEN END) -->
+
+        <activity android:name="com.google.android.gms.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+        <activity android:name="com.greystripe.sdk.GSFullscreenActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <activity android:name="com.mdotm.android.view.MdotMActivity" android:launchMode="singleTop"/>
+        <activity android:name="com.mdotm.android.mraid.MdotmMraidActivity" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity android:name="com.mdotm.android.vast.VastInterstitialActivity" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity android:name="com.chartboost.sdk.CBImpressionActivity" android:excludeFromRecents="true" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"  />
+        <activity android:name="com.mopub.mobileads.MoPubActivity" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidActivity" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidBrowser" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity" android:configChanges="keyboardHidden|orientation"/>
         <!-- ADLOOPER END -->"""
 ADLOOPER_PERMISSIONS = ";android.permission.INTERNET" + \
                        ";android.permission.READ_PHONE_STATE" + \
-                       ";android.permission.ACCESS_NETWORK_STATE"
+                       ";android.permission.ACCESS_NETWORK_STATE" + \
+                       ";android.permission.GET_ACCOUNTS"
 
 MANIFEST_1_PLAYHAVEN = """
         <!-- PLAYHAVEN BEGIN -->
@@ -768,7 +810,19 @@ def run_android_project_update(dest, name, dependencies, sdk_root, library):
             cmd += ' --library %s' % rel
 
     verbose("EXEC: %s" % cmd)
-    return subprocess.call(cmd, shell=True)
+    if 0 != subprocess.call(cmd, shell=True):
+        return 1;
+
+    # # Add the manifestmerger settings if not already present
+
+    # local_properties = os.path.join(dest, "local.properties")
+    # cmd = "if ! grep 'manifestmerger' %s ; then echo manifestmerger.enabled=true >> %s ; fi" % \
+    #       (local_properties, local_properties)
+    # verbose("EXEC: %s" % cmd)
+    # if 0 != subprocess.call(cmd, shell=True):
+    #     return 1;
+
+    return 0
 
 ############################################################
 
