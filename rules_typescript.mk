@@ -28,9 +28,9 @@ CLOSURE:=java -jar external/closure/compiler.jar \
 
 tsc_postfix_failonerror := || ($(RM) $$@ && false)
 ifeq ("win32",$(BUILDHOST))
-  tsc_postfix_ignoreerrors := || if exist $$@ (true) else (false)
+  tsc_postfix_ignoreerrors := > NUL 2>&1 || if exist $$@ (true) else (false)
 else
-  tsc_postfix_ignoreerrors := || [ -e $$@ ]
+  tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
 endif
 
 ############################################################
@@ -185,19 +185,24 @@ else # ifeq (1,$(TS_MODULAR))
 #
 ############################################################
 
+ifeq (1,$(TS_ONESHOT))
+
 TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
+TSC_POSTFIX := $(tsc_postfix_ignoreerrors)
+
+# Choose a file that is a real .ts file (not .d.ts)
+ts_representative_file := $(word 1,$(filter-out %.d.ts,$(TS_FILES)))
+ts_js_file := $(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts_representative_file))
+ts_js_file := $(ts_js_file:.ts=.js)
 
 .PHONY : jslib
-jslib: $(TS_FILES)
+jslib: $(ts_js_file)
+
+$(ts_js_file) : $(TS_FILES)
 	@echo "[TSC  ] *.ts -> $(TS_OUTPUT_DIR)"
 	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $^ $(TSC_POSTFIX)
 
-
-ifeq (1,$(TS_ONESHOT))
-
-
-
-else
+else # ifeq(1,$(TS_ONESHOT))
 
 ############################################################
 #
