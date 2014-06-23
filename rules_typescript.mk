@@ -27,8 +27,8 @@ CLOSURE:=java -jar external/closure/compiler.jar \
 # Define the postfix flags for various behaviour patterns
 
 tsc_postfix_failonerror := || ($(RM) $$@ && false)
-ifeq ("win32",$(BUILDHOST))
-  tsc_postfix_ignoreerrors := > NUL 2>&1 || if exist $$@ (true) else (false)
+ifeq (win32,$(BUILDHOST))
+  tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ (true) else (false)
 else
   tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
 endif
@@ -198,9 +198,16 @@ ts_js_file := $(ts_js_file:.ts=.js)
 .PHONY : jslib
 jslib: $(ts_js_file)
 
-$(ts_js_file) : $(TS_FILES)
+# (Windows version of makre requires this to be in a 'define' in order
+# that the POSTFIX variable gets expanded correctly.
+
+define _make_ts_js_rule
+  $(ts_js_file) : $(TS_FILES)
 	@echo "[TSC  ] *.ts -> $(TS_OUTPUT_DIR)"
-	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $^ $(TSC_POSTFIX)
+	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $$^ $(TSC_POSTFIX)
+endef
+
+$(eval $(call _make_ts_js_rule))
 
 else # ifeq(1,$(TS_ONESHOT))
 
