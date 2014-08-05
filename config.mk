@@ -162,6 +162,7 @@ endif
 
 ifeq ($(VALGRIND),1)
   RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full --error-exitcode=15
+  # --gen-suppressions=all
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
