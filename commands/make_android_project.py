@@ -792,18 +792,21 @@ def copy_png_asset_files(dest, png_asset_files):
 #
 #
 #
-def run_android_project_update(dest, name, dependencies, sdk_root, library):
+def run_android_project_update(dest, name, dependencies, sdk_root, library,
+                               options):
 
+    android_target = options['android-target']
     android = "android"
+
     if not sdk_root is None:
         android = sdk_root + "/tools/android"
 
     if library:
         cmd = '%s update lib-project -p %s -t %s' \
-            % (android, dest, 'android-16')
+            % (android, dest, android_target)
     else:
         cmd = '%s update project -p %s -t %s -n %s --subprojects' \
-            % (android, dest, 'android-16', name)
+            % (android, dest, android_target, name)
         for dep in dependencies:
             rel = os.path.relpath(dep, dest)
             verbose(" '%s' -> '%s'" % (dep, rel))
@@ -851,7 +854,7 @@ def usage():
     --version <X.Y.Z[.W]>
 
     --target <android-target-name>
-                        - e.g. 'android-16'
+                        - e.g. 'android-15'
 
     --name <project-name>
                         - e.g. 'finalfwy'
@@ -968,7 +971,7 @@ def usage():
     --mdotm             - (optional) include mdotm manifest entries
   Example:
 
-    make_android_project --dest java --version 3.2.5 --target 'android-16' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
+    make_android_project --dest java --version 3.2.5 --target 'android-15' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
 
 """
 
@@ -981,7 +984,6 @@ def main():
     dest = None
     android_sdk_root = None
     version = None
-    target = None
     name = None
     title = None
     package = None
@@ -1010,6 +1012,7 @@ def main():
     asset_files = []
     png_asset_files = []
     options = {
+        'android-target': "android-15",
         'landscape': 'sensorLandscape',
         'require-touch': True,
         'activity_files': [],
@@ -1062,7 +1065,7 @@ def main():
         elif "--version" == arg:
             version = args.pop(0)
         elif "--target" == arg:
-            target = args.pop(0)
+            options['android-target'] = args.pop(0)
         elif "--name" == arg:
             name = args.pop(0)
         elif "--title" == arg:
@@ -1287,14 +1290,15 @@ def main():
     if 0 != len(png_asset_files):
         copy_png_asset_files(dest, png_asset_files)
 
-    # Run 'android update project -p ... --target android-16 -n <name>
+    # Run 'android update project -p ... --target android-15 -n <name>
     # --library ...'
 
     global wrote
     if wrote or not os.path.exists(os.path.join(dest, "build.xml")):
         fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
-                                               android_sdk_root, library):
+                                               android_sdk_root, library,
+                                               options):
             return 1
     else:
         print "No project files changed, not running android project update"
