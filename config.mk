@@ -173,6 +173,14 @@ FIND := python $(BUILDDIR)/commands/find.py
 TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 
+ifeq (win32,$(BUILDHOST))
+  TRUE := cmd /c "exit /b 0"
+  FALSE := cmd /c "exit /b 1"
+else
+  TRUE := true
+  FALSE := false
+endif
+
 ############################################################
 
 # Util functions for the build description

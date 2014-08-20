@@ -26,9 +26,9 @@ CLOSURE:=java -jar external/closure/compiler.jar \
 
 # Define the postfix flags for various behaviour patterns
 
-tsc_postfix_failonerror := || ($(RM) $$@ && false)
+tsc_postfix_failonerror := || ($(RM) $$@ && $(FALSE))
 ifeq (win32,$(BUILDHOST))
-  tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ (true) else (false)
+  tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ ($(TRUE)) else ($(FALSE))
 else
   tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
 endif
