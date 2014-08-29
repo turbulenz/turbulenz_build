@@ -24,7 +24,11 @@ endif
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
+# SDK to build against
 XCODE_SDK_VER ?= 10.9
+
+# Minimum OS version to target
+XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
 
@@ -58,7 +62,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
@@ -76,7 +80,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
@@ -116,7 +120,8 @@ endif
 #     -framework IOKit \
 #     -framework System
 
-AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)libtool
+AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
+  $(MACOSX_XCODE_BIN_PATH)libtool
 ARFLAGSPRE := -static -arch_only i386 -g
 arout := -o
 ARFLAGSPOST := \
@@ -136,7 +141,8 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
+  $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := \
   -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g $(MACOSX_DLLFLAGS)
 DLLFLAGSPOST := \
@@ -177,7 +183,7 @@ LDFLAGSPRE := \
     $(MACOSX_LDFLAGS)
 
 LDFLAGSPOST := \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -dead_strip \
     -Wl,-search_paths_first \
     -framework CoreFoundation \
