@@ -55,7 +55,7 @@ CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -72,7 +72,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
 # -fvisibility=hidden
 
 CMMFLAGSPRE := -x objective-c++ \
-    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
