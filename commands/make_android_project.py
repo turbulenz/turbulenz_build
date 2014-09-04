@@ -233,30 +233,26 @@ MANIFEST_1_ADLOOPER = """
         </receiver>
         <!-- (OLD END) -->
 
-        <!-- (FROM PLAYHAVEN) -->
-        <activity
-            android:name=".view.FullScreen"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+        <!-- (FROM PLAYHAVEN - copied from project manifest since -->
+        <!--  manifestmerger doesn't seem to work)                -->
+        <activity android:configChanges="orientation|keyboardHidden|screenSize" android:name="com.playhaven.android.view.FullScreen" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:windowSoftInputMode="adjustResize">
             <!-- Support FullScreen.createIntent -->
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <!-- Support Uri.parse -->
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="playhaven" android:host="localhost" android:pathPattern="/full" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="localhost" android:pathPattern="/full" android:scheme="playhaven"/>
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name="com.playhaven.android.push.PushReceiver">
+        <receiver android:name="com.playhaven.android.push.PushReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="com.playhaven.android" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="com.playhaven.android"/>
             </intent-filter>
         </receiver>
         <!-- (FROM PLAYHAVEN END) -->
