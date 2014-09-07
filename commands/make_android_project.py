@@ -13,8 +13,10 @@ ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
-        <activity android:name="com.google.ads.AdActivity"
+        <activity android:name="com.google.android.gms.ads.AdActivity"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+       <meta-data android:name="com.google.android.gms.version"
+           android:value="@integer/google_play_services_version"/>
         <!-- ADMOB END -->"""
 ADMOB_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
@@ -271,7 +273,8 @@ MANIFEST_1_ADLOOPER = """
 ADLOOPER_PERMISSIONS = ";android.permission.INTERNET" + \
                        ";android.permission.READ_PHONE_STATE" + \
                        ";android.permission.ACCESS_NETWORK_STATE" + \
-                       ";android.permission.GET_ACCOUNTS"
+                       ";android.permission.GET_ACCOUNTS" + \
+                       ";android.permission.WRITE_EXTERNAL_STORAGE"
 
 MANIFEST_1_PLAYHAVEN = """
         <!-- PLAYHAVEN BEGIN -->
