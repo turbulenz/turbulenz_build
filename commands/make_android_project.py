@@ -11,6 +11,13 @@ MANIFEST_1_ANDROIDLICENSE = ""
 
 ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
+OUYA_EXTRA_CODE = """
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+            <category android:name="tv.ouya.intent.category.GAME"/>
+          </intent-filter>"""
+
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
         <activity android:name="com.google.android.gms.ads.AdActivity"
@@ -543,6 +550,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
             MANIFEST_0 += "\n"
             MANIFEST_0 += intent_f.read()
 
+    MANIFEST_0 += options['activity_extra_code']
+
     for k,v in meta.items():
         MANIFEST_0 += """
             <meta-data android:name="%s" android:value="%s" />""" % (k, v)
@@ -946,6 +955,8 @@ def usage():
     --expansion         - enable manifest entries for expansion files
 
     (External services / publishers)
+    --ouya              - (optional) include Ouya manifest entries
+    --ouya-icon <icon>  - (optional) icon for Ouya
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
     --gamecircle        - (optional) include Amazon GameCirlce entries
@@ -1020,6 +1031,8 @@ def main():
         'launcher_activities': [],
         'proguard': None,
         'install-referrer': None,
+        'activity_extra_code': "",
+        'ouya_icon': None,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -1050,6 +1063,9 @@ def main():
 
         i_base = os.path.splitext(os.path.split(i)[1])[0]
         options['launcher_activities'].append((a,l,i_base))
+
+    def add_activity_code(ac):
+        options['activity_extra_code'] += ac
 
     while len(args):
         arg = args.pop(0)
@@ -1170,6 +1186,10 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
+        elif "--ouya" == arg:
+            add_activity_code(OUYA_EXTRA_CODE)
+        elif "--ouya-icon" == arg:
+            options['ouya_icon'] = args.pop(0)
         elif "--openkit" == arg:
             extras.append('openkit')
             extras.append('facebook')
@@ -1261,6 +1281,12 @@ def main():
         copy_icon_files(dest, icon_dir)
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
+
+    if options['ouya_icon']:
+        if "ouya_icon.png" != os.path.split(options['ouya_icon'])[1]:
+            raise Exception("Ouya icon must be named ouya_icon.png")
+        _copy_files_to_dir(os.path.join(dest, "res", "drawable-xhdpi"),
+                           [ options['ouya_icon'] ])
 
     # Copy xml files
 
