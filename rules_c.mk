@@ -350,6 +350,34 @@ $(foreach mod,$(C_MODULES),$(eval \
 $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 
 #
+# Flags
+#
+
+# 1 - mod
+# 2 - flags file
+# 3 - flags string
+define _make_cxx_flags_file
+
+  ifneq ('$(strip $(shell cat $(2) 2>/dev/null))','$(strip $(3))')
+    $$(shell mkdir -p $($(1)_OBJDIR) ; echo "$(3)" > $(2))
+  endif
+
+  $($(1)_OBJECTS) : $(2)
+
+endef
+
+$(foreach mod,$(C_MODULES),$(eval \
+  $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags, $(strip   \
+    $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags) $($(mod)_cxxflags) \
+    $($(mod)_local_cxxflags)                                            \
+    $(addprefix -I,$($(mod)_incdirs))                                   \
+    $(addprefix -I,$($(mod)_depincdirs))                                \
+    $(addprefix -I,$($(mod)_ext_incdirs))                               \
+    $(CXXFLAGSPOST)                                                     \
+  ))                                                                    \
+))
+
+#
 # Function to make a flymake target for a source file
 #
 
