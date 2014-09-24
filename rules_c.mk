@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Turbulenz Limited.
+# Copyright (c) 2012-2014 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
 ############################################################
@@ -358,8 +358,8 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 # 3 - flags string
 define _make_cxx_flags_file
 
-  ifneq ('$(strip $(shell cat $(2) 2>/dev/null))','$(strip $(3))')
-    $$(shell mkdir -p $($(1)_OBJDIR) ; echo "$(3)" > $(2))
+  ifneq ('$(shell cat $(2) 2>/dev/null)','$(strip $(3))')
+    $$(shell mkdir -p $($(1)_OBJDIR) ; echo '$(strip $(3))' > $(2))
   endif
 
   $($(1)_OBJECTS) : $(2)
