@@ -516,6 +516,9 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         MANIFEST_0 += """
                  android:name=".%APPLICATION_NAME%" """
 
+    if options['debug']:
+        MANIFEST_0 += """
+                 android:debuggable="true" """
 
     if options['backup_agent']:
         class_key = options['backup_agent'].split(',')
@@ -883,6 +886,8 @@ def usage():
 
     --sdk-version       - minSdkVersion
 
+    --debug             - (optional) set the debuggable flag in the application
+
     --permissions "<perm1>;<perm2>;.."
                         - (optional) e.g. "com.android.vending.CHECK_LICENSE;
                           android.permission.INTERNET"
@@ -1033,6 +1038,7 @@ def main():
         'install-referrer': None,
         'activity_extra_code': "",
         'ouya_icon': None,
+        'debug': False,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -1095,6 +1101,8 @@ def main():
             add_launcher_activity(args.pop(0))
         elif "--sdk-version" == arg:
             sdk_version = args.pop(0)
+        elif "--debug" == arg:
+            options['debug'] = True
         elif "--permissions" == arg:
             permissions += ";" + args.pop(0)
         elif "--resource-string" == arg:
