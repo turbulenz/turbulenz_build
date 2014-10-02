@@ -514,7 +514,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
 
     if table['%APPLICATION_NAME%']:
         MANIFEST_0 += """
-                 android:name=".%APPLICATION_NAME%" """
+                 android:name="%APPLICATION_NAME%" """
 
     if options['debug']:
         MANIFEST_0 += """
@@ -1095,6 +1095,8 @@ def main():
             package = args.pop(0)
         elif "--app-tag-name" == arg:
             application_name = args.pop(0)
+            if -1 == application_name.find("."):
+                application_name = "." + application_name
         elif "--activity" == arg:
             activity = args.pop(0)
         elif "--launcher-activity" == arg:
