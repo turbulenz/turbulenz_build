@@ -407,7 +407,7 @@ define _make_pch_rule
 
   $(3) : $(2)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [PCH] \($(1)\) $$(notdir $$@)
+	@echo [PCH $(ARCH)] \($(1)\) $$(notdir $$@)
 	$(CMDPREFIX)$(CXX)                                             \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
       -MD -MT $4 -MT $$@ -MP                                       \
@@ -432,7 +432,7 @@ define _make_cxx_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CXX] \($(1)\) $$(notdir $$<)
+	@echo [CXX $(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
@@ -462,7 +462,7 @@ define _make_cmm_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CMM] \($(1)\) $$(notdir $$<)
+	@echo [CMM $(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CMMFLAGSPRE) $(CMMFLAGS)                                   \
@@ -537,7 +537,7 @@ define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
 	@mkdir -p $$(dir $$@)
-	@echo [AR ] $$(notdir $$@)
+	@echo [AR  $(ARCH)] $$(notdir $$@)
 	$(CMDPREFIX)rm -f $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
@@ -569,7 +569,7 @@ define _make_dll_rule
 
   $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
-	@echo [DLL] $$@
+	@echo [DLL $(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
       $(if $(DLLFLAGS_LIBDIR), \
@@ -617,7 +617,7 @@ define _make_app_rule
 
   $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
-	@echo [LD ] $$@
+	@echo [LD  $(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$(LIBDIR)) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
