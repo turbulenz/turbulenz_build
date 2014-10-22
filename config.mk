@@ -123,10 +123,12 @@ endif
 ifeq ($(CONFIG),release)
   C_SYMBOLS ?= 0
   C_OPTIMIZE ?= 1
+  LD_OPTIMIZE ?= 0    # Keep LTO off by default
 endif
 ifeq ($(CONFIG),debug)
   C_SYMBOLS ?= 1
   C_OPTIMIZE ?= 0
+  LD_OPTIMIZE ?= 0
 endif
 
 ############################################################
