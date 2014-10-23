@@ -25,10 +25,10 @@ CMM := $(XCODE_TOOLROOT)/usr/bin/clang
 
 CXXFLAGSPRE += -x objective-c++ \
   -arch $(ARCH) \
-  -stdlib=libc++ \
+  -stdlib=libc++ -std=c++11 \
   -fmessage-length=0 -fpascal-strings -fexceptions -fasm-blocks \
   -fvisibility=hidden -fvisibility-inlines-hidden \
-  -Wall -Wno-c++11-extensions \
+  -Wall \
   -isysroot $(XCODE_SDKROOT) \
   -DTZ_IOS=1
 
