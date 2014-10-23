@@ -20,6 +20,9 @@ ifeq (1,$(TS_REFCHECK))
   TS_MODULAR := 0
 endif
 
+TS_ALLOW_REFS ?= 0
+TS_NODE_JS ?=
+
 CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
@@ -106,10 +109,11 @@ define _make_js_rule
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $(notdir $($(1)_src)) -> $$@"
 	$(CMDPREFIX) $(TSC_PREFIX)                           \
-      $(TSC) --noResolve                                 \
+      $(TSC) $(if $(TS_ALLOW_REFS),,--noResolve)         \
       $(if $($(1)_nodecls),,--declaration)               \
       $($(1)_tscflags)                                   \
-      --out $$@ $(TS_BASE_FILES)                         \
+      $(if $(TS_NODE_JS),,--out $$@)                     \
+      $(TS_BASE_FILES)                                   \
       $(_$(1)_dep_d_files) $(_$(1)_d_ts_src)             \
       $(abspath $(_$(1)_ts_src))                         \
       $(TSC_POSTFIX)
