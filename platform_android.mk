@@ -47,13 +47,18 @@ _android_arch_name = $(strip					\
 
 ANDROID_SDK_TARGET ?= android-15
 ANDROID_SDK_VERSION ?= 8
+ANDROID_SDK ?= $(ANDROID_SDK_PATH)/android-sdk-$(android_build_host)
+
+# NDK dir
+
 ANDROID_NDK ?= external/android/android-ndk-r9d
-ANDROID_SDK ?= external/android/android-sdk-$(BUILDHOST)
 NDK_PLATFORM ?= android-9
 NDK_GCC_VER ?= 4.8
 NDK_CLANG_VER ?= 3.4
 # NDK_HOSTOS ?= darwin
 NDK_HOSTARCH ?= x86_64
+NDK_STLPORT ?= 0
+NDK_LIBCPP ?= 0
 
 # Toolset for which arch
 
@@ -107,13 +112,38 @@ NDK_CLANG_FLAGS += -gcc-toolchain $(NDK_TOOLCHAIN) -no-canonical-prefixes
 
 # Some include paths
 
-NDK_STL_DIR := \
-  $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/$(NDK_GCC_VER)
-NDK_STL_LIBS += \
-  $(NDK_STL_DIR)/libs/$(ANDROID_ARCH_NAME)
+NDK_GNUSTL_DIR := $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/$(NDK_GCC_VER)
+NDK_GNUSTL_LIBS := \
+  $(NDK_GNUSTL_DIR)/libs/$(ANDROID_ARCH_NAME)/libgnustl_static.a
+NDK_GNUSTL_INCLUDES := $(NDK_GNUSTL_DIR)/include \
+  $(NDK_GNUSTL_DIR)/libs/$(ANDROID_ARCH_NAME)/include
 
-NDK_STL_INCLUDES := \
-  $(NDK_STL_LIBS)/include $(NDK_STL_DIR)/include
+NDK_STLPORT_DIR := $(ANDROID_NDK)/sources/cxx-stl/stlport
+NDK_STLPORT_LIBS += \
+  $(NDK_STLPORT_DIR)/libs/$(ANDROID_ARCH_NAME)/libstlport_static.a
+NDK_STLPORT_INCLUDES := $(NDK_STLPORT_DIR)/stlport
+
+NDK_LIBCPP_DIR := $(ANDROID_NDK)/sources/cxx-stl/llvm-libc++
+NDK_LIBCPP_LIBS := $(NDK_LIBCPP_DIR)/libs/$(ANDROID_ARCH_NAME)/libc++_static.a
+NDK_LIBCPP_INCLUDES := $(NDK_LIBCPP_DIR)/libcxx/include
+
+ifeq (1,$(NDK_LIBCPP))
+  NDK_STL_DIR := $(NDK_LIBCPP_DIR)
+  NDK_STL_LIBS += $(NDK_LIBCPP_LIBS)
+  NDK_STL_INCLUDES := $(NDK_LIBCPP_INCLUDES)
+else
+  ifeq (1,$(NDK_STLPORT))
+    NDK_STL_DIR := $(NDK_STLPORT_DIR)
+    NDK_STL_LIBS += $(NDK_STLPORT_LIBS)
+    NDK_STL_INCLUDES := $(NDK_STLPORT_INCLUDES)
+  else
+    NDK_STL_DIR := $(NDK_GNUSTL_DIR)
+    NDK_STL_LIBS += $(NDK_GNUSTL_LIBS)
+    NDK_STL_INCLUDES := $(NDK_GNUSTL_INCLUDES)
+    # $(warning Using GNUSTL: $(NDK_GNUSTL_INCLUDES))
+  endif
+endif
+
 NDK_PLATFORM_INCLUDES := \
   $(ANDROID_NDK)/sources/android/native_app_glue \
   $(NDK_PLATFORMDIR)/usr/include
@@ -319,7 +349,7 @@ DLLFLAGSPRE += -shared \
 # -Wl,-shared,-Bsymbolic
 
 DLLFLAGSPOST += \
-  $(NDK_STL_LIBS)/libgnustl_static.a \
+  $(NDK_STL_LIBS) \
   -Wl,--no-undefined -Wl,-z,noexecstack \
   -L$(NDK_PLATFORMDIR)/usr/lib \
   -ldl -llog -lc -lm

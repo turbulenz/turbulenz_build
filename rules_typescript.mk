@@ -24,7 +24,14 @@ CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
 
-ifeq (1,$(TS_MODULAR))
+# Define the postfix flags for various behaviour patterns
+
+tsc_postfix_failonerror := || ($(RM) $$@ && $(FALSE))
+ifeq (win32,$(BUILDHOST))
+  tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ ($(TRUE)) else ($(FALSE))
+else
+  tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
+endif
 
 ############################################################
 #
@@ -37,8 +44,12 @@ ifeq (1,$(TS_MODULAR))
 #
 ############################################################
 
+ifeq (1,$(TS_MODULAR))
+
 TS_OUTPUT_DIR ?= jslib-modular
 TS_SYNTAX_CHECK ?= 0
+
+TSC_POSTFIX := $(tsc_postfix_failonerror)
 
 # Syntax checking
 syntax_replace = $(1)
@@ -51,7 +62,7 @@ ifeq (1,$(TS_SYNTAX_CHECK))
     )
   endif
   TSC_PREFIX := !
-  TSC_POSTFIX := 2>&1 | grep '$(CHK_SOURCES)\:'
+  TSC_POSTFIX := $(TSC_POSTFIX) 2>&1 | grep '$(CHK_SOURCES)\:'
 endif
 
 # Calc .ts and .d.ts src
@@ -95,15 +106,23 @@ define _make_js_rule
    |$(call _dir_marker,$(dir $(_$(1)_out_js)))
 	@echo "[TSC  ] $(notdir $($(1)_src)) -> $$@"
 	$(CMDPREFIX) $(TSC_PREFIX)                           \
-      $(TSC) --failonerror --noResolve                   \
+      $(TSC) --noResolve                                 \
       $(if $($(1)_nodecls),,--declaration)               \
       $($(1)_tscflags)                                   \
       --out $$@ $(TS_BASE_FILES)                         \
       $(_$(1)_dep_d_files) $(_$(1)_d_ts_src)             \
       $(abspath $(_$(1)_ts_src))                         \
-      $(TSC_POSTFIX) || ($(RM) $(_$(1)_out_js) ; FAIL)
+      $(TSC_POSTFIX)
 
   jslib : $(1)
+
+  # tslint rule
+
+  .PHONY: _tslint_$(1)
+  _tslint_$(1) :
+	tslint $(if $(TSLINT_CONFIG),-c $(TSLINT_CONFIG),) -f $($(1)_src)
+
+  tslint : _tslint_$(1)
 
   # Add the module to the syntax-check deps ?
 
@@ -136,6 +155,10 @@ $(foreach t,$(TSLIBS),\
   $(if $(_$(t)_d_ts_src),$(eval $(call _make_d_ts_copy_rule,$(t)))) \
 )
 
+# tslint rules (defined in _make_js_rule)
+
+.PHONY: tslint
+
 # clean rules
 
 .PHONY: clean clean_ts distclean_ts
@@ -155,6 +178,40 @@ distclean: distclean_ts
 else # ifeq (1,$(TS_MODULAR))
 
 ############################################################
+# ONESHOT BUILD
+#
+# Build everything in a single command.  No timestamp checking, just a
+# single huge operation to generate jslib.
+#
+############################################################
+
+ifeq (1,$(TS_ONESHOT))
+
+TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
+TSC_POSTFIX := $(tsc_postfix_ignoreerrors)
+
+# Choose a file that is a real .ts file (not .d.ts)
+ts_representative_file := $(word 1,$(filter-out %.d.ts,$(TS_FILES)))
+ts_js_file := $(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts_representative_file))
+ts_js_file := $(ts_js_file:.ts=.js)
+
+.PHONY : jslib
+jslib: $(ts_js_file)
+
+# (Windows version of makre requires this to be in a 'define' in order
+# that the POSTFIX variable gets expanded correctly.
+
+define _make_ts_js_rule
+  $(ts_js_file) : $(TS_FILES)
+	@echo "[TSC  ] *.ts -> $(TS_OUTPUT_DIR)"
+	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $$^ $(TSC_POSTFIX)
+endef
+
+$(eval $(call _make_ts_js_rule))
+
+else # ifeq(1,$(TS_ONESHOT))
+
+############################################################
 #
 # CRUDE BUILD.
 #
@@ -172,9 +229,11 @@ endif
 TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
 
 ifeq (1,$(TS_REFCHECK))
-  TSC_FLAGS := --failonerror
+  TSC_FLAGS := #--failonerror
+  TSC_POSTFIX := $(tsc_postfix_failonerror)
 else
-  TSC_FLAGS := --noResolve --ignoretypeerrors
+  TSC_FLAGS := --noResolve
+  TSC_POSTFIX := $(tsc_postfix_ignoreerrors)
 endif
 
 # Override if we are syntax checking
@@ -211,7 +270,7 @@ define _make_ts_js_rule
 
   $(2) : $(1) |$(call _dir_marker,$(dir $(2)))
 	@echo "[TSC  ] $$< -> $$@"
-	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --out $(2) $(1)
+	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --out $(2) $(1) $(TSC_POSTFIX)
 	$(if $(VERIFY_CLOSURE),\
       $(CMDPREFIX)echo "[CLOSURE]" $(2) ; $(CLOSURE) --js $(2) \
     )
@@ -239,5 +298,7 @@ distclean_ts:
 clean: clean_ts
 
 distclean: distclean_ts
+
+endif # else # ifeq (1,$(TS_ONESHOT))
 
 endif # else # ifeq (1,$(TS_MODULAR))

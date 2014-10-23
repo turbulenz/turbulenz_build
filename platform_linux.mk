@@ -21,6 +21,7 @@ CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then e
 CXX := $(CCACHE) g++
 
 CXXFLAGSPRE := \
+    -std=c++11 \
     -fmessage-length=0 -pipe \
     -Wall \
     -Wno-reorder -Wno-trigraphs \

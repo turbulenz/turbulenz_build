@@ -123,10 +123,12 @@ endif
 ifeq ($(CONFIG),release)
   C_SYMBOLS ?= 0
   C_OPTIMIZE ?= 1
+  LD_OPTIMIZE ?= 0    # Keep LTO off by default
 endif
 ifeq ($(CONFIG),debug)
   C_SYMBOLS ?= 1
   C_OPTIMIZE ?= 0
+  LD_OPTIMIZE ?= 0
 endif
 
 ############################################################
@@ -163,6 +165,7 @@ endif
 
 ifeq ($(VALGRIND),1)
   RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full --error-exitcode=15
+  # --gen-suppressions=all
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
@@ -170,8 +173,16 @@ CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
-TSC ?= node $(BUILDDIR)/../typescript/0.9.1/tsc.js
+TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
+
+ifeq (win32,$(BUILDHOST))
+  TRUE := cmd /c "exit /b 0"
+  FALSE := cmd /c "exit /b 1"
+else
+  TRUE := true
+  FALSE := false
+endif
 
 ############################################################
 

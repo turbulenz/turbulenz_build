@@ -3,9 +3,9 @@
 
 ############################################################
 
-# ifneq (1,$(MACOSX_IGNORE_OLD_TOOLS))
-#   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
-# endif
+ifeq (1,$(MACOSX_USE_OLD_TOOLS))
+  MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
+endif
 
 ifneq (,$(MACOSX_XCODE_BIN_PATH))
   # OLD TOOLS
@@ -16,6 +16,7 @@ else
   # clang
   MACOSX_CXX := clang
   CXXFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
+  CMMFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
   MACOSX_LDFLAGS += -lc++
   MACOSX_DLLFLAGS += -lc++
 endif
@@ -23,16 +24,13 @@ endif
 # Language to compile all .cpp files as
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
+# SDK to build against
 XCODE_SDK_VER ?= 10.9
 
-# Create a variable holding the xcode configuration
-ifeq ($(CONFIG),debug)
-  XCODE_CONFIG := Debug
-else
-  XCODE_CONFIG := Release
-endif
+# Minimum OS version to target
+XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
 
-# Mark non-10.6 builds
+# Mark builds that are linked against the non-default SDKs
 
 ifneq ($(XCODE_SDK_VER),10.9)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
@@ -57,14 +55,14 @@ CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
     -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
@@ -74,7 +72,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
 # -fvisibility=hidden
 
 CMMFLAGSPRE := -x objective-c++ \
-    -arch i386 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -82,7 +80,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
@@ -100,12 +98,23 @@ PCHFLAGS := -x objective-c++-header
 
 # DEBUG / RELEASE
 
-ifeq ($(CONFIG),debug)
-  CXXFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
-  CMMFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+ifeq (1,$(C_SYMBOLS))
+  CXXFLAGSPRE += -g
+  CMMFLAGSPRE += -g
+endif
+
+ifeq (1,$(C_OPTIMIZE))
+  CXXFLAGSPRE += -O3 -DNDEBUG
+  CMMFLAGSPRE += -O3 -DNDEBUG
 else
-  CXXFLAGSPRE += -g -O3 -DNDEBUG
-  CMMFLAGSPRE += -g -O3 -DNDEBUG
+  CXXFLAGSPRE += -O0 -D_DEBUG -DDEBUG
+  CMMFLAGSPRE += -O0 -D_DEBUG -DDEBUG
+endif
+
+ifeq (1,$(LD_OPTIMIZE))
+  CXXFLAGSPRE += -flto
+  CMMFLAGSPRE += -flto
+  MACOSX_LDFLAGS += -O3 -flto
 endif
 
 #
@@ -124,7 +133,8 @@ endif
 #     -framework IOKit \
 #     -framework System
 
-AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)libtool
+AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
+  $(MACOSX_XCODE_BIN_PATH)libtool
 ARFLAGSPRE := -static -arch_only i386 -g
 arout := -o
 ARFLAGSPOST := \
@@ -144,7 +154,8 @@ libsuffix := .a
 # DLL
 #
 
-DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_SDK_VER) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
+  $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := \
   -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g $(MACOSX_DLLFLAGS)
 DLLFLAGSPOST := \
@@ -185,7 +196,7 @@ LDFLAGSPRE := \
     $(MACOSX_LDFLAGS)
 
 LDFLAGSPOST := \
-    -mmacosx-version-min=$(XCODE_SDK_VER) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -dead_strip \
     -Wl,-search_paths_first \
     -framework CoreFoundation \
