@@ -24,7 +24,7 @@ CXXFLAGSPRE := \
     -std=c++11 \
     -fmessage-length=0 -pipe \
     -Wall \
-    -Wno-reorder -Wno-trigraphs \
+    -Wno-reorder -Wno-trigraphs -Wno-unknown-pragmas \
     -fPIC \
     -ftree-vectorize -msse3 -mssse3 \
     -DXP_LINUX=1 -DXP_UNIX=1 \
