@@ -5,13 +5,17 @@ XCODE_ROOT := /Applications/Xcode.app/Contents/Developer
 XCODE_TOOLROOT := $(XCODE_ROOT)/Toolchains/XcodeDefault.xctoolchain
 XCODE_PLATFORMS := $(XCODE_ROOT)/Platforms
 
+
 ifeq (i386,$(ARCH))
   XCODE_PLATFORM := $(XCODE_PLATFORMS)/iPhoneSimulator.platform
   CXXFLAGSPRE := -mios-simulator-version-min=5.0 \
     -fobjc-abi-version=2 \
-    -fobjc-legacy-dispatch "-DIBOutlet=__attribute__((iboutlet))" \
-    "-DIBOutletCollection(ClassName)=__attribute__((iboutletcollection(ClassName)))" \
-    "-DIBAction=void)__attribute__((ibaction)"
+    -fobjc-legacy-dispatch \
+    -DIBOutlet=__attribute__\(\(iboutlet\)\) \
+    -DIBOutletCollection\(ClassName\)=__attribute__\(\(iboutletcollection\(ClassName\)\)\) \
+    -D_d1=\( -DIBAction=void\)__attribute__\(\(ibaction\) -D_d2=\)
+
+
 else
   XCODE_PLATFORM := $(XCODE_PLATFORMS)/iPhoneOS.platform
   CXXFLAGSPRE := -miphoneos-version-min=5.0
