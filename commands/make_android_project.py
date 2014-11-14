@@ -388,6 +388,9 @@ def copy_file_if_different(src, target):
 def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                    extras, library, resource_strings, options):
 
+    target = options['android-target']
+    target_num = int(target.split('-')[1])
+
     MANIFEST_1_TAPFORTAP = """
         <!-- TAPFORTAP BEGIN -->
         <activity android:name="com.tapfortap.TapForTapActivity" """
@@ -512,6 +515,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
       android:installLocation="auto">
     <application android:label="@string/app_name" %ICON_ATTR%"""
 
+    if target_num >= 21:
+        MANIFEST_0 += """
+                 android:isGame="true" """
+
     if table['%APPLICATION_NAME%']:
         MANIFEST_0 += """
                  android:name="%APPLICATION_NAME%" """
@@ -540,7 +547,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                   android:screenOrientation=""" +'"'+options['landscape']+'"'
 
     MANIFEST_0 += """
-                  >"""
+                  >
+            <meta-data android:name="isGame" android:value="true" />"""
     if not override_main_activity:
         MANIFEST_0 += """
             <intent-filter>
@@ -682,9 +690,9 @@ def write_ant_properties(dest, dependencies, src, library, keystore, keyalias,
     data += "includeantruntime=false\n"
 
     if src:
-        src_rel = os.path.relpath(os.path.abspath(src), dest)
+        src_rel = [ os.path.relpath(os.path.abspath(s), dest) for s in src ]
         verbose(" '%s' (src) -> '%s'" % (src, src_rel))
-        data += "source.dir=%s\n" % src_rel
+        data += "source.dir=%s\n" % ";".join(src_rel)
 
     i = 1
     for dep in dependencies:
@@ -1009,7 +1017,7 @@ def main():
     icon_file = None
     keystore = None
     keyalias = None
-    src = None
+    src = []
     extras = []
     permissions = \
         "android.permission.WAKE_LOCK" \
@@ -1159,7 +1167,7 @@ def main():
         elif "--no-touch" == arg:
             options['require-touch'] = False
         elif "--src" == arg:
-            src = args.pop(0)
+            src.append(args.pop(0))
         elif "--library" == arg:
             library = True
         elif "--android-licensing" == arg:
