@@ -366,6 +366,7 @@ define _make_cxx_flags_file
 
 endef
 
+ifeq (1,$(DISABLE_FLAG_CHECKS))
 $(foreach mod,$(C_MODULES),$(eval \
   $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags, $(strip   \
     $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags) $($(mod)_cxxflags) \
@@ -376,6 +377,7 @@ $(foreach mod,$(C_MODULES),$(eval \
     $(CXXFLAGSPOST)                                                     \
   ))                                                                    \
 ))
+endif
 
 #
 # Function to make a flymake target for a source file
