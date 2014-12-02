@@ -359,6 +359,9 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 define _make_cxx_flags_file
 
   ifneq ('$(shell cat $(2) 2>/dev/null)','$(strip $(3))')
+    # $$(info .flags: '$(shell cat $(2) 2>/dev/null)')
+    # $$(info new fl: '$(strip $(3))')
+
     $$(shell mkdir -p $($(1)_OBJDIR) ; echo '$(strip $(3))' > $(2))
   endif
 
@@ -366,7 +369,7 @@ define _make_cxx_flags_file
 
 endef
 
-ifeq (1,$(DISABLE_FLAG_CHECKS))
+ifneq (1,$(DISABLE_FLAG_CHECKS))
 $(foreach mod,$(C_MODULES),$(eval \
   $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags, $(strip   \
     $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags) $($(mod)_cxxflags) \
