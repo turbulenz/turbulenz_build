@@ -799,6 +799,11 @@ def copy_drawable_files(dest, drawable_files):
     _copy_files_to_dir(dest_dir, drawable_files, "[DRAWABLE]")
 
 #
+def copy_raw_resource_files(dest, raw_resource_files):
+    dest_dir = os.path.join(dest, "res", "raw")
+    _copy_files_to_dir(dest_dir, raw_resource_files, "[RAW RES]")
+
+#
 def copy_asset_files(dest, asset_files):
     dest_dir = os.path.join(dest, "assets")
     _copy_files_to_dir(dest_dir, asset_files, "[ASSET]")
@@ -951,6 +956,9 @@ def usage():
 
     --drawable <file>   - (optional) file to copy to res/drawable/
 
+    --raw-resource <file>
+                        - file to copy to res/raw/
+
     --asset <file>      - (optional) asset file to copy to assets
 
     --png-asset <file>  - (optional) asset file with .png extension
@@ -1032,6 +1040,7 @@ def main():
     value_files = []
     layout_files = []
     drawable_files = []
+    raw_resource_files = []
     asset_files = []
     png_asset_files = []
     options = {
@@ -1152,6 +1161,8 @@ def main():
             layout_files.append(args.pop(0))
         elif "--drawable" == arg:
             drawable_files.append(args.pop(0))
+        elif "--raw-resource" == arg:
+            raw_resource_files.append(args.pop(0))
         elif "--asset" == arg:
             asset_files.append(args.pop(0))
         elif "--png-asset" == arg:
@@ -1325,6 +1336,11 @@ def main():
 
     if 0 != len(drawable_files):
         copy_drawable_files(dest, drawable_files)
+
+    # Copy raw resource files
+
+    if 0 != len(raw_resource_files):
+        copy_raw_resource_files(dest, raw_resource_files)
 
     # Copy asset files
 
