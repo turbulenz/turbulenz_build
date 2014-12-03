@@ -99,6 +99,11 @@ ifeq ($(TARGET),win32)
   ARCH ?= i386
 endif
 
+ifeq ($(TARGET),win64)
+  TARGETNAME := win64
+  ARCH ?= x86_64
+endif
+
 ifeq ($(TARGET),iossim)
   # 'iossim' is shorthand for TARGET=ios, ARCH=i386
   override TARGET := ios
