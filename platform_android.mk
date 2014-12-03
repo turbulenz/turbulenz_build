@@ -31,10 +31,10 @@
 
 android_build_host := $(BUILDHOST)
 ifeq (linux64,$(BUILDHOST))
-  android_build_host := linux_x86
+  android_build_host := linux
 endif
 ifeq (linux32,$(BUILDHOST))
-  android_build_host := linux_x86
+  android_build_host := linux
 endif
 
 # SDK Settings
