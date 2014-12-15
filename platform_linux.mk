@@ -44,6 +44,8 @@ else
   CMMFLAGSPRE += -g -O0 -DNDEBUG
 endif
 
+PCHFLAGS := -x c++-header
+
 #
 # LIBS
 #

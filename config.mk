@@ -149,6 +149,7 @@ OBJDIR = $(ROOTDIR)/obj/$(TARGET)$(VARIANT)-$(CONFIG)
 DEPDIR = $(OBJDIR)
 LIBDIR = $(ROOTDIR)/lib/$(TARGET)$(VARIANT)-$(CONFIG)
 BINDIR = $(ROOTDIR)/bin/$(TARGET)$(VARIANT)-$(CONFIG)
+BINOUTDIR = $(ROOTDIR)/bin/$(TARGET)-$(CONFIG)
 
 ############################################################
 

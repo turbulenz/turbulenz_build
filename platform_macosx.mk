@@ -94,6 +94,8 @@ CXXFLAGSPOST := \
 CMMFLAGSPOST := \
     -c
 
+PCHFLAGS := -x objective-c++-header
+
 # DEBUG / RELEASE
 
 ifeq (1,$(C_SYMBOLS))

@@ -11,10 +11,19 @@ MANIFEST_1_ANDROIDLICENSE = ""
 
 ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
+OUYA_EXTRA_CODE = """
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+            <category android:name="tv.ouya.intent.category.GAME"/>
+          </intent-filter>"""
+
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
-        <activity android:name="com.google.ads.AdActivity"
+        <activity android:name="com.google.android.gms.ads.AdActivity"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+       <meta-data android:name="com.google.android.gms.version"
+           android:value="@integer/google_play_services_version"/>
         <!-- ADMOB END -->"""
 ADMOB_PERMISSIONS = ";android.permission.INTERNET" + \
     ";android.permission.ACCESS_NETWORK_STATE"
@@ -215,6 +224,7 @@ APPAYABLE_PERMISSIONS = ""
 
 MANIFEST_1_ADLOOPER = """
         <!-- ADLOOPER BEGIN -->
+        <!-- (OLD) -->
         <receiver android:name="com.kiwi.ads.service.AdInstallReceiver">
          <intent-filter>
           <action android:name="android.intent.action.PACKAGE_ADDED" />
@@ -230,10 +240,48 @@ MANIFEST_1_ADLOOPER = """
           <action android:name="com.android.vending.INSTALL_REFERRER" />
          </intent-filter>
         </receiver>
+        <!-- (OLD END) -->
+
+        <!-- (FROM PLAYHAVEN - copied from project manifest since -->
+        <!--  manifestmerger doesn't seem to work)                -->
+        <activity android:configChanges="orientation|keyboardHidden|screenSize" android:name="com.playhaven.android.view.FullScreen" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:windowSoftInputMode="adjustResize">
+            <!-- Support FullScreen.createIntent -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <!-- Support Uri.parse -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="localhost" android:pathPattern="/full" android:scheme="playhaven"/>
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="com.playhaven.android.push.PushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="com.playhaven.android"/>
+            </intent-filter>
+        </receiver>
+        <!-- (FROM PLAYHAVEN END) -->
+
+        <activity android:name="com.google.android.gms.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+        <activity android:name="com.greystripe.sdk.GSFullscreenActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <activity android:name="com.mdotm.android.view.MdotMActivity" android:launchMode="singleTop"/>
+        <activity android:name="com.mdotm.android.mraid.MdotmMraidActivity" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity android:name="com.mdotm.android.vast.VastInterstitialActivity" android:configChanges="keyboardHidden|orientation" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity android:name="com.chartboost.sdk.CBImpressionActivity" android:excludeFromRecents="true" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="keyboard|keyboardHidden|orientation|screenSize"  />
+        <activity android:name="com.mopub.mobileads.MoPubActivity" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidActivity" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidBrowser" android:configChanges="keyboardHidden|orientation"/>
+        <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity" android:configChanges="keyboardHidden|orientation"/>
         <!-- ADLOOPER END -->"""
 ADLOOPER_PERMISSIONS = ";android.permission.INTERNET" + \
                        ";android.permission.READ_PHONE_STATE" + \
-                       ";android.permission.ACCESS_NETWORK_STATE"
+                       ";android.permission.ACCESS_NETWORK_STATE" + \
+                       ";android.permission.GET_ACCOUNTS" + \
+                       ";android.permission.WRITE_EXTERNAL_STORAGE"
 
 MANIFEST_1_PLAYHAVEN = """
         <!-- PLAYHAVEN BEGIN -->
@@ -339,6 +387,9 @@ def copy_file_if_different(src, target):
 #
 def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                    extras, library, resource_strings, options):
+
+    target = options['android-target']
+    target_num = int(target.split('-')[1])
 
     MANIFEST_1_TAPFORTAP = """
         <!-- TAPFORTAP BEGIN -->
@@ -464,10 +515,17 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
       android:installLocation="auto">
     <application android:label="@string/app_name" %ICON_ATTR%"""
 
+    if target_num >= 21:
+        MANIFEST_0 += """
+                 android:isGame="true" """
+
     if table['%APPLICATION_NAME%']:
         MANIFEST_0 += """
-                 android:name=".%APPLICATION_NAME%" """
+                 android:name="%APPLICATION_NAME%" """
 
+    if options['debug']:
+        MANIFEST_0 += """
+                 android:debuggable="true" """
 
     if options['backup_agent']:
         class_key = options['backup_agent'].split(',')
@@ -489,7 +547,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
                   android:screenOrientation=""" +'"'+options['landscape']+'"'
 
     MANIFEST_0 += """
-                  >"""
+                  >
+            <meta-data android:name="isGame" android:value="true" />"""
     if not override_main_activity:
         MANIFEST_0 += """
             <intent-filter>
@@ -501,6 +560,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         with open(intent_filters, "rb") as intent_f:
             MANIFEST_0 += "\n"
             MANIFEST_0 += intent_f.read()
+
+    MANIFEST_0 += options['activity_extra_code']
 
     for k,v in meta.items():
         MANIFEST_0 += """
@@ -629,9 +690,9 @@ def write_ant_properties(dest, dependencies, src, library, keystore, keyalias,
     data += "includeantruntime=false\n"
 
     if src:
-        src_rel = os.path.relpath(os.path.abspath(src), dest)
+        src_rel = [ os.path.relpath(os.path.abspath(s), dest) for s in src ]
         verbose(" '%s' (src) -> '%s'" % (src, src_rel))
-        data += "source.dir=%s\n" % src_rel
+        data += "source.dir=%s\n" % ";".join(src_rel)
 
     i = 1
     for dep in dependencies:
@@ -738,6 +799,11 @@ def copy_drawable_files(dest, drawable_files):
     _copy_files_to_dir(dest_dir, drawable_files, "[DRAWABLE]")
 
 #
+def copy_raw_resource_files(dest, raw_resource_files):
+    dest_dir = os.path.join(dest, "res", "raw")
+    _copy_files_to_dir(dest_dir, raw_resource_files, "[RAW RES]")
+
+#
 def copy_asset_files(dest, asset_files):
     dest_dir = os.path.join(dest, "assets")
     _copy_files_to_dir(dest_dir, asset_files, "[ASSET]")
@@ -750,25 +816,40 @@ def copy_png_asset_files(dest, png_asset_files):
 #
 #
 #
-def run_android_project_update(dest, name, dependencies, sdk_root, library):
+def run_android_project_update(dest, name, dependencies, sdk_root, library,
+                               options):
 
+    android_target = options['android-target']
     android = "android"
+
     if not sdk_root is None:
         android = sdk_root + "/tools/android"
 
     if library:
         cmd = '%s update lib-project -p %s -t %s' \
-            % (android, dest, 'android-16')
+            % (android, dest, android_target)
     else:
         cmd = '%s update project -p %s -t %s -n %s --subprojects' \
-            % (android, dest, 'android-16', name)
+            % (android, dest, android_target, name)
         for dep in dependencies:
             rel = os.path.relpath(dep, dest)
             verbose(" '%s' -> '%s'" % (dep, rel))
             cmd += ' --library %s' % rel
 
     verbose("EXEC: %s" % cmd)
-    return subprocess.call(cmd, shell=True)
+    if 0 != subprocess.call(cmd, shell=True):
+        return 1;
+
+    # # Add the manifestmerger settings if not already present
+
+    # local_properties = os.path.join(dest, "local.properties")
+    # cmd = "if ! grep 'manifestmerger' %s ; then echo manifestmerger.enabled=true >> %s ; fi" % \
+    #       (local_properties, local_properties)
+    # verbose("EXEC: %s" % cmd)
+    # if 0 != subprocess.call(cmd, shell=True):
+    #     return 1;
+
+    return 0
 
 ############################################################
 
@@ -797,7 +878,7 @@ def usage():
     --version <X.Y.Z[.W]>
 
     --target <android-target-name>
-                        - e.g. 'android-16'
+                        - e.g. 'android-15'
 
     --name <project-name>
                         - e.g. 'finalfwy'
@@ -817,6 +898,8 @@ def usage():
                           using the given icon.
 
     --sdk-version       - minSdkVersion
+
+    --debug             - (optional) set the debuggable flag in the application
 
     --permissions "<perm1>;<perm2>;.."
                         - (optional) e.g. "com.android.vending.CHECK_LICENSE;
@@ -873,6 +956,9 @@ def usage():
 
     --drawable <file>   - (optional) file to copy to res/drawable/
 
+    --raw-resource <file>
+                        - file to copy to res/raw/
+
     --asset <file>      - (optional) asset file to copy to assets
 
     --png-asset <file>  - (optional) asset file with .png extension
@@ -890,6 +976,8 @@ def usage():
     --expansion         - enable manifest entries for expansion files
 
     (External services / publishers)
+    --ouya              - (optional) include Ouya manifest entries
+    --ouya-icon <icon>  - (optional) icon for Ouya
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
     --gamecircle        - (optional) include Amazon GameCirlce entries
@@ -914,7 +1002,7 @@ def usage():
     --mdotm             - (optional) include mdotm manifest entries
   Example:
 
-    make_android_project --dest java --version 3.2.5 --target 'android-16' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
+    make_android_project --dest java --version 3.2.5 --target 'android-15' --name 'myproj' --title 'MyProject' --package com.company.project.app --sdk-version 8 --activity MyProjectActivity
 
 """
 
@@ -927,7 +1015,6 @@ def main():
     dest = None
     android_sdk_root = None
     version = None
-    target = None
     name = None
     title = None
     package = None
@@ -938,7 +1025,7 @@ def main():
     icon_file = None
     keystore = None
     keyalias = None
-    src = None
+    src = []
     extras = []
     permissions = \
         "android.permission.WAKE_LOCK" \
@@ -953,9 +1040,11 @@ def main():
     value_files = []
     layout_files = []
     drawable_files = []
+    raw_resource_files = []
     asset_files = []
     png_asset_files = []
     options = {
+        'android-target': "android-15",
         'landscape': 'sensorLandscape',
         'require-touch': True,
         'activity_files': [],
@@ -964,6 +1053,9 @@ def main():
         'launcher_activities': [],
         'proguard': None,
         'install-referrer': None,
+        'activity_extra_code': "",
+        'ouya_icon': None,
+        'debug': False,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -995,6 +1087,9 @@ def main():
         i_base = os.path.splitext(os.path.split(i)[1])[0]
         options['launcher_activities'].append((a,l,i_base))
 
+    def add_activity_code(ac):
+        options['activity_extra_code'] += ac
+
     while len(args):
         arg = args.pop(0)
 
@@ -1008,7 +1103,7 @@ def main():
         elif "--version" == arg:
             version = args.pop(0)
         elif "--target" == arg:
-            target = args.pop(0)
+            options['android-target'] = args.pop(0)
         elif "--name" == arg:
             name = args.pop(0)
         elif "--title" == arg:
@@ -1017,12 +1112,16 @@ def main():
             package = args.pop(0)
         elif "--app-tag-name" == arg:
             application_name = args.pop(0)
+            if -1 == application_name.find("."):
+                application_name = "." + application_name
         elif "--activity" == arg:
             activity = args.pop(0)
         elif "--launcher-activity" == arg:
             add_launcher_activity(args.pop(0))
         elif "--sdk-version" == arg:
             sdk_version = args.pop(0)
+        elif "--debug" == arg:
+            options['debug'] = True
         elif "--permissions" == arg:
             permissions += ";" + args.pop(0)
         elif "--resource-string" == arg:
@@ -1062,6 +1161,8 @@ def main():
             layout_files.append(args.pop(0))
         elif "--drawable" == arg:
             drawable_files.append(args.pop(0))
+        elif "--raw-resource" == arg:
+            raw_resource_files.append(args.pop(0))
         elif "--asset" == arg:
             asset_files.append(args.pop(0))
         elif "--png-asset" == arg:
@@ -1077,7 +1178,7 @@ def main():
         elif "--no-touch" == arg:
             options['require-touch'] = False
         elif "--src" == arg:
-            src = args.pop(0)
+            src.append(args.pop(0))
         elif "--library" == arg:
             library = True
         elif "--android-licensing" == arg:
@@ -1114,6 +1215,10 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
+        elif "--ouya" == arg:
+            add_activity_code(OUYA_EXTRA_CODE)
+        elif "--ouya-icon" == arg:
+            options['ouya_icon'] = args.pop(0)
         elif "--openkit" == arg:
             extras.append('openkit')
             extras.append('facebook')
@@ -1206,6 +1311,12 @@ def main():
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
 
+    if options['ouya_icon']:
+        if "ouya_icon.png" != os.path.split(options['ouya_icon'])[1]:
+            raise Exception("Ouya icon must be named ouya_icon.png")
+        _copy_files_to_dir(os.path.join(dest, "res", "drawable-xhdpi"),
+                           [ options['ouya_icon'] ])
+
     # Copy xml files
 
     if 0 != len(xml_files):
@@ -1226,6 +1337,11 @@ def main():
     if 0 != len(drawable_files):
         copy_drawable_files(dest, drawable_files)
 
+    # Copy raw resource files
+
+    if 0 != len(raw_resource_files):
+        copy_raw_resource_files(dest, raw_resource_files)
+
     # Copy asset files
 
     if 0 != len(asset_files):
@@ -1233,14 +1349,15 @@ def main():
     if 0 != len(png_asset_files):
         copy_png_asset_files(dest, png_asset_files)
 
-    # Run 'android update project -p ... --target android-16 -n <name>
+    # Run 'android update project -p ... --target android-15 -n <name>
     # --library ...'
 
     global wrote
     if wrote or not os.path.exists(os.path.join(dest, "build.xml")):
         fullname = "%s-%s" % (name, version)
         if not 0 == run_android_project_update(dest, fullname, depends,
-                                               android_sdk_root, library):
+                                               android_sdk_root, library,
+                                               options):
             return 1
     else:
         print "No project files changed, not running android project update"

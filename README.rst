@@ -143,6 +143,84 @@ Below are some advanced / internal variables.  All optional.
   Overrides the destination file for the given module.  Used only
   when `TS_MODULAR` is set.
 
+C++
+===
+
+External Libraries
+------------------
+
+Used to reference pre built static or dynamic libraries.  Usually take
+one of 2 forms ::
+
+  extmod_incdirs := path/to/extmod/include
+  extmod_libdir := path/to/extmod/lib
+  extmod_lib := ext
+  EXT += extmod
+
+where the include path is used in compiling any local modules that
+depend on `extmod`, and any apps or dlls with a dependency are
+linked using ::
+
+  -L $(extmod_libdir) -l $(extmod_lib)
+
+Alternatively, the path to the lib file can be given ::
+
+  extmod_incdirs := path/to/extmod/include
+  extmod_libfile := path/to/extmod/lib/libext.a
+  EXT += extlib
+
+in which case, link commands of dependent modules use the form ::
+
+  path/to/extmod/lib/libext.a
+
+
+Local Modules
+-------------
+
+C++ modules are added to one of `LIBS` (static lib), `DLLS` (dynamic
+lbi) or `APPS` (applications).  Each module may define:
+
+- `<modname>_src`
+
+  (required) List of .cpp or .c files to compile
+
+- `<modname>_incdirs`
+
+  Any include paths used in compiling this module.  Include paths will
+  also be used in compiling any module that depends on `<modname>`.
+
+- `<modname>_deps`
+
+  C++ modules on which `<modname>` depends.
+
+- `<modname>_extlibs`
+
+  External libs on which `<modname>` depends (see 'External Libraries'
+  above).
+
+- `<modname>_unity`
+
+  If set to `1`, attempt to compile all source files in a single
+  invocation of the compiler.
+
+- `<modname>_pch`
+
+  A header file to be used as a precompiled header for this module.
+
+- `<modname>_cxxflags`
+
+  Extra flags to pass to the compiler when building this module and
+  any modules that depend upon it.  Useful for flags such as
+  `-DENABLE_FEATURE=1`.
+
+- `<modname>_local_cxxflags`
+
+  Extra flags to pass to the compiler when building this module only.
+  Modules that depend upon this module do not see these flags.  Useful
+  for flags such as `-x c` to force a single module to be compiled as
+  C instead of C++.
+
+
 Configuration Variables
 =======================
 

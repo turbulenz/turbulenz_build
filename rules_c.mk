@@ -359,6 +359,9 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 define _make_cxx_flags_file
 
   ifneq ('$(shell cat $(2) 2>/dev/null)','$(strip $(3))')
+    # $$(info .flags: '$(shell cat $(2) 2>/dev/null)')
+    # $$(info new fl: '$(strip $(3))')
+
     $$(shell mkdir -p $($(1)_OBJDIR) ; echo '$(strip $(3))' > $(2))
   endif
 
@@ -366,6 +369,7 @@ define _make_cxx_flags_file
 
 endef
 
+ifneq (1,$(DISABLE_FLAG_CHECKS))
 $(foreach mod,$(C_MODULES),$(eval \
   $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags, $(strip   \
     $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags) $($(mod)_cxxflags) \
@@ -376,6 +380,7 @@ $(foreach mod,$(C_MODULES),$(eval \
     $(CXXFLAGSPOST)                                                     \
   ))                                                                    \
 ))
+endif
 
 #
 # Function to make a flymake target for a source file
@@ -435,7 +440,7 @@ define _make_pch_rule
 
   $(3) : $(2)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [PCH] \($(1)\) $$(notdir $$@)
+	@echo [PCH $(ARCH)] \($(1)\) $$(notdir $$@)
 	$(CMDPREFIX)$(CXX)                                             \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
       -MD -MT $4 -MT $$@ -MP                                       \
@@ -444,7 +449,7 @@ define _make_pch_rule
       $(addprefix -I,$($(1)_depincdirs))                           \
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
-      -x c++-header                                                \
+      $(PCHFLAGS)                                                  \
       $$< -o $$@
 
 
@@ -460,7 +465,7 @@ define _make_cxx_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CXX] \($(1)\) $$(notdir $$<)
+	@echo [CXX $(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
@@ -490,7 +495,7 @@ define _make_cmm_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CMM] \($(1)\) $$(notdir $$<)
+	@echo [CMM $(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CMMFLAGSPRE) $(CMMFLAGS)                                   \
@@ -565,7 +570,7 @@ define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
 	@mkdir -p $$(dir $$@)
-	@echo [AR ] $$(notdir $$@)
+	@echo [AR  $(ARCH)] $$(notdir $$@)
 	$(CMDPREFIX)rm -f $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
@@ -597,7 +602,7 @@ define _make_dll_rule
 
   $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
-	@echo [DLL] $$@
+	@echo [DLL $(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
       $(if $(DLLFLAGS_LIBDIR), \
@@ -645,7 +650,7 @@ define _make_app_rule
 
   $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@mkdir -p $(BINDIR)
-	@echo [LD ] $$@
+	@echo [LD  $(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$(LIBDIR)) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
@@ -735,18 +740,17 @@ APK_CONFIG := $(if $(ANDROID_KEY_STORE),$(CONFIG),debug)
 
 # For each apk, calc the destination and full set of native libs to
 # copy
-$(foreach apk,$(APKS),                                          \
-  $(eval $(apk)_apk_dest := $(BINDIR)/$(apk))                   \
-  $(eval $(apk)_apk_copylibs :=                                 \
-     $($(apk)_nativelibs)                                       \
-     $($($(apk)_native)_dllfile)                                \
-     $($($(apk)_native)_ext_dlls) )                             \
-  $(eval                                                        \
-     $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0) \
-  )                                                             \
-  $(eval $(apk)_apk_file :=                                     \
+$(foreach apk,$(APKS),														\
+  $(eval $(apk)_apk_dest := $(BINOUTDIR)/$(apk))							\
+  $(eval																	\
+     $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0)		\
+  )																			\
+  $(eval $(apk)_apk_file :=													\
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
-  )                                                             \
+  )																			\
+  $(eval																	\
+    $(apk)_archs := $(if $($(apk)_archs),$($(apk)_archs),$(ARCH))			\
+  )																			\
 )
 $(call log,android_engine_dest = $(android_engine_dest))
 $(call log,android_engine_copylibs = $(android_engine_copylibs))
@@ -771,10 +775,24 @@ $(foreach apk,$(APKS),                                          \
 )
 # $(warning android_online_apk_depflags = $(android_online_apk_depflags))
 
+# Rule to make native apps for APK
+# 1 - apk name
+# 2 - apk location
+# 3 - arch
+define _make_apk_native_rule
+
+  .PHONY : _$(1)_make_$(3)_native_libs
+  _$(1)_make_$(3)_native_libs :
+	$(MAKE) ARCH=$(3) $($(1)_native)                   \
+      BINDIR=$(2)/libs/$(call _android_arch_name,$(3))
+
+  $(1) : _$(1)_make_$(3)_native_libs
+
+endef
+
 # Rule to make an APK
 # 1 - apk name
 # 2 - apk location
-# 3 - required dlls
 define _make_apk_rule
 
   .PHONY : $(1)
@@ -788,7 +806,7 @@ define _make_apk_rule
   # 4.2.24(1)) are broken and don't deal with missing destination
   # files as part of -nt.
 
-  $(1) : $(3) $($(1)_deps) $($(1)_native) $($(1)_datarule)
+  $(1) : $($(1)_deps) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
 	echo $(CMDPREFIX)rm -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
@@ -801,7 +819,7 @@ define _make_apk_rule
       --version $($(1)_version)                                              \
       --name $(1)                                                            \
       --package $($(1)_package)                                              \
-      $(if $($(1)_srcbase),--src $($(1)_srcbase))                            \
+      $(if $($(1)_srcbase),$(addprefix --src ,$($(1)_srcbase)))              \
       $(if $(ANDROID_KEY_STORE),--key-store $(ANDROID_KEY_STORE))            \
       $(if $(ANDROID_KEY_ALIAS),--key-alias $(ANDROID_KEY_ALIAS))            \
       $(if $(ANDROID_SDK),--android-sdk $(ANDROID_SDK))                      \
@@ -812,12 +830,6 @@ define _make_apk_rule
       $(if $($(1)_icondir),--icon-dir $($(1)_icondir))                       \
       $($(1)_apk_depflags)                                                   \
       $($(1)_flags)
-	$(CMDPREFIX)for l in $(3) ; do                              \
-      dst=$(2)/libs/$(ANDROID_ARCH_NAME)/`basename $$$$l` ;     \
-      if [ ! -e $$$$dst ] || [ $$$$l -nt $$$$dst ] ; then       \
-        echo [CP DLL] $$$$l ; cp -a $$$$l $$$$dst ;             \
-      fi ;                                                      \
-    done
 	$(CMDPREFIX)for j in $($(1)_jarfiles) ; do                  \
       dst=$(2)/libs/`basename $$$$j` ;                          \
       if [ ! -f $$$$dst ] || [ $$$$j -nt $$$$dst ] ; then       \
@@ -841,9 +853,17 @@ endef
 
 
 ifeq ($(TARGET),android)
-  $(foreach apk,$(APKS),$(eval                                      \
-    $(call _make_apk_rule,$(apk),$($(apk)_apk_dest),$($(apk)_apk_copylibs)) \
-  ))
+
+  # Rules to build the native libs for each arch into the correct
+  # location, followed by the APK itself.
+
+  $(foreach apk,$(APKS),													\
+    $(if $($(apk)_native), $(foreach arch,$($(apk)_archs),                  \
+      $(eval $(call _make_apk_native_rule,$(apk),$($(apk)_apk_dest),$(arch))) \
+    ))																		\
+    $(eval $(call _make_apk_rule,$(apk),$($(apk)_apk_dest)))                \
+  )
+
 endif
 
 ############################################################
