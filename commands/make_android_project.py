@@ -94,9 +94,10 @@ MANIFEST_1_CHARTBOOST = """
         <!-- CHARTBOOST END -->"""
 
 CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
-    ";android.permission.WRITE_EXTERNAL_STORAGE" + \
-    ";android.permission.ACCESS_NETWORK_STATE" + \
-    ";android.permission.ACCESS_WIFI_STATE"
+    ";android.permission.ACCESS_NETWORK_STATE"
+
+    # ";android.permission.WRITE_EXTERNAL_STORAGE" + \
+    # ";android.permission.ACCESS_WIFI_STATE"
 
 MANIFEST_1_TAPFORTAP = "defined in write_manifest"
 
