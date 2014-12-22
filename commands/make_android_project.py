@@ -11,13 +11,6 @@ MANIFEST_1_ANDROIDLICENSE = ""
 
 ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
-OUYA_EXTRA_CODE = """
-          <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-            <category android:name="tv.ouya.intent.category.GAME"/>
-          </intent-filter>"""
-
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
         <activity android:name="com.google.android.gms.ads.AdActivity"
@@ -555,6 +548,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="tv.ouya.intent.category.GAME"/>
             </intent-filter>"""
 
     if intent_filters:
@@ -977,7 +972,6 @@ def usage():
     --expansion         - enable manifest entries for expansion files
 
     (External services / publishers)
-    --ouya              - (optional) include Ouya manifest entries
     --ouya-icon <icon>  - (optional) icon for Ouya
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -1216,8 +1210,6 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
-        elif "--ouya" == arg:
-            add_activity_code(OUYA_EXTRA_CODE)
         elif "--ouya-icon" == arg:
             options['ouya_icon'] = args.pop(0)
         elif "--openkit" == arg:
