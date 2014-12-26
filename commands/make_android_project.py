@@ -11,6 +11,16 @@ MANIFEST_1_ANDROIDLICENSE = ""
 
 ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
+MANIFEST_1_ACRA = """
+        <!-- ACRA BEGIN -->
+        <activity android:name="org.acra.CrashReportDialog"
+            android:theme="@android:style/Theme.Dialog"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
+        <!-- ACRA END -->"""
+ACRA_PERMISSIONS = ""
+
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
         <activity android:name="com.google.android.gms.ads.AdActivity"
@@ -403,6 +413,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
     # [ MANIFEST_FRAGMENT, <permissions>, <override main activity> ]
 
     extras_table = {
+        'acra': [ MANIFEST_1_ACRA, ACRA_PERMISSIONS, False ],
         'androidlicense':
         [ MANIFEST_1_ANDROIDLICENSE, ANDROIDLICENSE_PERMISSIONS, False ],
         'admob'      : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
@@ -972,6 +983,7 @@ def usage():
     --expansion         - enable manifest entries for expansion files
 
     (External services / publishers)
+    --acra              - (optional) Acra declarations
     --ouya-icon <icon>  - (optional) icon for Ouya
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -1210,6 +1222,8 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
+        elif "--acra" == arg:
+            extras.append('acra')
         elif "--ouya-icon" == arg:
             options['ouya_icon'] = args.pop(0)
         elif "--openkit" == arg:
