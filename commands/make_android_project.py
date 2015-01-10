@@ -640,6 +640,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
 
     <uses-sdk android:minSdkVersion="%ANDROID_SDK_VERSION%" />"""
 
+    if options['gamepad']:
+        MANIFEST_2 += """
+    <uses-feature android:name="android.hardware.gamepad" android:required="false"/>"""
+
     if not options['require-touch']:
         MANIFEST_2 += """
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />"""
@@ -981,6 +985,7 @@ def usage():
     --proguard <file>   - (optional) enable proguard using given file
 
     --expansion         - enable manifest entries for expansion files
+    --gamepad           - declare game-pad support (with required="false")
 
     (External services / publishers)
     --acra              - (optional) Acra declarations
@@ -1063,6 +1068,8 @@ def main():
         'activity_extra_code': "",
         'ouya_icon': None,
         'debug': False,
+        'gamepad': False,
+        'banner': None,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -1194,6 +1201,8 @@ def main():
             options['proguard'] = args.pop(0)
         elif "--expansion" == arg:
             extras.append('expansion')
+        elif "--gamepad" == arg:
+            options['gamepad'] = True
         elif "--admob" == arg:
             extras.append('admob')
         elif "--mmedia" == arg:
