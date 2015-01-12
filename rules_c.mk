@@ -837,6 +837,7 @@ define _make_apk_rule
       fi ;                                                      \
     done
 	$(CMDPREFIX)cd $(2) && ant $(APK_CONFIG)
+	$($(1)_poststep)
 
   $(1)_install : $(1)
 	adb install -r $($(1)_apk_file)
