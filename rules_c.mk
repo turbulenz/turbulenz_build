@@ -357,12 +357,12 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 # 2 - flags file
 # 3 - flags string
 define _make_cxx_flags_file
-
-  ifneq ('$(shell cat $(2) 2>/dev/null)','$(strip $(3))')
+  ifneq ('$(shell $(CAT) $(2))','$(strip $(3))')
     # $$(info .flags: '$(shell cat $(2) 2>/dev/null)')
     # $$(info new fl: '$(strip $(3))')
 
-    $$(shell mkdir -p $($(1)_OBJDIR) ; echo '$(strip $(3))' > $(2))
+    $$(shell $(MKDIR) -p $($(1)_OBJDIR))
+    $$(shell echo '$(strip $(3))' > $(2))
   endif
 
   $($(1)_OBJECTS) : $(2)
@@ -464,7 +464,7 @@ define _make_cxx_object_rule
   .PRECIOUS : $(3)
 
   $(3) : $(2) $(_$1_pchfile)
-	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
+	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX $(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
@@ -569,9 +569,9 @@ $(foreach mod,$(C_MODULES),$(eval \
 define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
-	@mkdir -p $$(dir $$@)
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	@echo [AR  $(ARCH)] $$(notdir $$@)
-	$(CMDPREFIX)rm -f $$@
+	$(CMDPREFIX)$(RM) $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
      $(arout) $$@ \

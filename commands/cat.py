@@ -4,8 +4,11 @@ import sys
 ############################################################
 
 def _read_file(filename):
-    with open(filename, 'rb') as f:
-        return f.read()
+    try:
+        with open(filename, 'rb') as f:
+            return f.read()
+    except IOError:
+        exit(-1)
 
 def cat(infiles):
 

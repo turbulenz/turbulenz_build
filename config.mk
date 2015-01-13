@@ -175,7 +175,7 @@ ifeq ($(VALGRIND),1)
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
-CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
+CAT := python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
