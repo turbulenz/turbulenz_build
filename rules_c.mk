@@ -92,27 +92,31 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 
 ############################################################
 
-# call full paths of all source files
-# ifneq (1,$(C_SYNTAX_CHECK))
-$(call log,standalone_src = $(standalone_src))
-$(foreach mod,$(C_MODULES),$(eval                          \
-  $(mod)_src := $(foreach s,$($(mod)_src),                 \
-    $(if $(realpath $(s)),$(realpath $(s)),$(s))           \
-  )                                                        \
-))
-# endif
-$(call log,standalone_src = $(standalone_src))
+ifeq (1,$(ABSPATHS))
+  # call full paths of all source files
+  # ifneq (1,$(C_SYNTAX_CHECK))
+  $(call log,standalone_src = $(standalone_src))
+  $(foreach mod,$(C_MODULES),$(eval                          \
+	$(mod)_src := $(foreach s,$($(mod)_src),                 \
+	  $(if $(realpath $(s)),$(realpath $(s)),$(s))           \
+	)                                                        \
+  ))
+  # endif
+  $(call log,standalone_src = $(standalone_src))
+endif
 
 # calc <mod>_headerfile all headers belonging to this module
 $(foreach mod,$(C_MODULES),$(eval \
   $(mod)_headerfiles := $(foreach i,$($(mod)_incdirs),$(wildcard $(i)/*.h)) \
 ))
 
-# calc full paths of all incdirs and libdirs (including externals)
-$(foreach mod,$(C_MODULES) $(EXT),$(eval \
-  $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
-))
-$(call log,javascriptcore_incdirs = $(javascriptcore_incdirs))
+ifeq (1,$(ABSPATHS))
+  # calc full paths of all incdirs and libdirs (including externals)
+  $(foreach mod,$(C_MODULES) $(EXT),$(eval \
+	$(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
+  ))
+  $(call log,javascriptcore_incdirs = $(javascriptcore_incdirs))
+endif
 
 # calc full path of each <ext>_libdir
 $(foreach ext,$(EXT), \

@@ -11,6 +11,7 @@ BUILDVERBOSE ?= 0
 CMDVERBOSE ?= 0
 CONFIG ?= release
 VALGRIND ?= 0
+ABSPATHS ?= 1
 
 # Disable all build-in rules
 .SUFFIXES:
@@ -155,12 +156,14 @@ include $(_platform_config)
 
 ############################################################
 
-ROOTDIR ?= $(realpath .)
-OBJDIR = $(ROOTDIR)/obj/$(TARGET)$(VARIANT)-$(CONFIG)
+ifeq (1,$(ABSPATHS))
+  ROOTDIR ?= $(realpath .)/
+endif
+OBJDIR = $(ROOTDIR)obj/$(TARGET)$(VARIANT)-$(CONFIG)
 DEPDIR = $(OBJDIR)
-LIBDIR = $(ROOTDIR)/lib/$(TARGET)$(VARIANT)-$(CONFIG)
-BINDIR = $(ROOTDIR)/bin/$(TARGET)$(VARIANT)-$(CONFIG)
-BINOUTDIR = $(ROOTDIR)/bin/$(TARGET)-$(CONFIG)
+LIBDIR = $(ROOTDIR)lib/$(TARGET)$(VARIANT)-$(CONFIG)
+BINDIR = $(ROOTDIR)bin/$(TARGET)$(VARIANT)-$(CONFIG)
+BINOUTDIR = $(ROOTDIR)bin/$(TARGET)-$(CONFIG)
 
 ############################################################
 
