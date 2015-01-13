@@ -358,9 +358,10 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 # 3 - flags string
 define _make_cxx_flags_file
   ifneq ('$(shell $(CAT) $(2))','$(strip $(3))')
-    # $$(info .flags: '$(shell cat $(2) 2>/dev/null)')
-    # $$(info new fl: '$(strip $(3))')
+    # $$(info .flags: '$$(shell cat $(2) 2>/dev/null)')
+    # $$(info new fl: '$$(strip $(3))')
 
+    $$(shell $(MKDIR) -p $($(1)_OBJDIR))
     $$(shell $(MKDIR) -p $($(1)_OBJDIR))
     $$(shell echo '$(strip $(3))' > $(2))
   endif
