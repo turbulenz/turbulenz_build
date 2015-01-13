@@ -148,7 +148,7 @@ _platform_config :=                                     \
   $(wildcard $(BUILDDIR)/platform_$(TARGET).mk)         \
   $(wildcard $(CUSTOMSCRIPTS)/platform_$(TARGET).mk)
 
-ifeq (,$(_platform_config))
+ifeq (,$(strip $(_platform_config)))
   $(error Cannot find platform_$(TARGET).mk)
 endif
 include $(_platform_config)
