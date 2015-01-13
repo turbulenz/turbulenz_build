@@ -116,6 +116,10 @@ ifeq ($(TARGET),ios)
   VARIANT:=-$(ARCH)
 endif
 
+# Give the client a chance to define their own configuration code and
+# platforms.
+-include $(CUSTOMSCRIPTS)/tzbuild_config.mk
+
 # unknown
 ifeq ($(TARGETNAME),)
   $(error Couldnt determine TARGETNAME from TARGET: $(TARGET))
@@ -140,7 +144,14 @@ endif
 # Target PLATFORM variables
 ############################################################
 
-include $(BUILDDIR)/platform_$(TARGET).mk
+_platform_config :=                                     \
+  $(wildcard $(BUILDDIR)/platform_$(TARGET).mk)         \
+  $(wildcard $(CUSTOMSCRIPTS)/platform_$(TARGET).mk)
+
+ifeq (,$(_platform_config))
+  $(error Cannot find platform_$(TARGET).mk)
+endif
+include $(_platform_config)
 
 ############################################################
 
