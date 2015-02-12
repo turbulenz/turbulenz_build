@@ -258,7 +258,7 @@ ifeq ($(UNITY),1)
 define _make_cxx_unity_file
 
   $($(1)_src) : $($(1)_unity_src)
-	@mkdir -p $($(1)_OBJDIR)
+	@$(MKDIR) -p $($(1)_OBJDIR)
 	echo > $$@
 	for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
 
@@ -662,7 +662,7 @@ $(foreach app,$(APPS),$(eval \
 define _make_app_rule
 
   $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
-	@mkdir -p $(BINDIR)
+	@$(MKDIR) -p $(BINDIR)
 	@echo [LD  $(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$(LIBDIR)) \

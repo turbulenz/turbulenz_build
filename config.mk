@@ -60,6 +60,7 @@ endif
 ifeq ($(UNAME),win32)
   BUILDHOST := win32
   ABSPATHS := 0
+  UNITY := 0
 endif
 
 # Set TARGET if it hasn't been determined, and based on that, set
