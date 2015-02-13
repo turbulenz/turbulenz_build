@@ -305,6 +305,9 @@ define _make_cxx_obj_dep_list
      ) \
     $(foreach s,$(filter %.c,$($(1)_src)), \
       $(s)!$($(1)_OBJDIR)/$(notdir $(s:.c=.o))!$($(1)_DEPDIR)/$(notdir $(s:.c=.d)) \
+     ) \
+    $(foreach s,$(filter %.cc,$($(1)_src)), \
+      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cc=.o))!$($(1)_DEPDIR)/$(notdir $(s:.cc=.d)) \
      )
 endef
 
