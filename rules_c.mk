@@ -507,7 +507,7 @@ endef
 define _make_cmm_object_rule
 
   .PRECIOUS : $(3)
-.
+
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CMM $(ARCH)] \($(1)\) $$(notdir $$<)
