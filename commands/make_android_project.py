@@ -596,7 +596,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         <activity """
         MANIFEST_0 += "android:name=\"%s\" android:label=\"%s\" " \
                       % (activity_class, activity_label)
-        MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon) + """
+        if activity_icon:
+            MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon)
+
+        MANIFEST_0 += """
                   >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -898,7 +901,7 @@ def usage():
     --package <com.company...myapp>
     --src <src-dir>     - base directory of source files
     --activity <class-name>
-    --launcher-activity <class-name>,<label>,<icon-file>
+    --launcher-activity <class-name>,<label>[,<icon-file>]
                         - (optional) add a basic decl for a launchable activity
                           using the given icon.
     --sdk-version       - minSdkVersion
@@ -1054,17 +1057,20 @@ def main():
 
     def add_launcher_activity(ai):
         parts = ai.split(',')
-        if 3 != len(parts):
+        if 2 > len(parts):
             print "Badly formated launcher activity: %s" % ai
             usage()
             exit(1)
 
         a = parts[0]
         l = parts[1]
-        i = parts[2]
-        drawable_files.append(i)
+        i_base = None
 
-        i_base = os.path.splitext(os.path.split(i)[1])[0]
+        if 3 <= len(parts):
+            i = parts[2]
+            drawable_files.append(i)
+            i_base = os.path.splitext(os.path.split(i)[1])[0]
+
         options['launcher_activities'].append((a,l,i_base))
 
     def add_activity_code(ac):
