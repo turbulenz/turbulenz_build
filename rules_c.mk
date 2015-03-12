@@ -18,7 +18,10 @@ endif
 
 ############################################################
 
+space:= #
 cdeps?= -MP -MD -MF
+cout?=-o$(space)
+cobj?=.o
 cdeptarget?=-MT
 cdeptargetpre?=
 cdeptargetpost?=
@@ -301,13 +304,13 @@ $(foreach mod,$(C_MODULES), \
 define _make_cxx_obj_dep_list
   $(1)_cxx_obj_dep := \
     $(foreach s,$(filter %.cpp,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cpp=.o))!$($(1)_DEPDIR)/$(notdir $(s:.cpp=.d)) \
+      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cpp=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.cpp=.d)) \
      ) \
     $(foreach s,$(filter %.c,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.c=.o))!$($(1)_DEPDIR)/$(notdir $(s:.c=.d)) \
+      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.c=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.c=.d)) \
      ) \
     $(foreach s,$(filter %.cc,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cc=.o))!$($(1)_DEPDIR)/$(notdir $(s:.cc=.d)) \
+      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cc=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.cc=.d)) \
      )
 endef
 
@@ -464,7 +467,7 @@ define _make_pch_rule
       $(addprefix -I,$($(1)_ext_incdirs))                           \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                    \
       $(PCHFLAGS)                                                   \
-      $$< -o $$@
+      $$< $(cout) $$@
 
 
 endef
@@ -483,14 +486,16 @@ define _make_cxx_object_rule
 	$(CMDPREFIX)$(CXX)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
-      $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
-      $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)           \
+      $(if $(DISABLE_DEP_GEN),, \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost) \
+      ) \
       $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)  \
       $(addprefix -I,$($(1)_incdirs))                              \
       $(addprefix -I,$($(1)_depincdirs))                           \
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
-      $$< -o $$@
+      $(cout)$$@ $(csrc) $$<
 
   $(3).S : $(3)
 	@echo [DISASS] \($(1)\) $$@
@@ -521,7 +526,7 @@ define _make_cmm_object_rule
       $(addprefix -I,$($(1)_depincdirs))                            \
       $(addprefix -I,$($(1)_ext_incdirs))                           \
       $(CMMFLAGSPOST) $($(call file_flags,$(2)))                    \
-      $$< -o $$@
+      $$< $(cout) $$@
 
 endef
 
@@ -590,7 +595,7 @@ define _make_lib_rule
 	$(CMDPREFIX)$(RM) $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
-     $(arout) $$@ \
+     $(arout)$$@ \
      $($(1)_OBJECTS) \
       $(ARFLAGSPOST) \
 
