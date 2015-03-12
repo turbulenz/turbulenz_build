@@ -4,13 +4,17 @@ import sys
 ############################################################
 
 def _read_file(filename):
-    with open(filename, 'rb') as f:
-        return f.read()
+    try:
+        with open(filename, 'rb') as f:
+            return f.read()
+    except IOError:
+        print "Error reading file: %s" % filename
+        exit(-1)
 
 def cat(infiles):
 
     if len(infiles) < 1:
-        usage()
+        print "No files specified"
         return 1
 
     # Dump all files to stdout

@@ -11,6 +11,7 @@ BUILDVERBOSE ?= 0
 CMDVERBOSE ?= 0
 CONFIG ?= release
 VALGRIND ?= 0
+ABSPATHS ?= 1
 
 # Disable all build-in rules
 .SUFFIXES:
@@ -58,6 +59,8 @@ endif
 
 ifeq ($(UNAME),win32)
   BUILDHOST := win32
+  ABSPATHS := 0
+  UNITY := 0
 endif
 
 # Set TARGET if it hasn't been determined, and based on that, set
@@ -99,6 +102,11 @@ ifeq ($(TARGET),win32)
   ARCH ?= i386
 endif
 
+ifeq ($(TARGET),win64)
+  TARGETNAME := win64
+  ARCH ?= x86_64
+endif
+
 ifeq ($(TARGET),iossim)
   # 'iossim' is shorthand for TARGET=ios, ARCH=i386
   override TARGET := ios
@@ -110,6 +118,10 @@ ifeq ($(TARGET),ios)
   ARCH ?= armv7
   VARIANT:=-$(ARCH)
 endif
+
+# Give the client a chance to define their own configuration code and
+# platforms.
+-include $(CUSTOMSCRIPTS)/tzbuild_config.mk
 
 # unknown
 ifeq ($(TARGETNAME),)
@@ -135,16 +147,25 @@ endif
 # Target PLATFORM variables
 ############################################################
 
-include $(BUILDDIR)/platform_$(TARGET).mk
+_platform_config :=                                     \
+  $(wildcard $(BUILDDIR)/platform_$(TARGET).mk)         \
+  $(wildcard $(CUSTOMSCRIPTS)/platform_$(TARGET).mk)
+
+ifeq (,$(strip $(_platform_config)))
+  $(error Cannot find platform_$(TARGET).mk)
+endif
+include $(_platform_config)
 
 ############################################################
 
-ROOTDIR ?= $(realpath .)
-OBJDIR = $(ROOTDIR)/obj/$(TARGET)$(VARIANT)-$(CONFIG)
+ifeq (1,$(ABSPATHS))
+  ROOTDIR ?= $(realpath .)/
+endif
+OBJDIR = $(ROOTDIR)obj/$(TARGET)$(VARIANT)-$(CONFIG)
 DEPDIR = $(OBJDIR)
-LIBDIR = $(ROOTDIR)/lib/$(TARGET)$(VARIANT)-$(CONFIG)
-BINDIR = $(ROOTDIR)/bin/$(TARGET)$(VARIANT)-$(CONFIG)
-BINOUTDIR = $(ROOTDIR)/bin/$(TARGET)-$(CONFIG)
+LIBDIR = $(ROOTDIR)lib/$(TARGET)$(VARIANT)-$(CONFIG)
+BINDIR = $(ROOTDIR)bin/$(TARGET)$(VARIANT)-$(CONFIG)
+BINOUTDIR = $(ROOTDIR)bin/$(TARGET)-$(CONFIG)
 
 ############################################################
 
@@ -164,12 +185,13 @@ ifneq ($(CMDVERBOSE),1)
 endif
 
 ifeq ($(VALGRIND),1)
-  RUNPREFIX+=valgrind --dsymutil=yes --leak-check=full --error-exitcode=15
+  RUNPREFIX+=valgrind --dsymutil=yes --track-origins=yes --leak-check=full --error-exitcode=15
   # --gen-suppressions=all
+  CXXFLAGS += -DTZ_VALGRIND
 endif
 
 CP := python $(BUILDDIR)/commands/cp.py
-CAT := $(CMDPREFIX)python $(BUILDDIR)/commands/cat.py
+CAT := python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py

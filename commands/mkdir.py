@@ -6,7 +6,7 @@ def mkdir():
 
     args = argv[1:]
 
-    d = None
+    dirs = []
     verbose = False
     create_intermediate = True
 
@@ -17,27 +17,27 @@ def mkdir():
         elif "-p" == a:
             # TODO: ?
             create_intermediate = True
+        elif "-h" == a or "--help" == a:
+            usage()
+            exit(0)
         else:
-            if not d is None:
-                usage()
-                return 1
-            d = a
+            dirs.append(a)
 
-    if not exists(d):
-
-        if verbose:
-            print "Making dir: %s" % d
-
-        try:
-            makedirs(d)
-        except OSError, e:
-            # Directory may have already been created after the check
-            # above
-            pass
-
+    for d in dirs:
         if not exists(d):
-            print "Error creating dir: %s" % d
-            return 1
+            if verbose:
+                print "Making dir: %s" % d
+
+            try:
+                makedirs(d)
+            except OSError, e:
+                # Directory may have already been created after the check
+                # above
+                pass
+
+            if not exists(d):
+                print "Error creating dir: %s" % d
+                return 1
 
     return 0
 
