@@ -26,6 +26,9 @@ cdeptarget?=-MT
 cdeptargetpre?=
 cdeptargetpost?=
 
+libprefix?=lib
+libsuffix?=.a
+
 #
 # Platform Checks
 #

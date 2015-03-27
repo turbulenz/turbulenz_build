@@ -250,10 +250,10 @@ endif
 ifeq (1,$(C_OPTIMIZE))
   CXXFLAGSPRE += /O2 /MD -DNEDBUG
   ifeq (i386,$(ARCH))
-    CXXFLAGSPRE += /Oy -DDEBUG -D_DEBUG
+    CXXFLAGSPRE += /Oy
   endif
 else
-  CXXFLAGSPRE += /GS (buffer security) /Od /RTC1 /MDd
+  CXXFLAGSPRE += /GS /Od /RTC1 /MDd -DDEBUG -D_DEBUG
   ifeq (i386,$(ARCH))
     CXXFLAGSPRE += /Oy-
   endif
