@@ -11,12 +11,15 @@ MANIFEST_1_ANDROIDLICENSE = ""
 
 ANDROIDLICENSE_PERMISSIONS = ";com.android.vending.CHECK_LICENSE"
 
-OUYA_EXTRA_CODE = """
-          <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-            <category android:name="tv.ouya.intent.category.GAME"/>
-          </intent-filter>"""
+MANIFEST_1_ACRA = """
+        <!-- ACRA BEGIN -->
+        <activity android:name="org.acra.CrashReportDialog"
+            android:theme="@android:style/Theme.Dialog"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
+        <!-- ACRA END -->"""
+ACRA_PERMISSIONS = ""
 
 MANIFEST_1_ADMOB = """
         <!-- ADMOB BEGIN -->
@@ -94,9 +97,10 @@ MANIFEST_1_CHARTBOOST = """
         <!-- CHARTBOOST END -->"""
 
 CHARTBOOST_PERMISSIONS = ";android.permission.INTERNET" + \
-    ";android.permission.WRITE_EXTERNAL_STORAGE" + \
-    ";android.permission.ACCESS_NETWORK_STATE" + \
-    ";android.permission.ACCESS_WIFI_STATE"
+    ";android.permission.ACCESS_NETWORK_STATE"
+
+    # ";android.permission.WRITE_EXTERNAL_STORAGE" + \
+    # ";android.permission.ACCESS_WIFI_STATE"
 
 MANIFEST_1_TAPFORTAP = "defined in write_manifest"
 
@@ -409,6 +413,7 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
     # [ MANIFEST_FRAGMENT, <permissions>, <override main activity> ]
 
     extras_table = {
+        'acra': [ MANIFEST_1_ACRA, ACRA_PERMISSIONS, False ],
         'androidlicense':
         [ MANIFEST_1_ANDROIDLICENSE, ANDROIDLICENSE_PERMISSIONS, False ],
         'admob'      : [ MANIFEST_1_ADMOB, ADMOB_PERMISSIONS, False ],
@@ -527,6 +532,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         MANIFEST_0 += """
                  android:debuggable="true" """
 
+    if options['banner']:
+        MANIFEST_0 += """
+                 android:banner="@drawable/banner" """
+
     if options['backup_agent']:
         class_key = options['backup_agent'].split(',')
         MANIFEST_0 += """
@@ -554,6 +563,8 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="tv.ouya.intent.category.GAME"/>
             </intent-filter>"""
 
     if intent_filters:
@@ -585,7 +596,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
         <activity """
         MANIFEST_0 += "android:name=\"%s\" android:label=\"%s\" " \
                       % (activity_class, activity_label)
-        MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon) + """
+        if activity_icon:
+            MANIFEST_0 += ("android:icon=\"@drawable/%s\"" % activity_icon)
+
+        MANIFEST_0 += """
                   >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -632,6 +646,10 @@ def write_manifest(dest, table, permissions, intent_filters, meta, app_meta,
     <!-- SCREEN END -->
 
     <uses-sdk android:minSdkVersion="%ANDROID_SDK_VERSION%" />"""
+
+    if options['gamepad']:
+        MANIFEST_2 += """
+    <uses-feature android:name="android.hardware.gamepad" android:required="false"/>"""
 
     if not options['require-touch']:
         MANIFEST_2 += """
@@ -731,30 +749,30 @@ def write_ant_properties(dest, dependencies, src, library, keystore, keyalias,
 #
 #
 #
-def copy_icon_files(dest, icon_dir):
-    types = [ "hdpi", "mdpi", "ldpi" ]
-    optional_types = [ "xhdpi" ]
+def copy_drawable_files_with_name(dest, root_dir, filename):
+    types = [ ]
+    optional_types = [ "hdpi", "mdpi", "ldpi", "xhdpi", "xxhdpi" ]
 
-    # Check for icon files
+    # Check for files
 
     src_dest = {}
     for i in types:
-        src = os.path.join(icon_dir, "drawable-%s" % i, "icon.png")
+        src = os.path.join(root_dir, "drawable-%s" % i, filename)
         if not os.path.exists(src):
             print "ERROR: Failed to find '%s'" % src
             exit(1)
         src_dest[src] = os.path.join(dest, "res", "drawable-%s" % i)
     for i in optional_types:
-        src = os.path.join(icon_dir, "drawable-%s" % i, "icon.png")
+        src = os.path.join(root_dir, "drawable-%s" % i, filename)
         if os.path.exists(src):
             src_dest[src] = os.path.join(dest, "res", "drawable-%s" % i)
 
     for src in src_dest:
         dest = src_dest[src]
-        verbose("[ICON] %s -> %s" % (src, dest))
+        verbose("[DRAWABLE] %s -> %s" % (src, dest))
 
         mkdir_if_not_exists(dest)
-        copy_file_if_different(src, os.path.join(dest, "icon.png"))
+        copy_file_if_different(src, os.path.join(dest, filename))
 
 #
 #
@@ -872,111 +890,74 @@ def usage():
   Options:
 
     -v,--verbose        - Spit out debugging information
-
     --dest <dir-name>   - Directory to create project in
-
     --version <X.Y.Z[.W]>
-
     --target <android-target-name>
                         - e.g. 'android-15'
-
     --name <project-name>
                         - e.g. 'finalfwy'
-
     --title <app-title>
                         - e.g. 'Final Fwy'
-
     --package <com.company...myapp>
-
-    --src <src-dir>
-                        - base directory of source files
-
+    --src <src-dir>     - base directory of source files
     --activity <class-name>
-
-    --launcher-activity <class-name>,<label>,<icon-file>
+    --launcher-activity <class-name>,<label>[,<icon-file>]
                         - (optional) add a basic decl for a launchable activity
                           using the given icon.
-
     --sdk-version       - minSdkVersion
-
     --debug             - (optional) set the debuggable flag in the application
-
     --permissions "<perm1>;<perm2>;.."
                         - (optional) e.g. "com.android.vending.CHECK_LICENSE;
                           android.permission.INTERNET"
-
     --resource-string name,value
                         - (optional) add a string resource to the APK
-
     --intent-filters <xml file>
                         - (optional) file with intent filters to add to main
                           activity
-
     --install-referrer <class-name>
                         - Add an intent filter to the manifest to send
                           INSTALL_REFERRER to the given class
-
     --no-launcher       - Remove the main LAUNCHER intent so that no launcher
                           icon is created for the app
-
     --activity-decl <xml file>
                         - (optional) file with an activity in it
-
     --backup-agent <class>,<appkey>
                         - (optional )Enable backup agent with class and key
-
     --meta <key>:<value>
                         - (optional) add a meta data key-value pair to the
                           main activity
-
     --app-meta <key>:<value>
                         - (optional) add a meta tag to the 'application' tag
-
     --app-tag-name <classname>
                         - (optional) name to use in application tag
-
     --depends <project-location>
                         - (optional) Can use multiple times
-
     --icon-dir <icon-dir>
-                        - (optional) Use drawable-* from <icon-dir>
-
+                        - (optional) Use drawable-*/icon.png from <icon-dir>
     --icon-file <icon-file>
                         - (optional) Use specific file as icon
-
+    --banner <banner-dir>
+                        - Use drawable-*/banner.png from <banner-dir>
     --key-store <file>  - (optional) Location of keystore
-
     --key-alias <alias> - (optional) Alias of key in keys store to use
-
     --xml <file>        - (optional) .xml file to copy to res/xml/
-
     --value <file>      - (optional) .xml file to copy to res/values/
-
     --layout <file>     - (optional) .xml file to copy to res/layout/
-
     --drawable <file>   - (optional) file to copy to res/drawable/
-
     --raw-resource <file>
                         - file to copy to res/raw/
-
     --asset <file>      - (optional) asset file to copy to assets
-
     --png-asset <file>  - (optional) asset file with .png extension
-
     --landscape <type>  - (optional) type can be: off, on, sensor(default)
-
     --no-touch          - (optional) don't require touch support
-
     --android-sdk       - (optional) root of android SDK (if not in path)
-
     --android-licensing - (optional) code for android licensing
-
     --proguard <file>   - (optional) enable proguard using given file
-
     --expansion         - enable manifest entries for expansion files
+    --gamepad           - declare game-pad support (with required="false")
 
     (External services / publishers)
-    --ouya              - (optional) include Ouya manifest entries
+    --acra              - (optional) Acra declarations
     --ouya-icon <icon>  - (optional) icon for Ouya
     --openkit           - (optional) include OpenKit manifest entries
     --amazon-billing    - (optional) include Amazon Billing manifest entries
@@ -1056,6 +1037,8 @@ def main():
         'activity_extra_code': "",
         'ouya_icon': None,
         'debug': False,
+        'gamepad': False,
+        'banner': None,
         }
 
     def add_meta(kv, meta_map = meta):
@@ -1074,17 +1057,20 @@ def main():
 
     def add_launcher_activity(ai):
         parts = ai.split(',')
-        if 3 != len(parts):
+        if 2 > len(parts):
             print "Badly formated launcher activity: %s" % ai
             usage()
             exit(1)
 
         a = parts[0]
         l = parts[1]
-        i = parts[2]
-        drawable_files.append(i)
+        i_base = None
 
-        i_base = os.path.splitext(os.path.split(i)[1])[0]
+        if 3 <= len(parts):
+            i = parts[2]
+            drawable_files.append(i)
+            i_base = os.path.splitext(os.path.split(i)[1])[0]
+
         options['launcher_activities'].append((a,l,i_base))
 
     def add_activity_code(ac):
@@ -1149,6 +1135,8 @@ def main():
         elif "--icon-file" == arg:
             icon_dir = None
             icon_file = args.pop(0)
+        elif "--banner" == arg:
+            options['banner'] = args.pop(0)
         elif "--key-store" == arg:
             keystore = args.pop(0)
         elif "--key-alias" == arg:
@@ -1187,6 +1175,8 @@ def main():
             options['proguard'] = args.pop(0)
         elif "--expansion" == arg:
             extras.append('expansion')
+        elif "--gamepad" == arg:
+            options['gamepad'] = True
         elif "--admob" == arg:
             extras.append('admob')
         elif "--mmedia" == arg:
@@ -1215,8 +1205,8 @@ def main():
             extras.append('zirconia')
         elif "--mobiroo" == arg:
             extras.append('mobiroo')
-        elif "--ouya" == arg:
-            add_activity_code(OUYA_EXTRA_CODE)
+        elif "--acra" == arg:
+            extras.append('acra')
         elif "--ouya-icon" == arg:
             options['ouya_icon'] = args.pop(0)
         elif "--openkit" == arg:
@@ -1307,7 +1297,7 @@ def main():
     # Copy icon file
 
     if icon_dir:
-        copy_icon_files(dest, icon_dir)
+        copy_drawable_files_with_name(dest, icon_dir, "icon.png")
     elif icon_file:
         copy_icon_single_file(dest, icon_file)
 
@@ -1316,6 +1306,11 @@ def main():
             raise Exception("Ouya icon must be named ouya_icon.png")
         _copy_files_to_dir(os.path.join(dest, "res", "drawable-xhdpi"),
                            [ options['ouya_icon'] ])
+
+    # Copy banner file(s)
+
+    if options['banner']:
+        copy_drawable_files_with_name(dest, options['banner'], "banner.png")
 
     # Copy xml files
 
