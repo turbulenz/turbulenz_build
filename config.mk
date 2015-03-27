@@ -98,12 +98,12 @@ ifeq ($(TARGET),linux32)
 endif
 
 ifeq ($(TARGET),win32)
-  TARGETNAME := win32
+  TARGETNAME := win
   ARCH ?= i386
 endif
 
 ifeq ($(TARGET),win64)
-  TARGETNAME := win64
+  TARGETNAME := win
   ARCH ?= x86_64
 endif
 

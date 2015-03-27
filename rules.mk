@@ -9,9 +9,7 @@
 # have been defined.
 
 ifneq (,$(strip $(LIBS) $(DLLS) $(APPS) $(APKS)))
-  ifneq (win32,$(TARGET))
-    include $(BUILDDIR)/rules_c.mk
-  endif
+  include $(BUILDDIR)/rules_c.mk
 endif
 
 ifneq (,$(TSLIBS))
