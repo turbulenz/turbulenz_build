@@ -248,12 +248,12 @@ ifeq (i386,$(ARCH))
 endif
 
 ifeq (1,$(C_OPTIMIZE))
-  CXXFLAGSPRE += /O2 /MT -DNEDBUG
+  CXXFLAGSPRE += /O2 /MD -DNEDBUG
   ifeq (i386,$(ARCH))
     CXXFLAGSPRE += /Oy -DDEBUG -D_DEBUG
   endif
 else
-  CXXFLAGSPRE += /GS (buffer security) /Od /RTC1 /MTd
+  CXXFLAGSPRE += /GS (buffer security) /Od /RTC1 /MDd
   ifeq (i386,$(ARCH))
     CXXFLAGSPRE += /Oy-
   endif
@@ -284,6 +284,8 @@ else
     /MACHINE:X64 \
     /LIBPATH:"$(VCBINDIR)/../../Windows Kits/8.1/Lib/winv6.3/um/x64"
 endif
+libprefix:=
+libsuffix:=.lib
 
 DISABLE_FLAG_CHECKS:=1
 DISABLE_DEP_GEN:=1

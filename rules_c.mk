@@ -137,7 +137,7 @@ $(foreach ext,$(EXT), \
   $(eval $(ext)_dlls := \
     $(foreach l,$($(ext)_lib), \
       $(foreach d,$($(ext)_libdir), \
-        $(wildcard $(d)/lib$(l)$(dllsuffix)*) \
+        $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*) \
       ) \
     ) \
     $(filter %$(dllsuffix),$($(ext)_libfile)) \
