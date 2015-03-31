@@ -500,6 +500,10 @@ define _make_cxx_object_rule
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
       $(cout)$$@ $(csrc) $$<
 
+  $(2):
+
+  $(4):
+
   $(3).S : $(3)
 	@echo [DISASS] \($(1)\) $$@
 	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@

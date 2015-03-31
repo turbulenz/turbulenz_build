@@ -229,6 +229,7 @@ endif
 
 CXXFLAGSPRE += \
   -ffunction-sections -funwind-tables -fno-rtti -fstrict-aliasing \
+  -std=c++11 \
   -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
   -Wno-unused-parameter \
   -DANDROID -DTZ_ANDROID -DTZ_USE_V8
