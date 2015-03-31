@@ -137,7 +137,7 @@ AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)libtool
 ARFLAGSPRE := -static -arch_only i386 -g
 space:= #
-arout := -o$(space)
+arout := -o #$(space)
 ARFLAGSPOST := \
   -framework CoreFoundation \
   -framework OpenGL \
