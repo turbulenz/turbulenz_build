@@ -29,6 +29,8 @@ cdeptargetpost?=
 libprefix?=lib
 libsuffix?=.a
 
+dllout?= -o #
+
 #
 # Platform Checks
 #
@@ -69,6 +71,9 @@ define _calc_fulldeps
 
   # Make sure each dep has been calculated
   $(foreach d,$($(1)_deps), \
+    $(if $(filter $(d),$(LIBS) $(DLLS)),, \
+      $(error $(1)_deps contains '$(d)' which is not a LIB or DLL) \
+    ) \
     $(if $($(d)_depsdone),$(call log,$(d) deps already done),$(eval \
       $(call _calc_fulldeps,$(d)) \
     )) \
@@ -191,6 +196,9 @@ $(foreach mod,$(C_MODULES),$(eval \
 $(foreach mod,$(C_MODULES),\
   $(eval $(mod)_ext_lib_files :=                          \
     $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),   \
+      $(if $(filter $(e),$(EXT)),,                        \
+        $(error $(mod)_extlibs contains '$(e)' no in EXT) \
+      )                                                   \
       $($(e)_libfile)                                     \
   ))                                                      \
   $(eval $(mod)_ext_lib_flags :=                          \
@@ -220,9 +228,9 @@ define _copy_external_dll
   $(1) : $(3)
 
   $(3) : $(2)
-	@mkdir -p $$(dir $$@)
+	@$(MKDIR) -p $$(dir $$@)
 	@echo [COPY-DLL] $$(notdir $$<)
-	$(CMDPREFIX) cp $$^ $$@
+	$(CMDPREFIX) $(CP) $$^ $$@
 
 endef
 
@@ -234,12 +242,16 @@ define _null_external_dll
 
 endef
 
-$(foreach e,$(EXT),$(if $($(e)_dlls),  \
-  $(foreach d,$($(e)_dlls),$(eval      \
-    $(call _copy_external_dll,$(e),$(d),$(BINDIR)/$(notdir $(d))) \
-  )), \
-  $(eval $(call _null_external_dll,$(e))) \
-))
+ifneq (1,$(DISABLE_COPY_EXTERNAL_DLLS))
+  $(foreach e,$(EXT),$(if $($(e)_dlls),  \
+    $(foreach d,$($(e)_dlls),$(eval      \
+      $(call _copy_external_dll,$(e),$(d),$(BINDIR)/$(notdir $(d))) \
+    )), \
+    $(eval $(call _null_external_dll,$(e))) \
+  ))
+else
+  $(foreach e,$(EXT),$(eval $(call _null_external_dll,$(e))))
+endif
 
 ############################################################
 
@@ -458,7 +470,7 @@ define _make_pch_rule
   .PRECIOUS : $(3)
 
   $(3) : $(2)
-	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
+	@$(MKDIR) -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [PCH $(ARCH)] \($(1)\) $$(notdir $$@)
 	$(CMDPREFIX)$(CXX)                                              \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                    \
@@ -625,14 +637,15 @@ $(foreach dll,$(DLLS),$(eval \
   $(dll)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix) \
 ))
 
-# 1 - mode
+# 1 - module
 define _make_dll_rule
 
   $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
-	@mkdir -p $(BINDIR)
+	@$(MKDIR) -p $(BINDIR)
 	@echo [DLL $(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
+      $(dllout) $$@ \
       $(if $(DLLFLAGS_LIBDIR), \
         $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
         $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
@@ -642,7 +655,6 @@ define _make_dll_rule
       $($(1)_ext_lib_flags) \
       $(DLLFLAGSPOST) \
       $($(1)_DLLFLAGSPOST) \
-      -o $$@
 	$(call dll-post,$(1))
 	$($(1)_poststep)
 
