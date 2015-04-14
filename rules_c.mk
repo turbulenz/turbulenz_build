@@ -654,7 +654,7 @@ define _make_dll_rule
       $($(1)_deplibs_cmdline) \
       $($(1)_ext_lib_flags) \
       $(DLLFLAGSPOST) \
-      $($(1)_DLLFLAGSPOST) \
+      $($(1)_DLLFLAGSPOST)
 	$(call dll-post,$(1))
 	$($(1)_poststep)
 
