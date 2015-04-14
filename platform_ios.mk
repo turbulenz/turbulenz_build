@@ -61,7 +61,7 @@ PCHFLAGS := -x objective-c++-header
 AR := $(XCODE_TOOLROOT)/usr/bin/libtool
 ARFLAGSPRE := -static -arch_only $(ARCH) -syslibroot $(XCODE_SDKROOT) -g
 space:= #
-arout := -o$(space)
+arout := -o #
 ARFLAGSPOST :=
 
 libprefix := lib
