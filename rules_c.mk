@@ -511,6 +511,7 @@ define _make_cxx_object_rule
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
       $(cout)$$@ $(csrc) $$<
+	$(call cxx-post,$(1),$(2),$(3),$(4))
 
   $(2):
 
