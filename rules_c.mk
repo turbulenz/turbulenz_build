@@ -657,7 +657,7 @@ define _make_dll_rule
       $(DLLFLAGSPOST) \
       $($(1)_DLLFLAGSPOST)
 	$(call dll-post,$(1))
-	($($(1)_poststep)) || $(RM) -f $$@
+	$(if $($(1)_poststep),($($(1)_poststep)) || $(RM) -f $$@)
 
   .PHONY : $(1)
   $(1) : $($(1)_extlibs) $($(1)_depextlibs)
