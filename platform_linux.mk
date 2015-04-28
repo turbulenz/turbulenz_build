@@ -7,12 +7,16 @@
 #
 ############################################################
 
-$(call log,LINUX BUILD CONFIGURATION)
-
 #
 # CCACHE
 #
 CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
+
+#
+# RPATH the executable dir?
+ifneq (1,$(DISABLE_EXECUTABLE_RPATH))
+  _rpath_flags := -Wl,-rpath,'$$$$ORIGIN'
+endif
 
 #
 # CXX / CMM FLAGS
@@ -21,17 +25,17 @@ CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then e
 CXX := $(CCACHE) g++
 
 CXXFLAGSPRE := \
-    -std=c++11 \
-    -fmessage-length=0 -pipe \
-    -Wall -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas \
-    -fPIC \
-    -ftree-vectorize -msse3 -mssse3 \
-    -DXP_LINUX=1 -DXP_UNIX=1 \
-    -DMOZILLA_STRICT_API \
-    -fexceptions
+  -std=c++11 \
+  -fmessage-length=0 -pipe \
+  -Wall -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas \
+  -fPIC \
+  -ftree-vectorize -msse3 -mssse3 \
+  -DXP_LINUX=1 -DXP_UNIX=1 \
+  -DMOZILLA_STRICT_API \
+  -fexceptions
 
 CXXFLAGSPOST := \
-    -c
+  -c
 
 # DEBUG / RELEASE
 
@@ -63,7 +67,7 @@ libsuffix := .a
 
 DLL := g++
 DLLFLAGSPRE := -shared -g
-DLLFLAGSPOST :=
+DLLFLAGSPOST := $(_rpath_flags)
 
 
 DLLFLAGS_LIBDIR := -L
@@ -80,11 +84,9 @@ LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
 LD := g++
-LDFLAGSPRE := \
-    -g \
+LDFLAGSPRE := -g
 
-LDFLAGSPOST := \
-    -lpthread
+LDFLAGSPOST := -lpthread $(_rpath_flags)
 
 
 ############################################################
