@@ -224,9 +224,9 @@ else
   endif
 endif
 
-$(info VS120COMNTOOLS = $(VS120COMNTOOLS))
-$(info VSBINDIR = $(VSBINDIR))
-$(info ARCH = $(ARCH))
+# $(info VS120COMNTOOLS = $(VS120COMNTOOLS))
+# $(info VSBINDIR = $(VSBINDIR))
+# $(info ARCH = $(ARCH))
 
 ############################################################
 # CXX

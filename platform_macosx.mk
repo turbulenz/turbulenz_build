@@ -59,7 +59,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
+    -Wall -Wsign-compare -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-trigraphs -Wno-unused-parameter \
     -isysroot $(XCODE_SDK_ROOT) \
     -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
@@ -76,7 +76,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
+    -Wall -Wsign-compare -Wno-unknown-pragmas -Wno-overloaded-virtual \
     -Wno-trigraphs -Wno-unused-parameter \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
