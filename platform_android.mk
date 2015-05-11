@@ -271,7 +271,8 @@ ifeq ($(CONFIG),release)
 endif
 
 ifeq ($(C_OPTIMIZE),1)
-  CXXFLAGSPOST += -O3 -fomit-frame-pointer -ffast-math -ftree-vectorize
+  CXXFLAGSPOST += -O3 -ffast-math -ftree-vectorize
+  # CXXFLAGSPOST += -fomit-frame-pointer
 
   # WORKAROUND: gcc 4.8 targeting x86
   ifeq (4.8,$(NDK_GCC_VER))
