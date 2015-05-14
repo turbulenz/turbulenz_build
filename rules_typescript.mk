@@ -119,16 +119,18 @@ define _make_cgfx_ts_list
       $$(foreach ct,$$(_$(1)_cgfx_ts_list), $$(call _getts,$$(ct)))
 
     $$(_$(1)_new_src) : $$(_$(1)_gen_src_list) $$(_$(1)_old_ts_src)
-	  $(CAT) $$^ > $$@
+	  @echo "[GEN_TS] $$@"
+	  @$(MKDIR) -p $$(dir $$@)
+	  $(CMDPREFIX)$(CAT) $$^ > $$@
 
     # Rules to generate .cgfx.ts files from .cgfx files
 
-    $$(foreach ct,$$(_$(1)_cgfx_ts_list),                   \
-      $$(eval $$(call _make_cgfx_ts_rule,                   \
-        $(1),                                               \
-        $$(call _getcgfx,$$(ct)),                           \
-        $$(call _getts,$$(ct))                              \
-      ))                                                    \
+    $$(foreach ct,$$(_$(1)_cgfx_ts_list),  \
+      $$(eval $$(call _make_cgfx_ts_rule,  \
+        $(1),                              \
+        $$(call _getcgfx,$$(ct)),          \
+        $$(call _getts,$$(ct))             \
+      ))                                   \
     )
 
   endif
