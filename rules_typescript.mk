@@ -35,14 +35,8 @@ CLOSURE:=java -jar external/closure/compiler.jar \
 tsc_postfix_failonerror := || ($(RM) $$@ && $(FALSE))
 ifeq (win32,$(BUILDHOST))
   tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ ($(TRUE)) else ($(FALSE))
-  CGFX2JSON := tools/cgfx2json/Release/cgfx2json.exe
 else
   tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
-  CGFX2JSON := tools/cgfx2json/bin/release/cgfx2json
-endif
-
-ifeq (,$(wildcard $(CGFX2JSON)))
-  $(error No cgfx2json tool: $(CGFX2JSON))
 endif
 
 ############################################################
@@ -52,6 +46,7 @@ endif
 ############################################################
 
 TS_GEN_DIR ?= jslib/_generated
+TS_GEN_FILES :=
 
 _getcgfx = $(word 1,$(subst !, ,$(1)))
 _getts = $(word 2,$(subst !, ,$(1)))
@@ -111,6 +106,7 @@ define _make_cgfx_ts_list
     $(1)_src :=                                               \
       $$(filter-out %.cgfx $$(_$(1)_old_ts_src),$($(1)_src))  \
       $$(_$(1)_new_src)
+    TS_GEN_FILES += $$(_$(1)_new_src)
 
     # Rules to generate new (concatenated) .ts from generated .cgfx.ts
     # files
@@ -138,6 +134,19 @@ define _make_cgfx_ts_list
 endef
 
 $(foreach t,$(TSLIBS),$(eval $(call _make_cgfx_ts_list,$(t))))
+
+# If there will be any cgfx->ts generation happening in this build,
+# ensure that the CGFX tool is available.
+
+ifneq (,$(TS_GEN_FILES))
+  $(info TS_GEN_FILES: '$(TS_GEN_FILES)')
+  ifeq (,$(CGFX2JSON))
+    $(error Some modules have cgfx files, but CGFX2JSON has not been set)
+  endif
+  ifeq (,$(wildcard $(CGFX2JSON)))
+    $(error CGFX2JSON points to non-existant file: $(CGFX2JSON))
+  endif
+endif
 
 ############################################################
 #
@@ -280,7 +289,7 @@ clean_ts:
     )
 
 distclean_ts:
-	$(RM) $(TS_OUTPUT_DIR) $(TS_GEN_DIR)
+	$(RM) $(TS_OUTPUT_DIR)
 
 clean: clean_ts
 
@@ -304,7 +313,9 @@ ifeq (1,$(TS_ONESHOT))
 
 TS_ALL_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
 TS_SRC_FILES := $(filter $(TS_SRC_DIR)/%,$(TS_ALL_FILES))
-TS_GEN_FILES := $(filter $(TS_GEN_DIR)/%,$(TS_ALL_FILES))
+
+# TS_GEN_FILES is set above
+# TS_GEN_FILES := $(filter $(TS_GEN_DIR)/%,$(TS_ALL_FILES))
 
 _ts_unexpected := $(filter-out $(TS_SRC_FILES) $(TS_GEN_FILES),$(TS_ALL_FILES))
 ifneq (,$(_ts_unexpected))
