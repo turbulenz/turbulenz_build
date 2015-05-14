@@ -64,7 +64,8 @@ define _make_cgfx_ts_rule
   $(3) : $(3:.ts=.json)
 	@echo "[JSON2TS] $$@"
 	@$(MKDIR) -p $$(dir $$@)
-	$(CMDPREFIX)echo var $(subst -,_,$(subst .,_,$(notdir $(2)))) : any = > $$@
+	$(CMDPREFIX)echo // Generated from $(2) > $$@
+	$(CMDPREFIX)echo var $(subst -,_,$(subst .,_,$(notdir $(2)))) : any = >> $$@
 	$(CMDPREFIX)$(CAT) $$^ >> $$@
 	$(CMDPREFIX)echo ; >> $$@
 endef
