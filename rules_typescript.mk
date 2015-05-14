@@ -140,7 +140,6 @@ $(foreach t,$(TSLIBS),$(eval $(call _make_cgfx_ts_list,$(t))))
 # ensure that the CGFX tool is available.
 
 ifneq (,$(TS_GEN_FILES))
-  $(info TS_GEN_FILES: '$(TS_GEN_FILES)')
   ifeq (,$(CGFX2JSON))
     $(error Some modules have cgfx files, but CGFX2JSON has not been set)
   endif
