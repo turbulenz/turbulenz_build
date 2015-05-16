@@ -213,6 +213,7 @@ ifeq (,$(VS120COMNTOOLS))
 endif
 
 VCBASEDIR:=$(VS120COMNTOOLS)/../../VC
+WINKITDIR:=$(VS120COMNTOOLS)/../../../Windows Kits/8.1
 
 ifeq (win32,$(TARGET))
   VCBINDIR:=$(VCBASEDIR)/bin
@@ -234,7 +235,8 @@ endif
 
 CXX := "$(VCBINDIR)/cl.exe"
 CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
-  /Zc:wchar_t /Zc:forScope /GR /Gm- /EHsc \
+  /Zc:wchar_t /Zc:forScope /GR /Gm- /EHsc /FS \
+  -D_WINDOWS -D_USRDLL -DWIN32 -DWIN32_LEAN_AND_MEAN \
   -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS \
   -I"$(VCBASEDIR)/include" \
   -I"$(VCBASEDIR)/../../Windows Kits/8.1/Include/shared" \
@@ -242,6 +244,8 @@ CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
 
 # /WX
 # /wd"4100" /wd"4127" /wd"4244" /wd"4245" /wd"4267" /wd"4702" /wd"4718"
+
+
 
 ifeq (i386,$(ARCH))
   CXXFLAGSPRE += /Gd
@@ -289,3 +293,6 @@ libsuffix:=.lib
 
 DISABLE_FLAG_CHECKS:=1
 DISABLE_DEP_GEN:=1
+
+dllprefix :=
+dllsuffix := .dll
