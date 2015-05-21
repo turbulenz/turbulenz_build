@@ -510,7 +510,7 @@ define _make_cxx_object_rule
       $(addprefix -I,$($(1)_depincdirs))                           \
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
-      $(cout)$$@ $(csrc) $$< || $(RM) $(4)
+      $(cout)$$@ $(csrc) $$< || ($(RM) $(4) && exit 1)
 	$(call cxx-post,$(1),$(2),$(3),$(4))
 
   $(2):
