@@ -54,13 +54,16 @@ $(call log,MACOSX BUILD CONFIGURATION)
 CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
+_cxxflags_warnings := \
+    -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
+    -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
+
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wsign-compare -Wno-unknown-pragmas -Wno-overloaded-virtual \
-    -Wno-trigraphs -Wno-unused-parameter \
+    $(_cxxflags_warnings) \
     -isysroot $(XCODE_SDK_ROOT) \
     -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
@@ -76,8 +79,7 @@ CMMFLAGSPRE := -x objective-c++ \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wsign-compare -Wno-unknown-pragmas -Wno-overloaded-virtual \
-    -Wno-trigraphs -Wno-unused-parameter \
+    $(_cxxflags_warnings) \
     -Wno-undeclared-selector \
     -isysroot $(XCODE_SDK_ROOT) \
     -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
