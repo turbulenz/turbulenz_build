@@ -476,6 +476,39 @@ endef
 # 2 - cxx srcfile
 # 3 - object file
 # 4 - depfile
+define _make_c_object_rule
+
+  .PRECIOUS : $(3)
+
+  $(3) : $(2) $(_$1_pchfile)
+	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
+	@echo [CC  $(ARCH)] \($(1)\) $$(notdir $$<)
+	$(CMDPREFIX)$(CC)                                             \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
+      $(CFLAGSPRE) $(CFLAGS)                                   \
+      $(if $(DISABLE_DEP_GEN),, \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost) \
+      ) \
+      $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)  \
+      $(addprefix -I,$($(1)_incdirs))                              \
+      $(addprefix -I,$($(1)_depincdirs))                           \
+      $(addprefix -I,$($(1)_ext_incdirs))                          \
+      $(CFLAGSPOST) $($(call file_flags,$(2)))                   \
+      $(cout)$$@ $(csrc) $$<
+
+  $(3).S : $(3)
+	@echo [DISASS] \($(1)\) $$@
+	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+
+  $(1)_asm : $(3).S
+
+endef
+
+# 1 - mod
+# 2 - cxx srcfile
+# 3 - object file
+# 4 - depfile
 define _make_cxx_object_rule
 
   .PRECIOUS : $(3)
@@ -540,9 +573,20 @@ define _make_object_rules
     $(call _make_pch_rule,$(1),$($(1)_pch),$(_$(1)_pchfile),$(_$(mod)_pchdep)) \
   )
 
-  $(foreach sod,$($(1)_cxx_obj_dep),$(eval \
-    $(call _make_cxx_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
-  ))
+  $(foreach sod,$($(1)_cxx_obj_dep), \
+    $(if $(filter %.cpp,$(call _getsrc,$(sod))), \
+      $(eval $(call _make_cxx_object_rule,$(1), \
+        $(call _getsrc,$(sod)), \
+        $(call _getobj,$(sod)), \
+        $(call _getdep,$(sod))  \
+      )), \
+      $(eval $(call _make_c_object_rule,$(1), \
+        $(call _getsrc,$(sod)), \
+        $(call _getobj,$(sod)), \
+        $(call _getdep,$(sod))  \
+      )) \
+    ) \
+  )
 
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
     $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
