@@ -21,7 +21,8 @@ else
   MACOSX_DLLFLAGS += -lc++
 endif
 
-# Language to compile all .cpp files as
+# Language to compile all .c and .cpp files as
+MACOSX_C_DEFAULTLANG ?= objective-c
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # SDK to build against
@@ -51,11 +52,25 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
+CC := $(CXX)
 CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
+CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) \
+    -arch $(ARCH) -fmessage-length=0 -pipe \
+    -fpascal-strings -fasm-blocks \
+    -fstrict-aliasing -fno-threadsafe-statics \
+    -msse3 -mssse3 \
+    -Wall -Wno-unknown-pragmas \
+    -Wno-trigraphs -Wno-unused-parameter \
+    -isysroot $(XCODE_SDK_ROOT) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
+    -fvisibility-inlines-hidden \
+    -fvisibility=hidden \
+    -DXP_MACOSX=1 -DMACOSX=1
+
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -72,7 +87,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
 # -fvisibility=hidden
 
 CMMFLAGSPRE := -x objective-c++ \
-    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -88,30 +103,32 @@ CMMFLAGSPRE := -x objective-c++ \
 # -fno-exceptions
 # -fno-rtti
 
-CXXFLAGSPOST := \
-    -c
-
-CMMFLAGSPOST := \
-    -c
+CFLAGSPOST := -c
+CXXFLAGSPOST := -c
+CMMFLAGSPOST := -c
 
 PCHFLAGS := -x objective-c++-header
 
 # DEBUG / RELEASE
 
 ifeq (1,$(C_SYMBOLS))
+  CFLAGSPRE += -g
   CXXFLAGSPRE += -g
   CMMFLAGSPRE += -g
 endif
 
 ifeq (1,$(C_OPTIMIZE))
+  CFLAGSPRE += -O3 -DNDEBUG
   CXXFLAGSPRE += -O3 -DNDEBUG
   CMMFLAGSPRE += -O3 -DNDEBUG
 else
+  CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
   CXXFLAGSPRE += -O0 -D_DEBUG -DDEBUG
   CMMFLAGSPRE += -O0 -D_DEBUG -DDEBUG
 endif
 
 ifeq (1,$(LD_OPTIMIZE))
+  CFLAGSPRE += =flto
   CXXFLAGSPRE += -flto
   CMMFLAGSPRE += -flto
   MACOSX_LDFLAGS += -O3 -flto
@@ -135,7 +152,7 @@ endif
 
 AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)libtool
-ARFLAGSPRE := -static -arch_only i386 -g
+ARFLAGSPRE := -static -arch_only $(ARCH) -g
 space:= #
 arout := -o #$(space)
 ARFLAGSPOST := \
@@ -158,7 +175,7 @@ libsuffix := .a
 DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := \
-  -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g $(MACOSX_DLLFLAGS)
+  -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch $(ARCH) -g $(MACOSX_DLLFLAGS)
 DLLFLAGSPOST := \
   -framework CoreFoundation \
   -framework OpenGL \
@@ -191,7 +208,7 @@ LDFLAGS_LIB := -l
 
 LD := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 LDFLAGSPRE := \
-    -arch i386 \
+    -arch $(ARCH) \
     -g \
     -isysroot $(XCODE_SDK_ROOT) \
     $(MACOSX_LDFLAGS)
