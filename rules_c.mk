@@ -934,16 +934,19 @@ endif
 
 ############################################################
 
-MODULEDEFDIR := moduledefs
+MODULEDEF_DIR ?= moduledefs
+MODULEDEF_SRCPREFIX ?=
+PROJECT_GYP_FILE ?= all.gyp
+PROJECT_MODULES ?= $(APPS) $(DLLS)
 
 # Define the <mod>_moduledef rule
 # 1 - module name
 # 2 - module type ('executable', 'shared_library', 'static_library')
 define _make_moduledef_rule
 
-  $(1)_moduledef := $(MODULEDEFDIR)/$(1).$(TARGET).$(CONFIG).def
-  $(MODULEDEFDIR)/$(1).$(TARGET).$(CONFIG).def :
-	@mkdir -p $(MODULEDEFDIR)
+  $(1)_moduledef := $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def
+  $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def :
+	@mkdir -p $(MODULEDEF_DIR)
 	@echo [MODULEDEF] \($(1)\) $$@
 	@echo "{ 'target_name': '$(1)'," > $$@
 	@echo "  'type': 'none'," >> $$@
@@ -970,19 +973,23 @@ define _make_moduledef_rule
 	else \
 	  echo "'$($(1)_cmds)' ]," >> $$@ ; \
 	fi
-	@echo "    'outputs': [ 'obj' ]," >> $$@
+	@echo "  'outputs': [ 'obj' ]," >> $$@
 
-	@echo "    'inputs': [" >> $$@
-	@_p=`pwd`/ ; for s in $($(1)_src) ; do echo "      '$$$${s#$$$$_p}'," ; \
-	  done >> $$@
-	@for s in $($(1)_headerfiles) ; do echo "      '$$$$s'," ; done >> $$@
-	@echo "    ]," >> $$@
+	@echo "  'inputs': [" >> $$@
+	@for s in $($(1)_src) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ; \
+      done >> $$@
+	@for s in $($(1)_headerfiles) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ;\
+      done >> $$@
+	@echo "  ]," >> $$@
 
 	@echo "  } ]," >> $$@
 
 	@echo "  'mac_external': 1," >> $$@
 
 	@echo "}," >> $$@
+
+  .PHONY: $(1)_moduledef
+  $(1)_moduledef : $$($(1)_moduledef)
 
 endef
 
@@ -1000,8 +1007,28 @@ $(foreach m,$(RULES),$(eval \
   $(call _make_moduledef_rule,$(m),static_library) \
 ))
 
-.PHONY : module-defs
-module-defs : $(foreach m,$(C_MODULES) $(RULES),$($(m)_moduledef))
+# .PHONY : module-defs project
+# module-defs : $(foreach m,$(C_MODULES) $(RULES),$($(m)_moduledef))
+
+_project_all_modules := $(sort \
+  $(foreach m,$(PROJECT_MODULES),$(m) $($(m)_fulldeps)) \
+)
+_project_moduledefs := $(foreach m,$(_project_all_modules),$($(m)_moduledef))
+
+$(info _project_moduledefs: $(_project_moduledefs))
+$(info $(PROJECT_GYP_FILE))
+
+$(PROJECT_GYP_FILE) : $(_project_moduledefs)
+	@echo "[MKGYP ]" $@
+	$(CMDPREFIX)echo "{ 'targets': [" > $@
+	$(CMDPREFIX)for i in $^ ; do cat $$i ; done >> $@
+	$(CMDPREFIX)echo "]," >> $@
+	$(CMDPREFIX)echo "  'target_defaults' : { 'configurations': { 'debug': {}, \
+               'release': {} } }," >> $@
+	$(CMDPREFIX)echo "}" >> $@
+
+project: $(PROJECT_GYP_FILE)
+	$(CMDPREFIX)$(GYP) --depth=. $^
 
 ############################################################
 
