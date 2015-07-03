@@ -107,6 +107,9 @@ endif
 ifeq ($(BUILDHOST),linux64)
   NDK_HOSTOS := linux
 endif
+ifeq ($(BUILDHOST),win32)
+  NDK_HOSTOS := windows
+endif
 ifeq ($(NDK_HOSTOS),)
   $(error Couldnt find toolchain for BUILDHOST $(BUILDHOST))
 endif
