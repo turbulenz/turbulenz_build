@@ -848,7 +848,7 @@ define _make_apk_native_rule
 
   .PHONY : _$(1)_make_$(3)_native_libs
   _$(1)_make_$(3)_native_libs :
-	$(MAKE) ARCH=$(3) $($(1)_native)                   \
+	+$(MAKE) ARCH=$(3) $($(1)_native)                   \
       BINDIR=$(2)/libs/$(call _android_arch_name,$(3))
 
   $(1) : _$(1)_make_$(3)_native_libs
