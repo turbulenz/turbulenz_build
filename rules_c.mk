@@ -151,6 +151,17 @@ $(foreach ext,$(EXT), \
     $(filter %$(dllsuffix),$($(ext)_libfile)) \
   ) \
 )
+
+# if it's a platform with .lib files accompanying .dlls (i.e. Windows)
+# where we don't include input .dlls int he link commnd line, filter
+# the dlls out from <ext>_libfiles, now that we have the list of dlls
+# to copy.
+ifneq (,$(dlllibsuffix))
+  $(foreach ext,$(EXT),$(eval \
+    $(ext)_libfile := $(filter-out %$(dllsuffix),$($(ext)_libfile)) \
+  ))
+endif
+
 $(call log,javascriptcore_dlls = $(javascriptcore_dlls))
 $(call log,openal_libfile = $(openal_libfile))
 $(call log,dllsuffix = $(dllsuffix))
@@ -197,7 +208,7 @@ $(foreach mod,$(C_MODULES),\
   $(eval $(mod)_ext_lib_files :=                          \
     $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),   \
       $(if $(filter $(e),$(EXT)),,                        \
-        $(error $(mod)_extlibs contains '$(e)' no in EXT) \
+        $(error $(mod)_extlibs contains '$(e)', not in EXT) \
       )                                                   \
       $($(e)_libfile)                                     \
   ))                                                      \
@@ -633,9 +644,18 @@ $(foreach lib,$(LIBS),$(eval \
 
 # DLLS
 
+# 1 - dll
+define _make_dll_paths
+
+  $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
+  $(1)_pdbfile ?= $(BINDIR)/$(dllprefix)$(dll)$(pdbsuffix)
+  $(1)_dlllibfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dlllibsuffix)
+
+endef
+
 # calc <dll>_dllfile
 $(foreach dll,$(DLLS),$(eval \
-  $(dll)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix) \
+  $(call _make_dll_paths,$(dll)) \
 ))
 
 # 1 - module
@@ -646,7 +666,9 @@ define _make_dll_rule
 	@echo [DLL $(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
-      $(dllout) $$@ \
+      $(dllout)$$@ \
+      $(if $(pdbsuffix),$(DLLFLAGS_PDB)$($(1)_pdbfile)) \
+      $(if $(dlllibsuffix),$(DLLFLAGS_DLLLIB)$($(1)_dlllibfile)) \
       $(if $(DLLFLAGS_LIBDIR), \
         $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
         $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \

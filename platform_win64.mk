@@ -294,5 +294,55 @@ libsuffix:=.lib
 DISABLE_FLAG_CHECKS:=1
 DISABLE_DEP_GEN:=1
 
+############################################################
+# DLL
+############################################################
+
+pdbsuffix := .pdb
+dlllibsuffix := .lib
+
+DLL := "$(VCBINDIR)/link.exe"
+DLLFLAGSPRE := /MANIFEST /NXCOMPAT /DYNAMICBASE
+dllout := /OUT:
+DLLFLAGS_PDB := /PDB:
+DLLFLAGS_DLLLIB := /IMPLIB:
+DLLFLAGS_LIBDIR := /LIBPATH:
+DLLFLAGSPOST := /DLL /SAFESEH /NOLOGO /ERRORREPORT:PROMPT /TLBID:1 \
+  /BASE:"0x23400000"
+
+ifeq (i386,$(ARCH))
+  DLLFLAGSPOST += /MACHINE:X86
+else
+  DLLFLAGSPOST += /MACHINE:X64
+endif
+
+ifeq (1,$(C_OPTIMIZE))
+  DLLFLAGSPOST += /OPT:REF /INCREMENTAL:NO /OPT:ICF /NODEFAULTLIB:"libcmt.lib" \
+    /NODEFAULTLIB:"libcpmt.lib"
+else
+  DLLFLAGSPOST += /DEBUG /INCREMENTAL /NODEFAULTLIB:"libcmt.lib" \
+    /NODEFAULTLIB:"msvcrt.lib" /NODEFAULTLIB:"libcpmt.lib"
+endif
+
+# /PGD:"..\..\bin\win32-debug-v8\jsstandalone\jsstandalone.pgd"
+# /ManifestFile:"..\..\bin\win32-debug-v8\jsstandalone\jsstandalone.exe.intermediate.manifest"
+# /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+# /LIBPATH:"../../../external_turbulenz/directx/lib/win32"
+
+# /OUT:"..\..\bin\win32-debug-v8\jsstandalone\jsstandalone.dll"
+# /MANIFEST /NXCOMPAT
+# /DYNAMICBASE
+# /PDB:"..\..\bin\win32-debug-v8\jsstandalone\jsstandalone.pdb"
+# <libs>
+# /IMPLIB:"..\..\bin\win32-debug-v8\jsstandalone\jsstandalone.lib"
+
+# /DLL
+# /SAFESEH
+# /NOLOGO
+# /ERRORREPORT:PROMPT
+# /TLBID:1
+
 dllprefix :=
 dllsuffix := .dll
+
+$(info Entering directory `$(shell echo %CD%)')
