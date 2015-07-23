@@ -708,10 +708,19 @@ $(foreach app,$(APPS),$(eval \
   $(app)_appfile := $(BINDIR)/$(app)$(binsuffix) \
 ))
 
+# calc <app>_depdlls (for platforms that dont have export libs
+# associated with DLLS)
+ifeq (,$(dlllibsuffix))
+  $(foreach app,$(APPS),$(eval \
+    $(app)_depdlls := $(foreach d,$($(app)_fulldeps),$($(d)_dllfile)) \
+  ))
+endif
+
 # 1 - mod
 define _make_app_rule
 
-  $($(1)_appfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
+  $($(1)_appfile) : $($(1)_deplibs) $($(1)_depdlls) $($(1)_OBJECTS) \
+  $($(1)_ext_lib_files)
 	@$(MKDIR) -p $(BINDIR)
 	@echo [LD  $(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
@@ -719,6 +728,7 @@ define _make_app_rule
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $($(1)_OBJECTS) \
       $($(1)_deplibs) \
+      $($(1)_depdlls) \
       $($(1)_ext_lib_flags) \
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
