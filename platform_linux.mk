@@ -22,12 +22,16 @@ endif
 # CXX / CMM FLAGS
 #
 
+_cxxflags_warnings := \
+    -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
+    -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
+
 CXX := $(CCACHE) g++
 
 CXXFLAGSPRE := \
   -std=c++11 \
   -fmessage-length=0 -pipe \
-  -Wall -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas \
+  $(_cxxflags_warnings) \
   -fPIC \
   -ftree-vectorize -msse3 -mssse3 \
   -DXP_LINUX=1 -DXP_UNIX=1 \
