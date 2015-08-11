@@ -206,14 +206,31 @@
 # /Fo"C:\Users\dtebbs\oyk\dev\angle\build\Release_Win32\obj\libANGLE\"
 # /Fp"C:\Users\dtebbs\oyk\dev\angle\build\Release_Win32\obj\libANGLE\libANGLE.pch"
 
-COMPILER := msvc
+COMPILER ?= vs2013
 
-ifeq (,$(VS120COMNTOOLS))
-  $(error VS120COMNTOOLS env var is not set.  Is Visual Studio 2013 installed?)
+############################################################
+# Setup based on vs version
+############################################################
+
+ifeq (vs2013,$(COMPILER))
+  ifeq (,$(VS120COMNTOOLS))
+    $(error VS120COMNTOOLS env var is not set.  Is Visual Studio 2013 installed?)
+  endif
+  VCBASEDIR:=$(VS120COMNTOOLS)/../../VC
+  WINKITDIR:=$(VS120COMNTOOLS)/../../../Windows Kits/8.1
 endif
 
-VCBASEDIR:=$(VS120COMNTOOLS)/../../VC
-WINKITDIR:=$(VS120COMNTOOLS)/../../../Windows Kits/8.1
+ifeq (vs2015,$(COMPILER))
+  ifeq (,$(VS140COMNTOOLS))
+    $(error VS140COMNTOOLS env var is not set.  Is Visual Studio 2015 installed?)
+  endif
+  VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
+  WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
+endif
+
+ifeq (,$(VCBASEDIR))
+  $(error Unrecognized COMPILER version: $(COMPILER))
+endif
 
 ifeq (win32,$(TARGET))
   VCBINDIR:=$(VCBASEDIR)/bin
@@ -239,13 +256,12 @@ CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
   -D_WINDOWS -D_USRDLL -DWIN32 -DWIN32_LEAN_AND_MEAN \
   -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS \
   -I"$(VCBASEDIR)/include" \
-  -I"$(VCBASEDIR)/../../Windows Kits/8.1/Include/shared" \
-  -I"$(VCBASEDIR)/../../Windows Kits/8.1/Include/um" \
+  -I"$(WINKITDIR)/Include/shared" \
+  -I"$(WINKITDIR)/Include/um" \
+  -I"$(WINKITDIR)/Include/10.0.10150.0/ucrt" \
 
 # /WX
 # /wd"4100" /wd"4127" /wd"4244" /wd"4245" /wd"4267" /wd"4702" /wd"4718"
-
-
 
 ifeq (i386,$(ARCH))
   CXXFLAGSPRE += /Gd
@@ -282,11 +298,11 @@ arout := /OUT:
 ifeq (i386,$(ARCH))
   ARFLAGSPRE += \
     /MACHINE:X86 \
-    /LIBPATH:"$(VCBINDIR)/../../Windows Kits/8.1/Lib/winv6.3/um/x86"
+    /LIBPATH:"$(WINKITDIR)/Lib/winv6.3/um/x86"
 else
   ARFLAGSPRE += \
     /MACHINE:X64 \
-    /LIBPATH:"$(VCBINDIR)/../../Windows Kits/8.1/Lib/winv6.3/um/x64"
+    /LIBPATH:"$(WINKITDIR)/Lib/winv6.3/um/x64"
 endif
 libprefix:=
 libsuffix:=.lib
