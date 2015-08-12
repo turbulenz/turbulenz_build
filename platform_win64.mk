@@ -241,6 +241,9 @@ ifeq (win32,$(TARGET))
 else
   ifeq (win64,$(TARGET))
     VCBINDIR:=$(VCBASEDIR)/bin/amd64
+    ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
+      VCBINDIR:=$(VCBASEDIR)/bin/x86_amd64
+    endif
   else
     $(error Target $(TARGET) not supported in this platform file)
   endif
