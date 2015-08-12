@@ -76,6 +76,7 @@ ifeq ($(TARGET),)
 endif
 
 ifeq ($(TARGET),macosx)
+  COMPILER ?= clang
   TARGETNAME := macosx
   ARCH ?= i386
 endif
@@ -83,28 +84,35 @@ endif
 ifeq ($(TARGET),android)
   TARGETNAME := android
   ARCH ?= armv7a
+  COMPILER ?= gcc
 endif
 
 ifeq ($(TARGET),linux64)
   TARGETNAME := linux
   ARCH ?= x86_64
+  COMPILER ?= gcc
   PKGARCH ?= amd64
 endif
 
 ifeq ($(TARGET),linux32)
   TARGETNAME := linux
   ARCH ?= i386
+  COMPILER ?= gcc
   PKGARCH ?= x86
 endif
 
 ifeq ($(TARGET),win32)
   TARGETNAME := win
   ARCH ?= i386
+  COMPILER ?= vs2013
+  VARIANT:=-$(COMPILER)$(VARIANT)
 endif
 
 ifeq ($(TARGET),win64)
   TARGETNAME := win
   ARCH ?= x86_64
+  COMPILER ?= vs2013
+  VARIANT:=-$(COMPILER)$(VARIANT)
 endif
 
 ifeq ($(TARGET),iossim)
@@ -116,7 +124,8 @@ endif
 ifeq ($(TARGET),ios)
   TARGETNAME := ios
   ARCH ?= armv7
-  VARIANT:=-$(ARCH)
+  COMPILER ?= clang
+  VARIANT:=-$(ARCH)$(VARIANT)
 endif
 
 # Give the client a chance to define their own configuration code and
@@ -173,10 +182,10 @@ ifeq ($(BUILDVERBOSE),1)
   log=$(warning $(1))
 endif
 $(call log,Verbose Mode Enabled...)
-$(call log,ROOTDIR=$(ROOTDIR))
-$(call log,OBJDIR=$(OBJDIR))
-$(call log,LIBDIR=$(LIBDIR))
-$(call log,BINDIR=$(BINDIR))
+# $(call log,ROOTDIR=$(ROOTDIR))
+# $(call log,OBJDIR=$(OBJDIR))
+# $(call log,LIBDIR=$(LIBDIR))
+# $(call log,BINDIR=$(BINDIR))
 
 ############################################################
 

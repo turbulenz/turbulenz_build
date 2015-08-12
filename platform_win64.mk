@@ -206,7 +206,9 @@
 # /Fo"C:\Users\dtebbs\oyk\dev\angle\build\Release_Win32\obj\libANGLE\"
 # /Fp"C:\Users\dtebbs\oyk\dev\angle\build\Release_Win32\obj\libANGLE\libANGLE.pch"
 
-COMPILER ?= vs2013
+ifeq (,$(COMPILER))
+  $(error COMPILER variable not defined)
+endif
 
 ############################################################
 # Setup based on vs version
@@ -225,7 +227,9 @@ ifeq (vs2015,$(COMPILER))
     $(error VS140COMNTOOLS env var is not set.  Is Visual Studio 2015 installed?)
   endif
   VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
-  WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
+  # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
+  WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/8.1
+  UCRTDIR:=$(WINKITDIR)/../10/Include/10.0.10150.0/ucrt
 endif
 
 ifeq (,$(VCBASEDIR))
@@ -258,7 +262,10 @@ CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
   -I"$(VCBASEDIR)/include" \
   -I"$(WINKITDIR)/Include/shared" \
   -I"$(WINKITDIR)/Include/um" \
-  -I"$(WINKITDIR)/Include/10.0.10150.0/ucrt" \
+
+ifneq (,$(UCRTDIR))
+  CXXFLAGSPRE += -I"$(UCRTDIR)"
+endif
 
 # /WX
 # /wd"4100" /wd"4127" /wd"4244" /wd"4245" /wd"4267" /wd"4702" /wd"4718"
