@@ -241,9 +241,16 @@ ifeq (win32,$(TARGET))
 else
   ifeq (win64,$(TARGET))
     VCBINDIR:=$(VCBASEDIR)/bin/amd64
-    ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
-      VCBINDIR:=$(VCBASEDIR)/bin/x86_amd64
-    endif
+    # ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
+    #   # On a 64-bit machine, the x86_amd64 tools tend to require the
+    #   # vcvars variables to be set up in order to find the correct
+    #   # DLLs.  Try it as a last resort.
+
+    #   VCBINDIR:=$(VCBASEDIR)/bin/x86_amd64
+    #   # export PATH:="$(VS120COMNTOOLS)\\..\\..\\bin";$(PATH)
+    #   # $(warning PATH = $(PATH))
+    #   # export VCINSTALLDIR:="$(VCBASEDIR)"
+    # endif
   else
     $(error Target $(TARGET) not supported in this platform file)
   endif
