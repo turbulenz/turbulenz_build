@@ -353,7 +353,7 @@ $(foreach mod,$(C_MODULES),                        \
 
 # only look for .mm's on mac and ios
 
-ifneq (,macosx ios,$(TARGETNAME))
+ifneq (,$(filter macosx ios,$(TARGETNAME)))
   $(foreach mod,$(C_MODULES), $(eval \
     $(call _make_cmm_obj_dep_list,$(mod)) \
   ))
@@ -380,7 +380,6 @@ $(foreach mod,$(C_MODULES),$(eval \
     $(foreach sod,$($(mod)_cxx_obj_dep),$(call _getobj,$(sod))) \
     $(foreach sod,$($(mod)_cmm_obj_dep),$(call _getobj,$(sod))) \
 ))
-$(call log,npengine_OBJECTS = $(npengine_OBJECTS))
 
 $(foreach mod,$(C_MODULES),$(eval \
   $(mod)_DEPFILES :=                                            \
