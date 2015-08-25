@@ -19,20 +19,26 @@ CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then e
 #
 
 CXX := $(CCACHE) g++
+CC := $(CXX) -x c
+
+CFLAGSPRE := \
+    -fmessage-length=0 -pipe \
+    -Wall \
+    -Wno-trigraphs -Wno-unknown-pragmas \
+    -fPIC \
+    -ftree-vectorize -msse3 -mssse3 \
+
+CFLAGSPOST := -c
 
 CXXFLAGSPRE := \
     -std=c++11 \
-    -fmessage-length=0 -pipe \
-    -Wall \
-    -Wno-reorder -Wno-trigraphs -Wno-unknown-pragmas \
-    -fPIC \
-    -ftree-vectorize -msse3 -mssse3 \
+    -Wno-reorder \
     -DXP_LINUX=1 -DXP_UNIX=1 \
     -DMOZILLA_STRICT_API \
-    -fexceptions
+    -fexceptions \
+    $(CFLAGSPRE)
 
-CXXFLAGSPOST := \
-    -c
+CXXFLAGSPOST := $(CFLAGSPOST)
 
 # DEBUG / RELEASE
 

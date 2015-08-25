@@ -1015,8 +1015,8 @@ _project_all_modules := $(sort \
 )
 _project_moduledefs := $(foreach m,$(_project_all_modules),$($(m)_moduledef))
 
-$(info _project_moduledefs: $(_project_moduledefs))
-$(info $(PROJECT_GYP_FILE))
+# $(info _project_moduledefs: $(_project_moduledefs))
+# $(info $(PROJECT_GYP_FILE))
 
 $(PROJECT_GYP_FILE) : $(_project_moduledefs)
 	@echo "[MKGYP ]" $@

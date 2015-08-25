@@ -223,79 +223,86 @@ VARIANT:=$(strip $(VARIANT)-$(ARCH))
 # hence android NDK, may not be known yet.
 
 ifeq (1,$(NDK_USE_CLANG))
-  CXX = $(NDK_CLANG_TOOLBIN)/clang++
-  CXXFLAGSPOST += $(NDK_CLANG_FLAGS)
+  CC = $(NDK_CLANG_TOOLBIN)/clang++
+  CFLAGSPOST += $(NDK_CLANG_FLAGS)
 else
-  CXX = $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)g++
-  CXXFLAGSPRE += -funswitch-loops -finline-limit=256 -Wno-psabi
+  CC = $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)g++
+  CFLAGSPRE += -funswitch-loops -finline-limit=256 -Wno-psabi
 endif
 
-CXXFLAGSPRE += \
+CXX = $(CC)
+
+CFLAGSPRE += \
   -ffunction-sections -funwind-tables -fno-rtti -fstrict-aliasing \
-  -Wall -Wno-unknown-pragmas -Wno-reorder -Wno-trigraphs \
+  -Wall -Wno-unknown-pragmas -Wno-trigraphs \
   -Wno-unused-parameter \
   -DANDROID -DTZ_ANDROID -DTZ_USE_V8
 
 # -fstack-protector
 
 ifeq ($(ARCH),armv5)
-  CXXFLAGSPRE += \
+  CFLAGSPRE += \
     -fpic \
     -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
     -mthumb -march=armv5te -mtune=xscale -msoft-float
 endif
 
 ifeq ($(ARCH),armv7a)
-  CXXFLAGSPRE += \
+  CFLAGSPRE += \
     -fpic \
     -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
     -mthumb
 
   ifeq ($(TEGRA3),1)
-    CXXFLAGSPRE += -mfpu=neon -mcpu=cortex-a9 -mfloat-abi=softfp
+    CFLAGSPRE += -mfpu=neon -mcpu=cortex-a9 -mfloat-abi=softfp
   else
-    CXXFLAGSPRE += -march=armv7-a -mfloat-abi=softfp -mfpu=vfp
+    CFLAGSPRE += -march=armv7-a -mfloat-abi=softfp -mfpu=vfp
   endif
 endif
 
 ifeq ($(ARCH),x86)
-  CXXFLAGSPRE += -Wa,--noexecstack
+  CFLAGSPRE += -Wa,--noexecstack
 endif
 
-CXXFLAGSPOST += \
- $(addprefix -I,$(NDK_STL_INCLUDES) $(NDK_PLATFORM_INCLUDES)) \
- -DFASTCALL= -Wa,--noexecstack -fexceptions
+CFLAGSPOST += \
+ $(addprefix -I,$(NDK_PLATFORM_INCLUDES)) \
+ -DFASTCALL= -Wa,--noexecstack
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPOST += -DDEBUG -D_DEBUG
+  CFLAGSPOST += -DDEBUG -D_DEBUG
 endif
 ifeq ($(CONFIG),release)
-  CXXFLAGSPOST += -DNDEBUG
+  CFLAGSPOST += -DNDEBUG
 endif
 
 ifeq ($(C_OPTIMIZE),1)
-  CXXFLAGSPOST += -O3 -ffast-math -ftree-vectorize
-  # CXXFLAGSPOST += -fomit-frame-pointer
+  CFLAGSPOST += -O3 -ffast-math -ftree-vectorize
+  # CFLAGSPOST += -fomit-frame-pointer
 
   # WORKAROUND: gcc 4.8 targeting x86
   ifeq (4.8,$(NDK_GCC_VER))
     ifeq (x86,$(ARCH))
       ifneq (1,$(NDK_USE_CLANG))
-        CXXFLAGSPOST += -fno-tree-vectorize
+        CFLAGSPOST += -fno-tree-vectorize
       endif
     endif
   endif
 else
-  CXXFLAGSPOST += -O0
+  CFLAGSPOST += -O0
 endif
 ifeq ($(C_SYMBOLS),1)
-  CXXFLAGSPOST += -g
+  CFLAGSPOST += -g
 else
   dll-post = \
     $(NDK_TOOLBIN)/$(NDK_TOOLPREFIX)strip --strip-unneeded \
     $($(1)_dllfile)
 endif
-CXXFLAGSPOST += -c
+CFLAGSPOST += -c
+
+CXXFLAGSPRE := $(CFLAGSPRE) -Wno-reorder 
+CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions $(addprefix -I,$(NDK_STL_INCLUDES))
+
+CFLAGSPOST += -x c -std=c99
 
 PCHFLAGS := -x c++-header
 
