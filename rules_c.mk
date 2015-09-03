@@ -682,18 +682,13 @@ define _make_dll_rule
 	$(if $($(1)_poststep),($($(1)_poststep)) || $(RM) -f $$@)
 
   .PHONY : $(1)
-  $(1) : $($(1)_extlibs) $($(1)_depextlibs)
+  $(1) : $($(1)_dllfile)
 
 endef
 
 # rule to make dll file
 $(foreach dll,$(DLLS),$(eval \
   $(call _make_dll_rule,$(dll)) \
-))
-
-# <dll> : $(<dll>_dllfile)
-$(foreach dll,$(DLLS),$(eval \
-  $(dll) : $($(dll)_dllfile) \
 ))
 
 # $(warning therun_ext_lib_files = $(therun_ext_lib_files))
@@ -744,8 +739,7 @@ define _make_app_rule
 	$($(1)_poststep)
 
   .PHONY : $(1)
-
-  $(1) : $($(1)_extlibs) $($(1)_depextlibs) $($(1)_appfile)
+  $(1) : $($(1)_appfile)
 
 endef
 
