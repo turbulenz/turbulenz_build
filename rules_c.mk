@@ -231,19 +231,22 @@ $(call log,npturbulenz_ext_dlls = $(npturbulenz_ext_dlls))
 
 # External dlls need to be copied to bin
 
-# 1 - EXT name
-# 2 - EXT file
-# 3 - destination file
-define _copy_external_dll
+# 1 - module name
+# 2 - dest
+# 3 - src
+ifneq (1,$(DISABLE_COPY_EXTERNAL_DLLS))
+  define _copy_dll_rule
 
-  $(1) : $(3)
+    $($(1)_dllfile) $($(1)_appfile) : $(2)
 
-  $(3) : $(2)
-	@$(MKDIR) -p $$(dir $$@)
-	@echo [COPY-DLL] $$(notdir $$<)
-	$(CMDPREFIX) $(CP) $$^ $$@
+    $(2) :: $(3)
+	  @$(MKDIR) -p $$(dir $$@)
+	  @echo [COPY-DLL] \($(1)\) $$(notdir $$<)
+	  $(CMDPREFIX) $(CP) $$^ $$@
 
-endef
+  endef
+endif
+
 
 # 1 - EXT name
 define _null_external_dll
@@ -252,17 +255,6 @@ define _null_external_dll
   $(1) :
 
 endef
-
-ifneq (1,$(DISABLE_COPY_EXTERNAL_DLLS))
-  $(foreach e,$(EXT),$(if $($(e)_dlls),  \
-    $(foreach d,$($(e)_dlls),$(eval      \
-      $(call _copy_external_dll,$(e),$(d),$(BINDIR)/$(notdir $(d))) \
-    )), \
-    $(eval $(call _null_external_dll,$(e))) \
-  ))
-else
-  $(foreach e,$(EXT),$(eval $(call _null_external_dll,$(e))))
-endif
 
 ############################################################
 
@@ -507,7 +499,7 @@ define _make_cxx_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CXX $(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CXX $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
@@ -621,7 +613,7 @@ define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
 	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
-	@echo [AR  $(ARCH)] $$(notdir $$@)
+	@echo [AR  $(TARGET)-$(ARCH)] $$(notdir $$@)
 	$(CMDPREFIX)$(RM) $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
@@ -645,11 +637,9 @@ $(foreach lib,$(LIBS),$(eval \
 
 # 1 - dll
 define _make_dll_paths
-
   $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
-  $(1)_pdbfile ?= $(BINDIR)/$(dllprefix)$(dll)$(pdbsuffix)
-  $(1)_dlllibfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dlllibsuffix)
-
+  $(1)_pdbfile ?= $$($(1)_dllfile:$(dllsuffix)=$(pdbsuffix))
+  $(1)_dlllibfile ?= $$($(1)_dllfile:$(dllsuffix)=$(dlllibsuffix))
 endef
 
 # calc <dll>_dllfile
@@ -657,12 +647,23 @@ $(foreach dll,$(DLLS),$(eval \
   $(call _make_dll_paths,$(dll)) \
 ))
 
+# $(info core_dllfile = $(core_dllfile))
+# $(info core_pdbfile = $(core_pdbfile))
+# $(info core_dlllibfile = $(core_dlllibfile))
+
+# rules to copy the dependent dlls
+$(foreach dll,$(DLLS), \
+  $(foreach d,$($(dll)_ext_dlls),$(eval \
+    $(call _copy_dll_rule,$(dll),$(dir $($(dll)_dllfile))/$(notdir $(d)),$(d)) \
+  )) \
+)
+
 # 1 - module
 define _make_dll_rule
 
   $($(1)_dllfile) : $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
-	@$(MKDIR) -p $(BINDIR)
-	@echo [DLL $(ARCH)] $$@
+	@$(MKDIR) -p $$(dir $$@)
+	@echo [DLL $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
       $(dllout)$$@ \
@@ -704,7 +705,7 @@ $(foreach dll,$(DLLS),$(eval \
 
 # calc <app>_appfile
 $(foreach app,$(APPS),$(eval \
-  $(app)_appfile := $(BINDIR)/$(app)$(binsuffix) \
+  $(app)_appfile ?= $(BINDIR)/$(app)$(binsuffix) \
 ))
 
 # calc <app>_depdlls (for platforms that dont have export libs
@@ -715,13 +716,20 @@ ifeq (,$(dlllibsuffix))
   ))
 endif
 
+# rules to copy the dependent dlls
+$(foreach app,$(APPS),                                                         \
+  $(foreach a,$($(app)_ext_dlls),$(eval                                        \
+    $(call _copy_dll_rule,$(app),$(dir $($(app)_appfile))/$(notdir $(a)),$(a)) \
+  ))                                                                           \
+)
+
 # 1 - mod
 define _make_app_rule
 
   $($(1)_appfile) : $($(1)_deplibs) $($(1)_depdlls) $($(1)_OBJECTS) \
   $($(1)_ext_lib_files)
-	@$(MKDIR) -p $(BINDIR)
-	@echo [LD  $(ARCH)] $$@
+	@$(MKDIR) -p $$(dir $$@)
+	@echo [LD  $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$(LIBDIR)) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
