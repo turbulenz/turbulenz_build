@@ -3,6 +3,10 @@
 
 ############################################################
 
+ifeq (,$(ARCH))
+  $(error ARCH variable is not set (x86_64|i386))
+endif
+
 ifeq (1,$(MACOSX_USE_OLD_TOOLS))
   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
 endif
@@ -59,7 +63,7 @@ _cxxflags_warnings := \
     -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -75,7 +79,7 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
 # -fvisibility=hidden
 
 CMMFLAGSPRE := -x objective-c++ \
-    -arch i386 -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
+    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -137,7 +141,7 @@ endif
 
 AR := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)libtool
-ARFLAGSPRE := -static -arch_only i386 -g
+ARFLAGSPRE := -static -arch_only $(ARCH) -g
 space:= #
 arout := -o #$(space)
 ARFLAGSPOST := \
@@ -160,7 +164,7 @@ libsuffix := .a
 DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := \
-  -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch i386 -g $(MACOSX_DLLFLAGS)
+  -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch $(ARCH) -g $(MACOSX_DLLFLAGS)
 DLLFLAGSPOST := \
   -framework CoreFoundation \
   -framework OpenGL \
@@ -193,7 +197,7 @@ LDFLAGS_LIB := -l
 
 LD := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 LDFLAGSPRE := \
-    -arch i386 \
+    -arch $(ARCH) \
     -g \
     -isysroot $(XCODE_SDK_ROOT) \
     $(MACOSX_LDFLAGS)
