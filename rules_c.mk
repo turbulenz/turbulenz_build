@@ -810,9 +810,9 @@ $(foreach apk,$(APKS),														\
   $(eval																	\
      $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0)		\
   )																			\
-  $(eval $(apk)_apk_file :=													\
+  $(eval $(apk)_apk_file := $(strip                                         \
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
-  )																			\
+  ))																		\
   $(eval																	\
     $(apk)_archs := $(if $($(apk)_archs),$($(apk)_archs),$(ARCH))			\
   )																			\
@@ -911,6 +911,10 @@ define _make_apk_rule
   $(1)_run : $(1)_install
 	adb shell am start -a android.intent.action.MAIN \
       -n $($(1)_package)/$$($(1)_run_dot)$($(1)_activity)
+
+  $(1)_deploy : #$(1)
+	APK="$($(1)_apk_file)" MARKET="$(MARKET)" \
+      $(BUILDDIR)/commands/deploy_apk.sh
 
   .PHONY : $(1)_clean
   $(1)_clean :
