@@ -148,7 +148,7 @@ $(foreach ext,$(EXT), \
         $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*) \
       ) \
     ) \
-    $(filter %$(dllsuffix),$($(ext)_libfile)) \
+    $(filter-out %$(libsuffix),$($(ext)_libfile)) \
   ) \
 )
 
