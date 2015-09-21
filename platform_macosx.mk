@@ -25,14 +25,14 @@ endif
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # SDK to build against
-XCODE_SDK_VER ?= 10.9
+XCODE_SDK_VER ?= 10.11
 
 # Minimum OS version to target
 XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
 
-ifneq ($(XCODE_SDK_VER),10.9)
+ifneq ($(XCODE_SDK_VER),10.11)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
