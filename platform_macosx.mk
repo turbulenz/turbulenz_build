@@ -32,7 +32,8 @@ MACOSX_CXX_DEFAULTLANG ?= objective-c++
 XCODE_SDK_VER ?= 10.11
 
 # Minimum OS version to target
-XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
+XCODE_MIN_OS_VER ?= 10.9
+# $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
 
