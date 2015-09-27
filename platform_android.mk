@@ -299,7 +299,7 @@ else
 endif
 CFLAGSPOST += -c
 
-CXXFLAGSPRE := $(CFLAGSPRE) -Wno-reorder 
+CXXFLAGSPRE := $(CFLAGSPRE) -std=c++11 -Wno-reorder
 CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions $(addprefix -I,$(NDK_STL_INCLUDES))
 
 CFLAGSPOST += -x c -std=c99

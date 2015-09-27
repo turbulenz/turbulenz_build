@@ -7,48 +7,48 @@
 #
 ############################################################
 
-$(call log,LINUX BUILD CONFIGURATION)
-
 #
 # CCACHE
 #
 CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
 
 #
+# RPATH the executable dir?
+ifneq (1,$(DISABLE_EXECUTABLE_RPATH))
+  _rpath_flags := -Wl,-rpath,'$$$$ORIGIN'
+endif
+
+#
 # CXX / CMM FLAGS
 #
+
+_cxxflags_warnings := \
+    -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
+    -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
 
 CXX := $(CCACHE) g++
 CC := $(CXX) -x c
 
 CFLAGSPRE := \
     -fmessage-length=0 -pipe \
+    $(_cxxflags_warnings) \
     -Wall \
-    -Wno-trigraphs -Wno-unknown-pragmas \
     -fPIC \
     -ftree-vectorize -msse3 -mssse3 \
 
 CFLAGSPOST := -c
 
-CXXFLAGSPRE := \
-    -std=c++11 \
-    -Wno-reorder \
-    -DXP_LINUX=1 -DXP_UNIX=1 \
-    -DMOZILLA_STRICT_API \
-    -fexceptions \
-    $(CFLAGSPRE)
-
-CXXFLAGSPOST := $(CFLAGSPOST)
-
 # DEBUG / RELEASE
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
-  CMMFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
+  CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
 else
-  CXXFLAGSPRE += -g -O3 -DNDEBUG
-  CMMFLAGSPRE += -g -O0 -DNDEBUG
+  CFLAGSPRE += -g -O3 -DNDEBUG
 endif
+
+CXXFLAGSPRE := $(CFLAGSPRE) -std=c++11 -Wno-reorder \
+  -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
+CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions
 
 PCHFLAGS := -x c++-header
 
@@ -70,7 +70,7 @@ libsuffix := .a
 
 DLL := g++
 DLLFLAGSPRE := -shared -g
-DLLFLAGSPOST :=
+DLLFLAGSPOST := $(_rpath_flags)
 
 
 DLLFLAGS_LIBDIR := -L
@@ -87,11 +87,9 @@ LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
 LD := g++
-LDFLAGSPRE := \
-    -g \
+LDFLAGSPRE := -g
 
-LDFLAGSPOST := \
-    -lpthread
+LDFLAGSPOST := -lpthread $(_rpath_flags)
 
 
 ############################################################

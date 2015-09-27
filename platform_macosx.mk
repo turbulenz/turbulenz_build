@@ -3,6 +3,10 @@
 
 ############################################################
 
+ifeq (,$(ARCH))
+  $(error ARCH variable is not set (x86_64|i386))
+endif
+
 ifeq (1,$(MACOSX_USE_OLD_TOOLS))
   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
 endif
@@ -26,14 +30,15 @@ MACOSX_C_DEFAULTLANG ?= objective-c
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # SDK to build against
-XCODE_SDK_VER ?= 10.10
+XCODE_SDK_VER ?= 10.11
 
 # Minimum OS version to target
-XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
+XCODE_MIN_OS_VER ?= 10.9
+# $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
 
-ifneq ($(XCODE_SDK_VER),10.10)
+ifneq ($(XCODE_SDK_VER),10.11)
   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
 endif
 
@@ -56,83 +61,56 @@ CC := $(CXX)
 CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
-CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) \
+_cxxflags_warnings := \
+    -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
+    -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
+
+CFLAGSPRE := \
     -arch $(ARCH) -fmessage-length=0 -pipe \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas \
-    -Wno-trigraphs -Wno-unused-parameter \
+    $(_cxxflags_warnings) \
     -isysroot $(XCODE_SDK_ROOT) \
     -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
-
-CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
-    -fpascal-strings -fasm-blocks \
-    -fstrict-aliasing -fno-threadsafe-statics \
-    -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
-    -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
-    -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
-    -fvisibility-inlines-hidden \
-    -fvisibility=hidden \
-    -DXP_MACOSX=1 -DMACOSX=1
-
-# -fno-rtti
-# -fno-exceptions
-# -fvisibility=hidden
-
-CMMFLAGSPRE := -x objective-c++ \
-    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
-    -fpascal-strings -fasm-blocks \
-    -fstrict-aliasing -fno-threadsafe-statics \
-    -msse3 -mssse3 \
-    -Wall -Wno-unknown-pragmas -Wno-overloaded-virtual \
-    -Wno-reorder -Wno-trigraphs -Wno-unused-parameter \
-    -Wno-undeclared-selector \
-    -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
-    -fvisibility-inlines-hidden \
-    -fvisibility=hidden \
-    -DXP_MACOSX=1 -DMACOSX=1
-
-# -fno-exceptions
-# -fno-rtti
 
 CFLAGSPOST := -c
-CXXFLAGSPOST := -c
-CMMFLAGSPOST := -c
-
-PCHFLAGS := -x objective-c++-header
 
 # DEBUG / RELEASE
 
 ifeq (1,$(C_SYMBOLS))
   CFLAGSPRE += -g
-  CXXFLAGSPRE += -g
-  CMMFLAGSPRE += -g
 endif
 
 ifeq (1,$(C_OPTIMIZE))
   CFLAGSPRE += -O3 -DNDEBUG
-  CXXFLAGSPRE += -O3 -DNDEBUG
-  CMMFLAGSPRE += -O3 -DNDEBUG
 else
   CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
-  CXXFLAGSPRE += -O0 -D_DEBUG -DDEBUG
-  CMMFLAGSPRE += -O0 -D_DEBUG -DDEBUG
 endif
 
 ifeq (1,$(LD_OPTIMIZE))
   CFLAGSPRE += =flto
-  CXXFLAGSPRE += -flto
-  CMMFLAGSPRE += -flto
   MACOSX_LDFLAGS += -O3 -flto
 endif
+
+# -fno-rtti
+# -fno-exceptions
+# -fvisibility=hidden
+
+CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++11 -fno-exceptions \
+  $(CFLAGSPRE)
+CMMFLAGSPRE := -x objective-c++ -std=c++11 -fno-exceptions \
+  -Wno-undeclared-selector \
+  $(CFLAGSPRE)
+CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) $(CFLAGSPRE)
+
+CXXFLAGSPOST := $(CFLAGSPOST)
+CMMFLAGSPOST := $(CFLAGSPOST)
+
+PCHFLAGS := -x objective-c++-header
 
 #
 # LIBS

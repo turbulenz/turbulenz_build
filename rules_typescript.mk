@@ -27,13 +27,125 @@ CLOSURE:=java -jar external/closure/compiler.jar \
   --compilation_level WHITESPACE_ONLY \
   --js_output_file /dev/null
 
-# Define the postfix flags for various behaviour patterns
+#
+
+# Define the postfix flags for various behaviour patterns, and
+# external tools
 
 tsc_postfix_failonerror := || ($(RM) $$@ && $(FALSE))
 ifeq (win32,$(BUILDHOST))
   tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ ($(TRUE)) else ($(FALSE))
 else
   tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]
+endif
+
+############################################################
+# Inlining compiled cgfx files
+#
+# Modules with .cgfx files as source must only have a single .ts file.
+############################################################
+
+TS_GEN_DIR ?= jslib/_generated
+TS_GEN_FILES :=
+
+_getcgfx = $(word 1,$(subst !, ,$(1)))
+_getts = $(word 2,$(subst !, ,$(1)))
+
+# Create the rules to build a .ts files from a .cgfx file
+# 1 - module name
+# 2 - cgfx file
+# 3 - ts file
+define _make_cgfx_ts_rule
+  $(3:.ts=.json) : $(2)
+	@echo "[CGFX2JSON] $$@"
+	@$(MKDIR) -p $$(dir $$@)
+	$(CMDPREFIX)$(CGFX2JSON) $(CGFX2JSONFLAGS) -o $$@ -i $$^
+
+  $(3) : $(3:.ts=.json)
+	@echo "[JSON2TS] $$@"
+	@$(MKDIR) -p $$(dir $$@)
+	$(CMDPREFIX)echo // Generated from $(2) > $$@
+	$(CMDPREFIX)echo var $(subst -,_,$(subst .,_,$(notdir $(2)))) : any = >> $$@
+	$(CMDPREFIX)$(CAT) $$^ >> $$@
+	$(CMDPREFIX)echo ; >> $$@
+endef
+
+# Main function that handles cgfx files for each module.  It appears
+# somewhat comlex, but it basically just does the following:
+#
+# If there are any cgfx files in <module>_src, there must be exactly 1
+# .ts file.  A new .ts files of the same name is generated, and
+# <module>_src is rewritten to reference that generated file.
+#
+# The generated .ts file contains the concatenation of:
+#
+#  1. each proceed cgfx file (compiled and inlined as typescript)
+#
+#  2. the original .ts file
+#
+# The rules for processing the cgfx files (into JSON and then into TS)
+# are also created here.
+#
+# 1 - module name
+define _make_cgfx_ts_list
+
+  _$(1)_cgfx_ts_list := $$(foreach c,$(filter %.cgfx,$($(1)_src)),  \
+    $$(c)!$(TS_GEN_DIR)/$$(notdir $$(c:.cgfx=.cgfx.ts))             \
+  )
+
+  ifneq (,$$(_$(1)_cgfx_ts_list))
+
+    _$(1)_old_ts_src := $(filter %.ts,$(filter-out %.d.ts,$($(1)_src)))
+    ifneq (1,$$(words $$(_$(1)_old_ts_src)))
+      $$(error $(1): .cgfx file found with multiple .ts files: \
+        $$(_$(1)_old_ts_src))
+    endif
+
+    # Replace .ts with the concatenated source in $(1)_src
+
+    _$(1)_new_src := $$(subst $(TS_SRC_DIR),$(TS_GEN_DIR),$$(_$(1)_old_ts_src))
+    $(1)_src :=                                               \
+      $$(filter-out %.cgfx $$(_$(1)_old_ts_src),$($(1)_src))  \
+      $$(_$(1)_new_src)
+    TS_GEN_FILES += $$(_$(1)_new_src)
+
+    # Rules to generate new (concatenated) .ts from generated .cgfx.ts
+    # files
+
+    _$(1)_gen_src_list := \
+      $$(foreach ct,$$(_$(1)_cgfx_ts_list), $$(call _getts,$$(ct)))
+
+    $$(_$(1)_new_src) : $$(_$(1)_gen_src_list) $$(_$(1)_old_ts_src)
+	  @echo "[GEN_TS] $$@"
+	  @$(MKDIR) -p $$(dir $$@)
+	  $(CMDPREFIX)$(CAT) $$^ > $$@
+
+    # Rules to generate .cgfx.ts files from .cgfx files
+
+    $$(foreach ct,$$(_$(1)_cgfx_ts_list),  \
+      $$(eval $$(call _make_cgfx_ts_rule,  \
+        $(1),                              \
+        $$(call _getcgfx,$$(ct)),          \
+        $$(call _getts,$$(ct))             \
+      ))                                   \
+    )
+
+  endif
+
+endef
+
+$(foreach t,$(TSLIBS),$(eval $(call _make_cgfx_ts_list,$(t))))
+
+# If there will be any cgfx->ts generation happening in this build,
+# ensure that the CGFX tool is available.
+
+ifneq (,$(TS_GEN_FILES))
+  ifeq (,$(CGFX2JSON))
+    $(error Some modules have cgfx files, but CGFX2JSON has not been set)
+  endif
+  ifeq (,$(wildcard $(CGFX2JSON)))
+    $(error CGFX2JSON points to non-existant file: $(CGFX2JSON))
+  endif
 endif
 
 ############################################################
@@ -70,11 +182,15 @@ endif
 
 # Calc .ts and .d.ts src
 $(foreach t,$(TSLIBS),\
-  $(eval _$(t)_ts_src := $(call syntax_replace,$(filter-out %.d.ts,$($(t)_src)))) \
+  $(eval _$(t)_ts_src := $(call syntax_replace, \
+    $(filter-out %.d.ts,$(filter %.ts,$($(t)_src))) \
+  )) \
   $(eval _$(t)_d_ts_src := $(filter %.d.ts,$($(t)_src))) \
+  $(eval _$(t)_cgfx_src := $(filter %.cgfx,$($(t)_src))) \
   $(eval _$(t)_out_js ?= $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).js))    \
   $(eval _$(t)_out_d_ts ?= $(if $(_$(t)_ts_src),$(TS_OUTPUT_DIR)/$(t).d.ts)) \
   $(eval _$(t)_out_copy_d_ts := $(if $(_$(t)_d_ts_src),$(addprefix $(TS_OUTPUT_DIR)/,$(notdir $(_$(t)_d_ts_src))))) \
+  \
 )
 
 # Dep files.  Note that we use the _d_ts_src for dependent decl
@@ -191,23 +307,42 @@ else # ifeq (1,$(TS_MODULAR))
 
 ifeq (1,$(TS_ONESHOT))
 
-TS_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
+# Split the list of all files into those from the tslib source dir and
+# those from the generated source dir.  Ensure that there are no
+# unexpected entries.
+
+TS_ALL_FILES := $(foreach m,$(TSLIBS),$($(m)_src))
+TS_SRC_FILES := $(filter $(TS_SRC_DIR)/%,$(TS_ALL_FILES))
+
+# TS_GEN_FILES is set above
+# TS_GEN_FILES := $(filter $(TS_GEN_DIR)/%,$(TS_ALL_FILES))
+
+_ts_unexpected := $(filter-out $(TS_SRC_FILES) $(TS_GEN_FILES),$(TS_ALL_FILES))
+ifneq (,$(_ts_unexpected))
+  $(error Unexpected source file(s): $(_ts_unexpected))
+endif
+
 TSC_POSTFIX := $(tsc_postfix_ignoreerrors)
 
 # Choose a file that is a real .ts file (not .d.ts)
-ts_representative_file := $(word 1,$(filter-out %.d.ts,$(TS_FILES)))
-ts_js_file := $(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts_representative_file))
-ts_js_file := $(ts_js_file:.ts=.js)
+ts_first_src := $(word 1,$(filter-out %.d.ts,$(TS_SRC_FILES)))
+ts_src_output := $(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts_first_src:.ts=.js))
+ts_first_gen := $(word 1,$(filter-out %.d.ts,$(TS_GEN_FILES)))
+ts_gen_output := $(subst $(TS_GEN_DIR),$(TS_OUTPUT_DIR),$(ts_first_gen:.ts=.js))
 
 .PHONY : jslib
-jslib: $(ts_js_file)
+jslib: $(ts_src_output) $(ts_gen_output)
 
-# (Windows version of makre requires this to be in a 'define' in order
+# (Windows version of make requires this to be in a 'define' in order
 # that the POSTFIX variable gets expanded correctly.
 
 define _make_ts_js_rule
-  $(ts_js_file) : $(TS_FILES)
+  $(ts_src_output) : $(TS_SRC_FILES)
 	@echo "[TSC  ] *.ts -> $(TS_OUTPUT_DIR)"
+	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $$^ $(TSC_POSTFIX)
+
+  $(ts_gen_output) : $(TS_GEN_FILES)
+	@echo "[TSC  ] (generated) *.ts -> $(TS_OUTPUT_DIR)"
 	$(CMDPREFIX)$(TSC) $(TSC_FLAGS) --outDir $(TS_OUTPUT_DIR) $$^ $(TSC_POSTFIX)
 endef
 
@@ -253,7 +388,7 @@ ifeq (1,$(TS_SYNTAX_CHECK))
 else
 
   ts_js_files := $(foreach ts,$(filter-out %.d.ts,$(TS_FILES)),   \
-    $(ts)!$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.js)) \
+    $(ts)!$(subst $(TS_GEN_DIR),$(TS_OUTPUT_DIR),$(subst $(TS_SRC_DIR),$(TS_OUTPUT_DIR),$(ts:.ts=.js))) \
   )
 
 endif
