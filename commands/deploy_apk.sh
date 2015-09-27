@@ -8,15 +8,15 @@ if ! [ -e "$APKDEPLOYPATH" ] ; then
     exit 1
 fi
 
-if ! [ -e "$APK" ] ; then
-    echo ERROR: APK ${APK} does not exist
-    exit 1
-fi
-
 # Get tag at current changeset
 
 if ! _tag=`git describe --tags --exact-match HEAD` ; then
     echo ERROR: not on a tag
+    exit 1
+fi
+
+if ! [ -e "$APK" ] ; then
+    echo ERROR: APK ${APK} does not exist
     exit 1
 fi
 
