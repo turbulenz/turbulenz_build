@@ -19,18 +19,42 @@ ABSPATHS ?= 1
 #
 # Platform stuff.  Determine the build host
 #
-_shell_base := $(notdir $(SHELL))
-ifneq (,$(filter %.exe,$(_shell_base)))
+
+# Try to detect Windows, most robust methods first
+
+ifeq (Windows_NT,$(OS))
   UNAME := win32
-  # This avoids problems where sh.exe exists in the path, but has
-  # spaces in it.
-  override SHELL := cmd.exe
 else
+  ifneq (,$(filter %.exe,$(notdir $(SHELL))))
+    UNAME := win32
+  else
+    ifdef SYSTEMROOT
+      UNAME := win32
+    else
+      ifdef SystemRoot
+        UNAME := win32
+      else
+        ifdef COMSPEC
+          UNAME := win32
+        else
+          ifdef ComSpec
+            UNAME := win32
+          endif
+        endif
+      endif
+    endif
+  endif
+endif
+
+ifeq (,$(UNAME))
   UNAME := $(shell uname)
 endif
 
-# $(warning UNAME = $(UNAME))
-# $(warning SHELL = $(SHELL))
+# Check for unsupported build host
+ifeq ($(UNAME),)
+  $(warning Couldnt determine BUILDHOST from uname: $(UNAME), assuming win32)
+  UNAME := win32
+endif
 
 # macosx
 ifeq ($(UNAME),Darwin)
@@ -51,17 +75,16 @@ ifeq ($(UNAME),Linux)
   endif
 endif
 
-# Check for unsupported build host
-ifeq ($(UNAME),)
-  $(warning Couldnt determine BUILDHOST from uname: $(UNAME), assuming win32)
-  UNAME := win32
-endif
-
+# windows
 ifeq ($(UNAME),win32)
+  override SHELL := cmd.exe
   BUILDHOST := win32
   ABSPATHS := 0
   UNITY := 0
 endif
+
+# $(info UNAME = $(UNAME))
+# $(info SHELL = $(SHELL))
 
 # Set TARGET if it hasn't been determined, and based on that, set
 # TARGETNAME:
