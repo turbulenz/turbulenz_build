@@ -29,6 +29,14 @@ endif
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # SDK to build against
+ifeq (auto,$(XCODE_SDK_VER))
+  XCODE_SDK_VER:=$(shell xcodebuild -showsdks | grep -o 'macosx.*' | sort -r | head -n 1 | grep -oe '[0-9\.]\+')
+  ifeq (,$(XCODE_SDK_VER))
+    $(error Failed to auto-detect SDK version)
+  endif
+  $(warning Using auto-detected SDK version: $(XCODE_SDK_VER))
+endif
+
 XCODE_SDK_VER ?= 10.11
 
 # Minimum OS version to target
@@ -36,10 +44,9 @@ XCODE_MIN_OS_VER ?= 10.9
 # $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
-
-ifneq ($(XCODE_SDK_VER),10.11)
-  VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
-endif
+# ifneq ($(XCODE_SDK_VER),10.11)
+#   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
+# endif
 
 # Check the known SDK install locations
 
