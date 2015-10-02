@@ -102,7 +102,9 @@ ifeq ($(TARGET),macosx)
   COMPILER ?= clang
   TARGETNAME := macosx
   ARCH ?= $(MACOSX_ARCH)
-  ARCH ?= x86_64
+  ifeq (,$(ARCH))
+    ARCH := x86_64
+  endif
 endif
 
 ifeq ($(TARGET),android)
