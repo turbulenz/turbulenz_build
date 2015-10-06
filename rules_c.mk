@@ -499,7 +499,7 @@ define _make_c_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CC  $(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CC $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CC)                                             \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
       $(CFLAGSPRE) $(CFLAGS)                                   \
@@ -570,7 +570,7 @@ define _make_cmm_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CMM $(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CMM $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM)                                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))            \
       $(CMMFLAGSPRE) $(CMMFLAGS)                                    \
