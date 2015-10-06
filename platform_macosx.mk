@@ -64,8 +64,8 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
-CC := $(CXX)
-CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+CC := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+CXX := $(CC)
 CMM := $(CXX)
 
 _cxxflags_warnings := \
