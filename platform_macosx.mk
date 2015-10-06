@@ -25,7 +25,8 @@ else
   MACOSX_DLLFLAGS += -lc++
 endif
 
-# Language to compile all .cpp files as
+# Language to compile all .c and .cpp files as
+MACOSX_C_DEFAULTLANG ?= objective-c
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
 
 # SDK to build against
@@ -63,6 +64,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
+CC := $(CXX)
 CXX := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CMM := $(CXX)
 
@@ -70,8 +72,8 @@ _cxxflags_warnings := \
     -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
     -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
 
-CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
-    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
+CFLAGSPRE := \
+    -arch $(ARCH) -fmessage-length=0 -pipe \
     -fpascal-strings -fasm-blocks \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
@@ -81,55 +83,41 @@ CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
+
+CFLAGSPOST := -c
+
+# DEBUG / RELEASE
+
+ifeq (1,$(C_SYMBOLS))
+  CFLAGSPRE += -g
+endif
+
+ifeq (1,$(C_OPTIMIZE))
+  CFLAGSPRE += -O3 -DNDEBUG
+else
+  CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
+endif
+
+ifeq (1,$(LD_OPTIMIZE))
+  CFLAGSPRE += =flto
+  MACOSX_LDFLAGS += -O3 -flto
+endif
 
 # -fno-rtti
 # -fno-exceptions
 # -fvisibility=hidden
 
-CMMFLAGSPRE := -x objective-c++ \
-    -arch $(ARCH) -std=c++11 -fmessage-length=0 -pipe -fno-exceptions \
-    -fpascal-strings -fasm-blocks \
-    -fstrict-aliasing -fno-threadsafe-statics \
-    -msse3 -mssse3 \
-    $(_cxxflags_warnings) \
-    -Wno-undeclared-selector \
-    -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
-    -fvisibility-inlines-hidden \
-    -fvisibility=hidden \
-    -DXP_MACOSX=1 -DMACOSX=1
+CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++11 -fno-exceptions \
+  $(CFLAGSPRE)
+CMMFLAGSPRE := -x objective-c++ -std=c++11 -fno-exceptions \
+  -Wno-undeclared-selector \
+  $(CFLAGSPRE)
+CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) $(CFLAGSPRE)
 
-# -fno-exceptions
-# -fno-rtti
-
-CXXFLAGSPOST := \
-    -c
-
-CMMFLAGSPOST := \
-    -c
+CXXFLAGSPOST := $(CFLAGSPOST)
+CMMFLAGSPOST := $(CFLAGSPOST)
 
 PCHFLAGS := -x objective-c++-header
-
-# DEBUG / RELEASE
-
-ifeq (1,$(C_SYMBOLS))
-  CXXFLAGSPRE += -g
-  CMMFLAGSPRE += -g
-endif
-
-ifeq (1,$(C_OPTIMIZE))
-  CXXFLAGSPRE += -O3 -DNDEBUG
-  CMMFLAGSPRE += -O3 -DNDEBUG
-else
-  CXXFLAGSPRE += -O0 -D_DEBUG -DDEBUG
-  CMMFLAGSPRE += -O0 -D_DEBUG -DDEBUG
-endif
-
-ifeq (1,$(LD_OPTIMIZE))
-  CXXFLAGSPRE += -flto
-  CMMFLAGSPRE += -flto
-  MACOSX_LDFLAGS += -O3 -flto
-endif
 
 #
 # LIBS

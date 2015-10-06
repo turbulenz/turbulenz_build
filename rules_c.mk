@@ -493,6 +493,39 @@ endef
 # 2 - cxx srcfile
 # 3 - object file
 # 4 - depfile
+define _make_c_object_rule
+
+  .PRECIOUS : $(3)
+
+  $(3) : $(2) $(_$1_pchfile)
+	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
+	@echo [CC  $(ARCH)] \($(1)\) $$(notdir $$<)
+	$(CMDPREFIX)$(CC)                                             \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
+      $(CFLAGSPRE) $(CFLAGS)                                   \
+      $(if $(DISABLE_DEP_GEN),, \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost) \
+      ) \
+      $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)  \
+      $(addprefix -I,$($(1)_incdirs))                              \
+      $(addprefix -I,$($(1)_depincdirs))                           \
+      $(addprefix -I,$($(1)_ext_incdirs))                          \
+      $(CFLAGSPOST) $($(call file_flags,$(2)))                   \
+      $(cout)$$@ $(csrc) $$<
+
+  $(3).S : $(3)
+	@echo [DISASS] \($(1)\) $$@
+	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+
+  $(1)_asm : $(3).S
+
+endef
+
+# 1 - mod
+# 2 - cxx srcfile
+# 3 - object file
+# 4 - depfile
 define _make_cxx_object_rule
 
   .PRECIOUS : $(3)
@@ -562,9 +595,20 @@ define _make_object_rules
     $(call _make_pch_rule,$(1),$($(1)_pch),$(_$(1)_pchfile),$(_$(mod)_pchdep)) \
   )
 
-  $(foreach sod,$($(1)_cxx_obj_dep),$(eval \
-    $(call _make_cxx_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
-  ))
+  $(foreach sod,$($(1)_cxx_obj_dep), \
+    $(if $(filter %.cpp,$(call _getsrc,$(sod))), \
+      $(eval $(call _make_cxx_object_rule,$(1), \
+        $(call _getsrc,$(sod)), \
+        $(call _getobj,$(sod)), \
+        $(call _getdep,$(sod))  \
+      )), \
+      $(eval $(call _make_c_object_rule,$(1), \
+        $(call _getsrc,$(sod)), \
+        $(call _getobj,$(sod)), \
+        $(call _getdep,$(sod))  \
+      )) \
+    ) \
+  )
 
   $(foreach sod,$($(1)_cmm_obj_dep),$(eval \
     $(call _make_cmm_object_rule,$(1),$(call _getsrc,$(sod)),$(call _getobj,$(sod)),$(call _getdep,$(sod))) \
@@ -819,9 +863,9 @@ $(foreach apk,$(APKS),														\
   $(eval																	\
      $(apk)_version := $(if $($(apk)_version),$($(apk)_version),1.0.0)		\
   )																			\
-  $(eval $(apk)_apk_file :=													\
+  $(eval $(apk)_apk_file := $(strip                                         \
     $($(apk)_apk_dest)/bin/$(apk)-$(strip $($(apk)_version))-$(APK_CONFIG).apk \
-  )																			\
+  ))																		\
   $(eval																	\
     $(apk)_archs := $(if $($(apk)_archs),$($(apk)_archs),$(ARCH))			\
   )																			\
@@ -857,7 +901,7 @@ define _make_apk_native_rule
 
   .PHONY : _$(1)_make_$(3)_native_libs
   _$(1)_make_$(3)_native_libs :
-	$(MAKE) ARCH=$(3) $($(1)_native)                   \
+	+$(MAKE) ARCH=$(3) $($(1)_native)                   \
       BINDIR=$(2)/libs/$(call _android_arch_name,$(3))
 
   $(1) : _$(1)_make_$(3)_native_libs
@@ -921,6 +965,10 @@ define _make_apk_rule
 	adb shell am start -a android.intent.action.MAIN \
       -n $($(1)_package)/$$($(1)_run_dot)$($(1)_activity)
 
+  $(1)_deploy : #$(1)
+	APK="$($(1)_apk_file)" MARKET="$(MARKET)" \
+      $(BUILDDIR)/commands/deploy_apk.sh
+
   .PHONY : $(1)_clean
   $(1)_clean :
 	rm -rf $(2)
@@ -943,16 +991,19 @@ endif
 
 ############################################################
 
-MODULEDEFDIR := moduledefs
+MODULEDEF_DIR ?= moduledefs
+MODULEDEF_SRCPREFIX ?=
+PROJECT_GYP_FILE ?= all.gyp
+PROJECT_MODULES ?= $(APPS) $(DLLS)
 
 # Define the <mod>_moduledef rule
 # 1 - module name
 # 2 - module type ('executable', 'shared_library', 'static_library')
 define _make_moduledef_rule
 
-  $(1)_moduledef := $(MODULEDEFDIR)/$(1).$(TARGET).$(CONFIG).def
-  $(MODULEDEFDIR)/$(1).$(TARGET).$(CONFIG).def :
-	@mkdir -p $(MODULEDEFDIR)
+  $(1)_moduledef := $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def
+  $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def :
+	@mkdir -p $(MODULEDEF_DIR)
 	@echo [MODULEDEF] \($(1)\) $$@
 	@echo "{ 'target_name': '$(1)'," > $$@
 	@echo "  'type': 'none'," >> $$@
@@ -979,19 +1030,23 @@ define _make_moduledef_rule
 	else \
 	  echo "'$($(1)_cmds)' ]," >> $$@ ; \
 	fi
-	@echo "    'outputs': [ 'obj' ]," >> $$@
+	@echo "  'outputs': [ 'obj' ]," >> $$@
 
-	@echo "    'inputs': [" >> $$@
-	@_p=`pwd`/ ; for s in $($(1)_src) ; do echo "      '$$$${s#$$$$_p}'," ; \
-	  done >> $$@
-	@for s in $($(1)_headerfiles) ; do echo "      '$$$$s'," ; done >> $$@
-	@echo "    ]," >> $$@
+	@echo "  'inputs': [" >> $$@
+	@for s in $($(1)_src) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ; \
+      done >> $$@
+	@for s in $($(1)_headerfiles) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ;\
+      done >> $$@
+	@echo "  ]," >> $$@
 
 	@echo "  } ]," >> $$@
 
 	@echo "  'mac_external': 1," >> $$@
 
 	@echo "}," >> $$@
+
+  .PHONY: $(1)_moduledef
+  $(1)_moduledef : $$($(1)_moduledef)
 
 endef
 
@@ -1009,8 +1064,28 @@ $(foreach m,$(RULES),$(eval \
   $(call _make_moduledef_rule,$(m),static_library) \
 ))
 
-.PHONY : module-defs
-module-defs : $(foreach m,$(C_MODULES) $(RULES),$($(m)_moduledef))
+# .PHONY : module-defs project
+# module-defs : $(foreach m,$(C_MODULES) $(RULES),$($(m)_moduledef))
+
+_project_all_modules := $(sort \
+  $(foreach m,$(PROJECT_MODULES),$(m) $($(m)_fulldeps)) \
+)
+_project_moduledefs := $(foreach m,$(_project_all_modules),$($(m)_moduledef))
+
+# $(info _project_moduledefs: $(_project_moduledefs))
+# $(info $(PROJECT_GYP_FILE))
+
+$(PROJECT_GYP_FILE) : $(_project_moduledefs)
+	@echo "[MKGYP ]" $@
+	$(CMDPREFIX)echo "{ 'targets': [" > $@
+	$(CMDPREFIX)for i in $^ ; do cat $$i ; done >> $@
+	$(CMDPREFIX)echo "]," >> $@
+	$(CMDPREFIX)echo "  'target_defaults' : { 'configurations': { 'debug': {}, \
+               'release': {} } }," >> $@
+	$(CMDPREFIX)echo "}" >> $@
+
+project: $(PROJECT_GYP_FILE)
+	$(CMDPREFIX)$(GYP) --depth=. $^
 
 ############################################################
 

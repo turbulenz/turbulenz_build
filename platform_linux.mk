@@ -27,29 +27,28 @@ _cxxflags_warnings := \
     -Wno-overloaded-virtual -Wno-trigraphs -Wno-unused-parameter
 
 CXX := $(CCACHE) g++
+CC := $(CXX) -x c
 
-CXXFLAGSPRE := \
-  -std=c++11 \
-  -fmessage-length=0 -pipe \
-  $(_cxxflags_warnings) \
-  -fPIC \
-  -ftree-vectorize -msse3 -mssse3 \
-  -DXP_LINUX=1 -DXP_UNIX=1 \
-  -DMOZILLA_STRICT_API \
-  -fexceptions
+CFLAGSPRE := \
+    -fmessage-length=0 -pipe \
+    $(_cxxflags_warnings) \
+    -Wall \
+    -fPIC \
+    -ftree-vectorize -msse3 -mssse3 \
 
-CXXFLAGSPOST := \
-  -c
+CFLAGSPOST := -c
 
 # DEBUG / RELEASE
 
 ifeq ($(CONFIG),debug)
-  CXXFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
-  CMMFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
+  CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
 else
-  CXXFLAGSPRE += -g -O3 -DNDEBUG
-  CMMFLAGSPRE += -g -O0 -DNDEBUG
+  CFLAGSPRE += -g -O3 -DNDEBUG
 endif
+
+CXXFLAGSPRE := $(CFLAGSPRE) -std=c++11 -Wno-reorder \
+  -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
+CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions
 
 PCHFLAGS := -x c++-header
 
