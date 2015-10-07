@@ -513,6 +513,7 @@ define _make_c_object_rule
       $(addprefix -I,$($(1)_ext_incdirs))                          \
       $(CFLAGSPOST) $($(call file_flags,$(2)))                   \
       $(cout)$$@ $(csrc) $$<
+	$(call cc-post,$(1),$(2),$(3),$(4))
 
   $(3).S : $(3)
 	@echo [DISASS] \($(1)\) $$@
