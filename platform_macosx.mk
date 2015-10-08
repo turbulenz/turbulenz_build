@@ -19,8 +19,6 @@ ifneq (,$(MACOSX_XCODE_BIN_PATH))
 else
   # clang
   MACOSX_CXX := clang
-  CXXFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
-  CMMFLAGS += -stdlib=libc++ -Wno-c++11-extensions -Wno-c++11-long-long
   MACOSX_LDFLAGS += -lc++
   MACOSX_DLLFLAGS += -lc++
 endif
@@ -108,10 +106,9 @@ endif
 # -fvisibility=hidden
 
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++11 -fno-exceptions \
+  -Wno-c++11-extensions -Wno-c++11-long-long -Wno-undeclared-selector \
   $(CFLAGSPRE)
-CMMFLAGSPRE := -x objective-c++ -std=c++11 -fno-exceptions \
-  -Wno-undeclared-selector \
-  $(CFLAGSPRE)
+CMMFLAGSPRE := $(CXXFLAGSPRE)
 CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) $(CFLAGSPRE)
 
 CXXFLAGSPOST := $(CFLAGSPOST)
