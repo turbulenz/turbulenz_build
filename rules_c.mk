@@ -389,29 +389,36 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 # 2 - flags file
 # 3 - flags string
 define _make_cxx_flags_file
-  ifneq ('$(shell $(CAT) $(2))','$(strip $(3))')
-    # $$(info .flags: '$$(shell cat $(2) 2>/dev/null)')
-    # $$(info new fl: '$$(strip $(3))')
+  .FORCE:
+  $(2) : .FORCE
+	@if [ "$(3)" != "`cat $(2) 2>/dev/null`" ] ; then \
+      echo rebuilding $(2) ; \
+      $(MKDIR) -p $($(1)_OBJDIR) ; \
+      echo '$(3)' > $(2) ; \
+    fi
 
-    $$(shell $(MKDIR) -p $($(1)_OBJDIR))
-    $$(shell $(MKDIR) -p $($(1)_OBJDIR))
-    $$(shell echo '$(strip $(3))' > $(2))
-  endif
+  # Keeping the old version for reference:
+
+  # ifneq ('$(shell $(CAT) $(2))','$(strip $(3))')
+  #   # $$(info .flags: '$$(shell cat $(2) 2>/dev/null)')
+  #   # $$(info new fl: '$$(strip $(3))')
+  #   $$(shell $(MKDIR) -p $($(1)_OBJDIR))
+  #   $$(shell $(MKDIR) -p $($(1)_OBJDIR))
+  #   $$(shell echo '$(strip $(3))' > $(2))
+  # endif
 
   $($(1)_OBJECTS) : $(2)
-
 endef
 
 ifneq (1,$(DISABLE_FLAG_CHECKS))
 $(foreach mod,$(C_MODULES),$(eval \
-  $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags, $(strip   \
-    $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags) $($(mod)_cxxflags) \
-    $($(mod)_local_cxxflags)                                            \
-    $(addprefix -I,$($(mod)_incdirs))                                   \
-    $(addprefix -I,$($(mod)_depincdirs))                                \
-    $(addprefix -I,$($(mod)_ext_incdirs))                               \
-    $(CXXFLAGSPOST)                                                     \
-  ))                                                                    \
+   $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags,                \
+     $(strip $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                 \
+       $($(mod)_cxxflags) $($(mod)_local_cxxflags)                            \
+       $(addprefix -I,$($(mod)_incdirs)) $(addprefix -I,$($(mod)_depincdirs)) \
+       $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)                  \
+     )                                                                        \
+   )                                                                          \
 ))
 endif
 
