@@ -32,9 +32,9 @@ XCODE_MIN_OS_VER ?= $(XCODE_SDK_VER)
 
 # Mark builds that are linked against the non-default SDKs
 
-ifneq ($(XCODE_SDK_VER),10.9)
-  VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
-endif
+# ifneq ($(XCODE_SDK_VER),10.9)
+#   VARIANT:=$(strip $(VARIANT)-$(XCODE_SDK_VER))
+# endif
 
 # Check the known SDK install locations
 
