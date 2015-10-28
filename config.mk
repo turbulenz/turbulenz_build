@@ -78,7 +78,7 @@ endif
 # windows
 ifeq ($(UNAME),win32)
   override SHELL := cmd.exe
-  BUILDHOST := win32
+  BUILDHOST := win64
   ABSPATHS := 0
   UNITY := 0
 endif
@@ -137,7 +137,7 @@ endif
 ifeq ($(TARGET),win64)
   TARGETNAME := win
   ARCH ?= x86_64
-  COMPILER ?= vs2013
+  COMPILER ?= vs2015
   VARIANT:=-$(COMPILER)$(VARIANT)
 endif
 
