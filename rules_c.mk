@@ -412,11 +412,12 @@ endef
 ifneq (1,$(DISABLE_FLAG_CHECKS))
 $(foreach mod,$(C_MODULES),$(eval \
    $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags,                \
-     $(strip $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                 \
+     $(strip $(filter-out $($(1)_remove_cxxflags),                            \
+       $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                       \
        $($(mod)_cxxflags) $($(mod)_local_cxxflags)                            \
        $(addprefix -I,$($(mod)_incdirs)) $(addprefix -I,$($(mod)_depincdirs)) \
        $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)                  \
-     )                                                                        \
+     ))                                                                       \
    )                                                                          \
 ))
 endif
@@ -481,14 +482,18 @@ define _make_pch_rule
 	@$(MKDIR) -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [PCH $(ARCH)] \($(1)\) $$(notdir $$@)
 	$(CMDPREFIX)$(CXX)                                              \
-      $(CXXFLAGSPRE) $(CXXFLAGS)                                    \
+      $(filter-out $($(1)_remove_cxxflags),                         \
+        $(CXXFLAGSPRE) $(CXXFLAGS)                                  \
+        $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags) \
+      )                                                             \
       $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
       $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)            \
-      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)   \
       $(addprefix -I,$($(1)_incdirs))                               \
       $(addprefix -I,$($(1)_depincdirs))                            \
       $(addprefix -I,$($(1)_ext_incdirs))                           \
-      $(CXXFLAGSPOST) $($(call file_flags,$(2)))                    \
+      $(filter-out $($(1)_remove_cxxflags),                         \
+        $(CXXFLAGSPOST) $($(call file_flags,$(2)))                  \
+      )                                                             \
       $(PCHFLAGS)                                                   \
       $$< $(cout) $$@
 
@@ -506,18 +511,18 @@ define _make_c_object_rule
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CC $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CC)                                             \
-      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
-      $(CFLAGSPRE) $(CFLAGS)                                   \
-      $(if $(DISABLE_DEP_GEN),, \
-        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
-        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost) \
-      ) \
-      $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)  \
-      $(addprefix -I,$($(1)_incdirs))                              \
-      $(addprefix -I,$($(1)_depincdirs))                           \
-      $(addprefix -I,$($(1)_ext_incdirs))                          \
-      $(CFLAGSPOST) $($(call file_flags,$(2)))                   \
+	$(CMDPREFIX)$(CC)                                                   \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
+        $(CFLAGSPRE) $(CFLAGS)                                          \
+        $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)         \
+      $(if $(DISABLE_DEP_GEN),,                                         \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
+      )                                                                 \
+      $(addprefix -I,$($(1)_incdirs))                                   \
+      $(addprefix -I,$($(1)_depincdirs))                                \
+      $(addprefix -I,$($(1)_ext_incdirs))                               \
+      $(CFLAGSPOST) $($(call file_flags,$(2)))                          \
       $(cout)$$@ $(csrc) $$<
 	$(call cc-post,$(1),$(2),$(3),$(4))
 
@@ -540,18 +545,23 @@ define _make_cxx_object_rule
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CXX)                                             \
-      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))           \
-      $(CXXFLAGSPRE) $(CXXFLAGS)                                   \
-      $(if $(DISABLE_DEP_GEN),, \
-        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
-        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost) \
-      ) \
-      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)  \
-      $(addprefix -I,$($(1)_incdirs))                              \
-      $(addprefix -I,$($(1)_depincdirs))                           \
-      $(addprefix -I,$($(1)_ext_incdirs))                          \
-      $(CXXFLAGSPOST) $($(call file_flags,$(2)))                   \
+	$(CMDPREFIX)$(CXX)                                                  \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
+      $(filter-out $($(1)_remove_cxxflags),                             \
+        $(CMMFLAGSPRE) $(CMMFLAGS) $($(1)_depcxxflags)                  \
+        $($(1)_cxxflags) $($(1)_local_cxxflags)                         \
+      )                                                                 \
+      $(if $(DISABLE_DEP_GEN),,                                         \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
+      )                                                                 \
+      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)       \
+      $(addprefix -I,$($(1)_incdirs))                                   \
+      $(addprefix -I,$($(1)_depincdirs))                                \
+      $(addprefix -I,$($(1)_ext_incdirs))                               \
+      $(filter-out $($(1)_remove_cxflags),                              \
+        $(CXXFLAGSPOST) $($(call file_flags,$(2)))                      \
+      )                                                                 \
       $(cout)$$@ $(csrc) $$< || ($(RM) $(4) && exit 1)
 	$(call cxx-post,$(1),$(2),$(3),$(4))
 
@@ -578,16 +588,20 @@ define _make_cmm_object_rule
   $(3) : $(2) $(_$1_pchfile)
 	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CMM $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
-	$(CMDPREFIX)$(CMM)                                              \
-      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))            \
-      $(CMMFLAGSPRE) $(CMMFLAGS)                                    \
-      $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
-      $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)            \
-      $($(1)_cxxflags) $($(1)_depcxxflags)                          \
-      $(addprefix -I,$($(1)_incdirs))                               \
-      $(addprefix -I,$($(1)_depincdirs))                            \
-      $(addprefix -I,$($(1)_ext_incdirs))                           \
-      $(CMMFLAGSPOST) $($(call file_flags,$(2)))                    \
+	$(CMDPREFIX)$(CMM)                                                  \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
+      $(filter-out $($(1)_remove_cxflags),                              \
+        $(CMMFLAGSPRE) $(CMMFLAGS) $($(1)_depcxxflags)                  \
+        $($(1)_cxxflags) $($(1)_local_cxxflags)                         \
+      )                                                                 \
+      $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)     \
+      $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)                \
+      $(addprefix -I,$($(1)_incdirs))                                   \
+      $(addprefix -I,$($(1)_depincdirs))                                \
+      $(addprefix -I,$($(1)_ext_incdirs))                               \
+      $(filter-out $($(1)_remove_cxflags),                              \
+        $(CMMFLAGSPOST) $($(call file_flags,$(2)))                      \
+      )                                                                 \
       $$< $(cout) $$@
 
 endef
