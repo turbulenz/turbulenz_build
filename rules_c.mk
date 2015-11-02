@@ -548,7 +548,7 @@ define _make_cxx_object_rule
 	$(CMDPREFIX)$(CXX)                                                  \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(filter-out $($(1)_remove_cxxflags),                             \
-        $(CMMFLAGSPRE) $(CMMFLAGS) $($(1)_depcxxflags)                  \
+        $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags)                  \
         $($(1)_cxxflags) $($(1)_local_cxxflags)                         \
       )                                                                 \
       $(if $(DISABLE_DEP_GEN),,                                         \
