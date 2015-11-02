@@ -141,15 +141,15 @@ $(foreach ext,$(EXT), \
 $(call log,javascriptcore_libdir = $(javascriptcore_libdir))
 
 # calc full path of external dlls
-$(foreach ext,$(EXT), \
-  $(eval $(ext)_dlls := \
-    $(foreach l,$($(ext)_lib), \
-      $(foreach d,$($(ext)_libdir), \
-        $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*) \
-      ) \
-    ) \
-    $(filter-out %$(libsuffix) -l%,$($(ext)_libfile)) \
-  ) \
+$(foreach ext,$(EXT),                                    \
+  $(eval $(ext)_dlls :=                                  \
+    $(foreach l,$($(ext)_lib),                           \
+      $(foreach d,$($(ext)_libdir),                      \
+        $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*)   \
+      )                                                  \
+    )                                                    \
+    $(filter-out %$(libsuffix) -l%,$($(ext)_libfile))    \
+  )                                                      \
 )
 
 # if it's a platform with .lib files accompanying .dlls (i.e. Windows)
