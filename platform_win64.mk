@@ -214,22 +214,25 @@ endif
 # Setup based on vs version
 ############################################################
 
+ifeq (vs2015,$(COMPILER))
+  ifeq (,$(VS140COMNTOOLS))
+    $(warning VS140COMNTOOLS env var not set.  Is Visual Studio 2015 installed?)
+	$(warning Falling back to Visual Studio 2013)
+    override COMPILER := vs2013
+  else
+    VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
+    # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
+    WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/8.1
+    UCRTDIR:=$(WINKITDIR)/../10/Include/10.0.10150.0/ucrt
+  endif
+endif
+
 ifeq (vs2013,$(COMPILER))
   ifeq (,$(VS120COMNTOOLS))
     $(error VS120COMNTOOLS env var is not set.  Is Visual Studio 2013 installed?)
   endif
   VCBASEDIR:=$(VS120COMNTOOLS)/../../VC
   WINKITDIR:=$(VS120COMNTOOLS)/../../../Windows Kits/8.1
-endif
-
-ifeq (vs2015,$(COMPILER))
-  ifeq (,$(VS140COMNTOOLS))
-    $(error VS140COMNTOOLS env var is not set.  Is Visual Studio 2015 installed?)
-  endif
-  VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
-  # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
-  WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/8.1
-  UCRTDIR:=$(WINKITDIR)/../10/Include/10.0.10150.0/ucrt
 endif
 
 ifeq (,$(VCBASEDIR))
