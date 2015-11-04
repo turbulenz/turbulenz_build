@@ -562,7 +562,7 @@ define _make_cxx_object_rule
       $(filter-out $($(1)_remove_cxflags),                              \
         $(CXXFLAGSPOST) $($(call file_flags,$(2)))                      \
       )                                                                 \
-      $(cout)$$@ $(csrc) $$< || ($(RM) $(4) && exit 1)
+      $(cout)$$@ $(csrc) $$< || ($(RM) $(3) $(4) && exit 1)
 	$(call cxx-post,$(1),$(2),$(3),$(4))
 
   $(2):
