@@ -23,9 +23,7 @@ endif
 #
 
 _cxxflags_warnings := \
-  -Wall -Wsign-compare \
-  -Wno-overloaded-virtual -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas \
-  -fpermissive
+  -Wall -Wsign-compare -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas
 
 CXX := $(CCACHE) g++
 CC := $(CXX) -x c
@@ -47,9 +45,10 @@ else
   CFLAGSPRE += -g -O3 -DNDEBUG
 endif
 
-CXXFLAGSPRE := $(CFLAGSPRE) -std=c++11 -Wno-reorder \
+CXXFLAGSPRE := \
+  $(CFLAGSPRE) -Wno-overloaded-virtual -std=c++11 -Wno-reorder \
   -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
-CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions
+CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions -fpermissive
 
 PCHFLAGS := -x c++-header
 
