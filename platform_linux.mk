@@ -23,7 +23,7 @@ endif
 #
 
 _cxxflags_warnings := \
-  -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-conversion \
+  -Wall -Wsign-compare \
   -Wno-overloaded-virtual -Wno-trigraphs -Wno-unknown-pragmas -Wno-pragmas \
   -fpermissive
 
