@@ -9,6 +9,7 @@ var sanitize = function(p)
 {
     // print("p: " + p);
     var res = p.replace(/\\/g, "/").toLowerCase();
+    res = res.replace(/\/[^\/]+\/\.\.\//g, "/");
     // print("res: " + res);
     return res;
 };
