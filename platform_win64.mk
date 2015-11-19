@@ -263,6 +263,12 @@ endif
 # $(info VSBINDIR = $(VSBINDIR))
 # $(info ARCH = $(ARCH))
 
+# Windows-specific stuff in 'development' config
+
+ifeq (development,$(CONFIG))
+  CXXFLAGSPRE += -D_ITERATOR_DEBUG_LEVEL=0
+endif
+
 ############################################################
 # CXX
 ############################################################

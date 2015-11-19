@@ -177,6 +177,11 @@ ifeq ($(CONFIG),debug)
   C_OPTIMIZE ?= 0
   LD_OPTIMIZE ?= 0
 endif
+ifeq ($(CONFIG),development)
+  C_SYMBOLS ?= 1
+  C_OPTIMIZE ?= 0
+  LD_OPTIMIZE ?= 0
+endif
 
 ############################################################
 # Target PLATFORM variables
