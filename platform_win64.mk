@@ -274,7 +274,7 @@ endif
 ############################################################
 
 CXX := "$(VCBINDIR)/cl.exe"
-CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
+CXXFLAGSPRE += /W4 /WX /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
   /Zc:wchar_t /Zc:forScope /GR /Gm- /EHsc /FS \
   -D_WINDOWS -D_USRDLL -DWIN32 -DWIN32_LEAN_AND_MEAN \
   -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS
