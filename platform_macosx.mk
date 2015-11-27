@@ -67,8 +67,8 @@ CXX := $(CC)
 CMM := $(CXX)
 
 _cxxflags_warnings := \
-    -Wall -Wconversion -Wsign-compare -Wsign-conversion -Wno-unknown-pragmas \
-    -Wno-overloaded-virtual -Wno-trigraphs
+    -Wall -Wconversion -Wsign-compare -Wunused-parameter \
+    -Wno-unknown-pragmas -Wno-overloaded-virtual -Wno-trigraphs
 
 CFLAGSPRE := \
     -arch $(ARCH) -fmessage-length=0 -pipe \
