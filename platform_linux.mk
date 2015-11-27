@@ -23,8 +23,10 @@ endif
 #
 
 _cxxflags_warnings := \
-  -Wall -Wconversion -Wsign-compare -Wunused-parameter \
-  -Wno-unknown-pragmas -Wno-overloaded-virtual -Wno-trigraphs
+  -Wall -Wsign-compare -Wunused-parameter \
+  -Wno-pragmas -Wno-unknown-pragmas -Wno-trigraphs
+
+# -Wconversion
 
 CXX := $(CCACHE) g++
 CC := $(CXX) -x c
