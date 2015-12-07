@@ -244,6 +244,8 @@ ifneq (1,$(DISABLE_COPY_EXTERNAL_DLLS))
 	  @echo [COPY-DLL] \($(1)\) $$(notdir $$<)
 	  $(CMDPREFIX) $(CP) $$^ $$@
 
+    $(1)_cleanfiles += $(2)
+
   endef
 endif
 
@@ -1128,8 +1130,8 @@ ALLDEPFILES := $(foreach t,$(C_MODULES),$($(t)_DEPFILES))
 
 # <mod>_cleanfiles
 $(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_cleanfiles := $($(mod)_OBJECTS) $($(mod)_OBJDIR) $($(mod)_libfile) \
-    $($(mod)_appfile) $($(mod)_DEPFILES) \
+  $(mod)_cleanfiles += $($(mod)_OBJECTS) $($(mod)_OBJDIR) $($(mod)_libfile) \
+    $($(mod)_dllfile) $($(mod)_appfile) $($(mod)_DEPFILES) \
 ))
 
 # <mod>_clean  rule to delete files
