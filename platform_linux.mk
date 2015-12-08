@@ -52,7 +52,7 @@ CFLAGSPRE := \
     -ftree-vectorize -msse3 -mssse3
 
 ifeq (clang, $(COMPILER))
-CFLAGSPRE += -Qunused-arguments
+CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register
 endif
 
 CFLAGSPOST := -c
