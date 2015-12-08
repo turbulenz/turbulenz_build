@@ -13,6 +13,13 @@
 CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
 
 #
+# DISTCC
+#
+ifeq (1,$(ENABLE_DISTCC))
+DISTCC:=$(shell test -n "`which distcc 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "distcc" ; fi)
+endif
+
+#
 # RPATH the executable dir?
 ifneq (1,$(DISABLE_EXECUTABLE_RPATH))
   _rpath_flags := -Wl,-rpath,'$$$$ORIGIN'
@@ -28,7 +35,13 @@ _cxxflags_warnings := \
 
 # -Wconversion
 
-CXX := $(CCACHE) g++
+ifeq (clang, $(COMPILER))
+CXXCOMPILER:=clang++
+else
+CXXCOMPILER:=g++
+endif
+
+CXX := $(CCACHE) $(DISTCC) $(CXXCOMPILER)
 CC := $(CXX) -x c
 
 CFLAGSPRE := \
@@ -36,14 +49,21 @@ CFLAGSPRE := \
     $(_cxxflags_warnings) \
     -Wall \
     -fPIC \
-    -ftree-vectorize -msse3 -mssse3 \
+    -ftree-vectorize -msse3 -mssse3
+
+ifeq (clang, $(COMPILER))
+CFLAGSPRE += -Qunused-arguments
+endif
 
 CFLAGSPOST := -c
 
 # DEBUG / RELEASE
 
 ifeq ($(CONFIG),debug)
-  CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG -falign-functions=4
+  CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
+ifneq ($(COMPILER), clang)
+  CFLAGSPRE += -falign-functions=4
+endif
 else
   CFLAGSPRE += -g -O3 -DNDEBUG
 endif
