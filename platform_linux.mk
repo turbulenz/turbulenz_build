@@ -7,6 +7,8 @@
 #
 ############################################################
 
+CLANG_VERSION ?= 3.6
+
 #
 # CCACHE
 #
@@ -26,6 +28,24 @@ ifneq (1,$(DISABLE_EXECUTABLE_RPATH))
 endif
 
 #
+# CXX / CMM
+#
+
+ifeq (clang,$(COMPILER))
+  CXXCOMPILER:=$(shell \
+    which clang++ || which clang++-$(CLANG_VERSION) || echo -n \
+  )
+  ifeq ($(CXXCOMPILER),)
+    $(error Cannot find clang++)
+  endif
+else
+  CXXCOMPILER:=g++
+endif
+
+CXX := $(CCACHE) $(DISTCC) $(CXXCOMPILER)
+CC := $(CXX) -x c
+
+#
 # CXX / CMM FLAGS
 #
 
@@ -35,24 +55,14 @@ _cxxflags_warnings := \
 
 # -Wconversion
 
-ifeq (clang, $(COMPILER))
-CXXCOMPILER:=clang++
-else
-CXXCOMPILER:=g++
-endif
-
-CXX := $(CCACHE) $(DISTCC) $(CXXCOMPILER)
-CC := $(CXX) -x c
-
 CFLAGSPRE := \
     -fmessage-length=0 -pipe \
     $(_cxxflags_warnings) \
-    -Wall \
     -fPIC \
     -ftree-vectorize -msse3 -mssse3
 
-ifeq (clang, $(COMPILER))
-CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register
+ifeq (clang,$(COMPILER))
+  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register
 endif
 
 CFLAGSPOST := -c
@@ -61,7 +71,7 @@ CFLAGSPOST := -c
 
 ifeq ($(CONFIG),debug)
   CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
-ifneq ($(COMPILER), clang)
+ifneq (clang,$(COMPILER))
   CFLAGSPRE += -falign-functions=4
 endif
 else
