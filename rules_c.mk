@@ -737,7 +737,6 @@ define _make_dll_rule
       $(if $(pdbsuffix),$(DLLFLAGS_PDB)$($(1)_pdbfile)) \
       $(if $(dlllibsuffix),$(DLLFLAGS_DLLLIB)$($(1)_dlllibfile)) \
       $(if $(DLLFLAGS_LIBDIR), \
-        $(addprefix $(DLLFLAGS_LIBDIR),$(LIBDIR)) \
         $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       ) \
       $($(1)_OBJECTS) \
@@ -793,7 +792,6 @@ define _make_app_rule
 	@$(MKDIR) -p $$(dir $$@)
 	@echo [LD  $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
-      $(addprefix $(LDFLAGS_LIBDIR),$(LIBDIR)) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $($(1)_OBJECTS) \
       $($(1)_deplibs) \
