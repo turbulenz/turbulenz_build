@@ -89,6 +89,16 @@ endif
 
 endif # ifeq (,$(BUILDHOST))
 
+############################################################
+# Target platform settings
+############################################################
+
+# Gate on _tz_build_set_target since TARGETNAME, ARCH, etc may be set
+# by the calling build process.
+
+ifeq (,$(_tz_build_set_target))
+_tz_build_set_target := 1
+
 # Set TARGET if it hasn't been determined, and based on that, set
 # TARGETNAME:
 #
@@ -96,8 +106,6 @@ endif # ifeq (,$(BUILDHOST))
 #  TARGETNAME = linux, macosx, win, android, ...
 #  ARCH = i386,x86_64,armv7a
 #  PKGARCH = x86,amd64
-
-ifeq (,$(TARGETNAME))
 
 ifeq ($(TARGET),)
   TARGET ?= $(BUILDHOST)
@@ -168,4 +176,4 @@ ifeq ($(TARGETNAME),)
   $(error Couldnt determine TARGETNAME from TARGET: $(TARGET))
 endif
 
-endif # ifeq (,$(TARGETNAME))
+endif # ifeq (,$(_tz_build_set_target))
