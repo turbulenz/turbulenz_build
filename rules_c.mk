@@ -619,7 +619,7 @@ define _make_object_rules
   )
 
   $(foreach sod,$($(1)_cxx_obj_dep), \
-    $(if $(filter %.cpp,$(call _getsrc,$(sod))), \
+    $(if $(filter %.cpp %.cc,$(call _getsrc,$(sod))), \
       $(eval $(call _make_cxx_object_rule,$(1), \
         $(call _getsrc,$(sod)), \
         $(call _getobj,$(sod)), \
