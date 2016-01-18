@@ -1051,12 +1051,13 @@ define _make_moduledef_rule
 	else \
 	  echo "'$($(1)_cmds)' ]," >> $$@ ; \
 	fi
-	@echo "  'outputs': [ 'obj' ]," >> $$@
-
+	@echo "  'outputs': [ '$($(1)_appfile' ]," >> $$@
 	@echo "  'inputs': [" >> $$@
-	@for s in $($(1)_src) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ; \
+	for s in `$(RELPATH) $($(1)_src)` ;                       \
+      do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ; \
       done >> $$@
-	@for s in $($(1)_headerfiles) ; do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ;\
+	@for s in `$(RELPATH) $($(1)_headerfiles)` ;               \
+      do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ;   \
       done >> $$@
 	@echo "  ]," >> $$@
 

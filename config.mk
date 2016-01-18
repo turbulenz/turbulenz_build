@@ -95,6 +95,7 @@ CAT := python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
 RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
+RELPATH := python $(BUILDDIR)/commands/relpath.py
 TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 
