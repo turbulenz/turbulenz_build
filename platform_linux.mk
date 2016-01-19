@@ -67,15 +67,22 @@ endif
 
 CFLAGSPOST := -c
 
-# DEBUG / RELEASE
+# SYMBOLS
 
-ifeq ($(CONFIG),debug)
-  CFLAGSPRE += -g -O0 -D_DEBUG -DDEBUG
-ifneq (clang,$(COMPILER))
-  CFLAGSPRE += -falign-functions=4
+ifeq (1,$(C_SYMBOLS))
+  CFLAGSPRE += -g
+  DLLFLAGSPOST += -g -rdynamic
+  LDFLAGSPOST += -g -rdynamic
 endif
+
+ifeq (1,$(C_OPTIMIZE))
+  CFLAGSPRE += -O3 -DNDEBUG -ftree-vectorize
+
 else
-  CFLAGSPRE += -g -O3 -DNDEBUG
+  CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
+  # ifneq (clang,$(COMPILER))
+  #   CFLAGSPRE += -falign-functions=4
+  # endif
 endif
 
 CXXFLAGSPRE := \
@@ -102,8 +109,8 @@ libsuffix := .a
 #
 
 DLL := g++
-DLLFLAGSPRE := -shared -g
-DLLFLAGSPOST := $(_rpath_flags)
+DLLFLAGSPRE += -shared
+DLLFLAGSPOST += $(_rpath_flags)
 
 
 DLLFLAGS_LIBDIR := -L
@@ -120,9 +127,8 @@ LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
 LD := g++
-LDFLAGSPRE := -g
-
-LDFLAGSPOST := -lpthread $(_rpath_flags)
+LDFLAGSPRE +=
+LDFLAGSPOST += -lpthread $(_rpath_flags)
 
 
 ############################################################
