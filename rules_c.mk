@@ -1023,6 +1023,7 @@ PROJECT_MODULES ?= $(APPS) $(DLLS)
 define _make_moduledef_rule
 
   $(1)_moduledef := $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def
+  .PHONY : $$($(1)_moduledef)
   $(MODULEDEF_DIR)/$(1).$(TARGET).$(CONFIG).def :
 	@mkdir -p $(MODULEDEF_DIR)
 	@echo [MODULEDEF] \($(1)\) $$@
@@ -1051,7 +1052,7 @@ define _make_moduledef_rule
 	else \
 	  echo "'$($(1)_cmds)' ]," >> $$@ ; \
 	fi
-	@echo "  'outputs': [ '$($(1)_appfile' ]," >> $$@
+	@echo "  'outputs': [ '$($(1)_appfile)' ]," >> $$@
 	@echo "  'inputs': [" >> $$@
 	for s in `$(RELPATH) $($(1)_src)` ;                       \
       do echo "  '$(MODULEDEF_SRCPREFIX)$$$$s'," ; \
