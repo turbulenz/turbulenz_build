@@ -31,6 +31,8 @@ libsuffix?=.a
 
 dllout?= -o #
 
+appout?= -o #
+
 #
 # Platform Checks
 #
@@ -764,9 +766,15 @@ $(foreach dll,$(DLLS),$(eval \
 
 # APPLICATIONS
 
+# 1 - app
+define _make_app_paths
+  $(1)_appfile ?= $(BINDIR)/$(app)$(binsuffix)
+  $(1)_pdbfile ?= $$($(1)_appfile:$(binsuffix)=$(pdbsuffix))
+endef
+
 # calc <app>_appfile
 $(foreach app,$(APPS),$(eval \
-  $(app)_appfile ?= $(BINDIR)/$(app)$(binsuffix) \
+  $(call _make_app_paths,$(app)) \
 ))
 
 # calc <app>_depdlls (for platforms that dont have export libs
@@ -799,7 +807,8 @@ define _make_app_rule
       $($(1)_ext_lib_flags) \
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
-      -o $$@
+      $(if $(pdbsuffix),$(LDFLAGS_PDB)$($(1)_pdbfile)) \
+      $(appout)$$@
 	$(call app-post,$(1))
 	$($(1)_poststep)
 
