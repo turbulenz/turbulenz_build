@@ -65,6 +65,11 @@ $(call log,MACOSX BUILD CONFIGURATION)
 CC := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CXX := $(CC)
 CMM := $(CXX)
+CLANG_TIDY := /usr/local/opt/llvm/bin/clang-tidy
+
+CSYSTEMFLAGS := \
+    -isysroot $(XCODE_SDK_ROOT) \
+    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
 
 _cxxflags_warnings := \
     -Wall -Wconversion -Wsign-compare -Wunused-parameter \
@@ -76,8 +81,6 @@ CFLAGSPRE := \
     -fstrict-aliasing -fno-threadsafe-statics \
     -msse3 -mssse3 \
     $(_cxxflags_warnings) \
-    -isysroot $(XCODE_SDK_ROOT) \
-    -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
     -DXP_MACOSX=1 -DMACOSX=1
@@ -105,6 +108,7 @@ endif
 # -fno-exceptions
 # -fvisibility=hidden
 
+CXXSYSTEMFLAGS := $(CSYSTEMFLAGS)
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++11 -fno-exceptions \
   -Wno-c++11-extensions -Wno-c++11-long-long -Wno-undeclared-selector \
   $(CFLAGSPRE)

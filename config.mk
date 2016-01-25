@@ -98,6 +98,7 @@ FIND := python $(BUILDDIR)/commands/find.py
 RELPATH := python $(BUILDDIR)/commands/relpath.py
 TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
+CLANG_TIDY ?= clang-tidy
 
 ifeq (win32,$(BUILDHOST))
   TRUE := cmd /c "exit /b 0"
