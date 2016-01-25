@@ -521,6 +521,7 @@ define _make_c_object_rule
       $(if $(DISABLE_DEP_GEN),,                                         \
         $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
         $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
+        $(cdeptarget) $(cdeptargetpre)$(3).clang-tidy$(cdeptargetpost)  \
       )                                                                 \
       $(addprefix -I,$($(1)_incdirs))                                   \
       $(addprefix -I,$($(1)_depincdirs))                                \
@@ -542,10 +543,6 @@ define _make_c_object_rule
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(CFLAGSPRE) $(CFLAGS)                                            \
       $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
-      $(if $(DISABLE_DEP_GEN),,                                         \
-        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
-        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
-      )                                                                 \
       $(addprefix -I,$($(1)_incdirs))                                   \
       $(addprefix -I,$($(1)_depincdirs))                                \
       $(addprefix -I,$($(1)_ext_incdirs))                               \
@@ -579,6 +576,7 @@ define _make_cxx_object_rule
       $(if $(DISABLE_DEP_GEN),,                                         \
         $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
         $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
+        $(cdeptarget) $(cdeptargetpre)$(3).clang-tidy$(cdeptargetpost)   \
       )                                                                 \
       $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)       \
       $(addprefix -I,$($(1)_incdirs))                                   \
@@ -608,10 +606,6 @@ define _make_cxx_object_rule
       $(filter-out $($(1)_remove_cxxflags),                             \
         $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags)                  \
         $($(1)_cxxflags) $($(1)_local_cxxflags)                         \
-      )                                                                 \
-      $(if $(DISABLE_DEP_GEN),,                                         \
-        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)   \
-        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)              \
       )                                                                 \
       $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)       \
       $(addprefix -I,$($(1)_incdirs))                                   \
