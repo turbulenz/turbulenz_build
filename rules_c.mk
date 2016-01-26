@@ -539,7 +539,7 @@ define _make_c_object_rule
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CC TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
-	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
+	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(CFLAGSPRE) $(CFLAGS)                                            \
       $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
@@ -547,7 +547,7 @@ define _make_c_object_rule
       $(addprefix -I,$($(1)_depincdirs))                                \
       $(addprefix -I,$($(1)_ext_incdirs))                               \
       $(CFLAGSPOST) $($(call file_flags,$(2)))                          \
-      $(cout)$$@ $(csrc) $$< > $$@ 2>&1) ||                              \
+      $(cout)$$@ $(csrc) $$< > $$@ 2>&1) ||                             \
       ( grep -e 'warning:' -e 'error:' $$@ ) ; then                     \
         cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
       fi
@@ -617,7 +617,7 @@ define _make_cxx_object_rule
       )                                                                 \
       $(cout)$$@ $(csrc) $$< > $$@ 2>&1 ) ||                            \
       grep -e 'warning:' -e 'error:' $$@ ; then                         \
-        cat $$@ ; rm $$@ ; $(FALSE) ;                                     \
+        cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
       fi
 
   $(1)_tidy : $(3).clang-tidy
