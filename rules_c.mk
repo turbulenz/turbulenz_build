@@ -539,7 +539,7 @@ define _make_c_object_rule
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CC TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
-	$(CMDPREFIX) $(CLANG_TIDY) $$< -warnings-as-errors='*' --           \
+	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(CFLAGSPRE) $(CFLAGS)                                            \
       $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
@@ -547,12 +547,13 @@ define _make_c_object_rule
       $(addprefix -I,$($(1)_depincdirs))                                \
       $(addprefix -I,$($(1)_ext_incdirs))                               \
       $(CFLAGSPOST) $($(call file_flags,$(2)))                          \
-      $(cout)$$@ $(csrc) $$< > $$@ 2>&1
-	if grep -e 'warning:' -e 'error:' $$@ ; then                        \
-      cat $$@ ; rm $$@ ; $(FALSE) ;                                     \
-    fi
+      $(cout)$$@ $(csrc) $$< > $$@ 2>&1) ||                              \
+      ( grep -e 'warning:' -e 'error:' $$@ ) ; then                     \
+        cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
+      fi
 
   $(1)_tidy : $(3).clang-tidy
+  $(1)_cleanfiles += $(3).clang-tidy
 
 endef
 
@@ -601,7 +602,7 @@ define _make_cxx_object_rule
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
-	$(CMDPREFIX)$(CLANG_TIDY) $$< --            \
+	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(filter-out $($(1)_remove_cxxflags),                             \
         $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags)                  \
@@ -614,12 +615,13 @@ define _make_cxx_object_rule
       $(filter-out $($(1)_remove_cxflags),                              \
         $(CXXFLAGSPOST) $($(call file_flags,$(2)))                      \
       )                                                                 \
-      $(cout)$$@ $(csrc) $$< > $$@ 2>&1
-	if grep -e 'warning:' -e 'error:' $$@ ; then                        \
-      cat $$@ ; rm $$@ ; $(FALSE) ;                                     \
-    fi
+      $(cout)$$@ $(csrc) $$< > $$@ 2>&1 ) ||                            \
+      grep -e 'warning:' -e 'error:' $$@ ; then                         \
+        cat $$@ ; rm $$@ ; $(FALSE) ;                                     \
+      fi
 
   $(1)_tidy : $(3).clang-tidy
+  $(1)_cleanfiles += $(3).clang-tidy
 
 endef
 
@@ -683,7 +685,7 @@ define _make_object_rules
 
   # Define the phony _asm and _tidy targets for this module
   .PHONY: $(1)_asm $(1)_tidy
-
+  $(1)_tidy :  $(foreach d,$($(1)_deps),$(d)_tidy)
 endef
 
 $(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
