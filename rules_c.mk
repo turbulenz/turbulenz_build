@@ -1045,7 +1045,7 @@ define _make_apk_rule
 
   .PHONY : $(1)_clean
   $(1)_clean :
-	rm -rf $(2)
+	$(RM) -rf $(2)
 endef
 
 
@@ -1199,7 +1199,7 @@ $(foreach mod,$(C_MODULES),$(eval \
 # 1 - mod
 define _make_clean_rule
   $(1)_clean :
-	rm -rf $($(1)_cleanfiles)
+	$(RM) -rf $($(1)_cleanfiles)
 endef
 
 $(foreach mod,$(C_MODULES),$(eval \
@@ -1212,8 +1212,8 @@ clean : $(foreach mod,$(C_MODULES) $(APKS),$(mod)_clean)
 
 .PHONY : depclean
 depclean :
-	rm -rf dep
+	$(RM) -rf dep
 
 .PHONY : distclean
 distclean :
-	rm -rf dep obj bin lib
+	$(RM) -rf dep obj bin lib

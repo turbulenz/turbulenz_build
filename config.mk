@@ -93,7 +93,6 @@ endif
 CP := python $(BUILDDIR)/commands/cp.py
 CAT := python $(BUILDDIR)/commands/cat.py
 MKDIR := python $(BUILDDIR)/commands/mkdir.py
-RM := python $(BUILDDIR)/commands/rm.py
 FIND := python $(BUILDDIR)/commands/find.py
 RELPATH := python $(BUILDDIR)/commands/relpath.py
 TSC ?= tsc
@@ -101,9 +100,11 @@ MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 CLANG_TIDY ?= clang-tidy
 
 ifeq (win32,$(BUILDHOST))
+  RM := python $(BUILDDIR)/commands/rm.py
   TRUE := cmd /c "exit /b 0"
   FALSE := cmd /c "exit /b 1"
 else
+  RM := rm
   TRUE := true
   FALSE := false
 endif
