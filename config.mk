@@ -99,7 +99,7 @@ TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 CLANG_TIDY ?= clang-tidy
 
-ifeq (win32,$(BUILDHOST))
+ifneq (,$(filter win%,$(BUILDHOST)))
   RM := python $(BUILDDIR)/commands/rm.py
   TRUE := cmd /c "exit /b 0"
   FALSE := cmd /c "exit /b 1"

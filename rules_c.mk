@@ -903,7 +903,7 @@ define _make_bundle_rule
 
   $(2) : $(3)
 	@echo [MAKE BUNDLE] $(2)
-	$(CMDPREFIX)rm -rf $(2)
+	$(CMDPREFIX)$(RM) -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/Contents/MacOS
 	$(CMDPREFIX)cp $(3) $(2)/Contents/MacOS
 	$(CMDPREFIX)$(BUILDDIR)/build-infoplist.py \
@@ -1000,7 +1000,7 @@ define _make_apk_rule
 
   $(1) : $($(1)_deps) $($(1)_datarule)
 	@echo [MAKE APK] $(2)
-	echo $(CMDPREFIX)rm -rf $(2)
+	echo $(CMDPREFIX)$(RM) -rf $(2)
 	$(CMDPREFIX)mkdir -p $(2)/libs/$(ANDROID_ARCH_NAME)
 	$($(1)_prebuild)
 	$(CMDPREFIX)$(MAKE_APK_PROJ)                                             \

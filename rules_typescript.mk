@@ -33,7 +33,7 @@ CLOSURE:=java -jar external/closure/compiler.jar \
 # external tools
 
 tsc_postfix_failonerror := || ($(RM) $$@ && $(FALSE))
-ifeq (win32,$(BUILDHOST))
+ifneq (,$(filter win%,$(BUILDHOST)))
   tsc_postfix_ignoreerrors := >NUL 2>&1 || if exist $$@ ($(TRUE)) else ($(FALSE))
 else
   tsc_postfix_ignoreerrors := > /dev/null 2>&1 || [ -e $$@ ]

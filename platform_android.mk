@@ -107,7 +107,7 @@ endif
 ifeq ($(BUILDHOST),linux64)
   NDK_HOSTOS := linux
 endif
-ifeq ($(BUILDHOST),win32)
+ifneq (,$(filter win%,$(BUILDHOST)))
   NDK_HOSTOS := windows
 endif
 ifeq ($(NDK_HOSTOS),)
