@@ -1194,12 +1194,27 @@ $(foreach mod,$(C_MODULES),$(eval \
     $($(mod)_dllfile) $($(mod)_appfile) $($(mod)_DEPFILES) \
 ))
 
-# <mod>_clean  rule to delete files
+# 1 - module
+# 2 - files
+# 3 - rule_name
+define _make_clean_split
 
+  $(3)_file := $(wordlist 1, 10, $(2))
+  $(3) :
+	$(RM) -rf $$($(3)_file)
+  .PHONY : $(3)
+  $(1)_clean : $(3)
+
+  $(if $(word 11,$(2)),$(eval \
+    $(call _make_clean_split,$(1),$(wordlist 11,$(words $(2)),$(2)),$(3)_a) \
+  ))
+
+endef
+
+# <mod>_clean  rule to delete files
 # 1 - mod
 define _make_clean_rule
-  $(1)_clean :
-	$(RM) -rf $($(1)_cleanfiles)
+  $(eval $(call _make_clean_split,$(1),$($(1)_cleanfiles),$(1)_clean_split))
 endef
 
 $(foreach mod,$(C_MODULES),$(eval \
