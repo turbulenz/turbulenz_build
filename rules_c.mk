@@ -586,7 +586,7 @@ define _make_cxx_object_rule
       $(filter-out $($(1)_remove_cxflags),                               \
         $(CXXFLAGSPOST) $($(call file_flags,$(2)))                       \
       )                                                                  \
-      $(cout)$$@ $(csrc) $$< || ($(RM) $(3) $(4) && exit 1)
+      $(cout)$$@ $(csrc) $$< || ($(RM) -f $(3) $(4) && exit 1)
 	$(call cxx-post,$(1),$(2),$(3),$(4))
 
   $(2):
@@ -727,7 +727,7 @@ define _make_lib_rule
   $($(1)_libfile) : $($(1)_OBJECTS)
 	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	@echo [AR  $(TARGET)-$(ARCH)] $$(notdir $$@)
-	$(CMDPREFIX)$(RM) $$@
+	$(CMDPREFIX)$(RM) -f $$@
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
      $(arout)$$@ \
@@ -1227,8 +1227,8 @@ clean : $(foreach mod,$(C_MODULES) $(APKS),$(mod)_clean)
 
 .PHONY : depclean
 depclean :
-	$(RM) -rf dep
+	$(RM) -rf $(DEPDIR)
 
 .PHONY : distclean
 distclean :
-	$(RM) -rf dep obj bin lib
+	$(RM) -rf dep obj lib bin
