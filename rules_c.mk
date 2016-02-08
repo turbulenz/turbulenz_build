@@ -486,12 +486,14 @@ define _make_pch_rule
 	@$(MKDIR) -p $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [PCH $(ARCH)] \($(1)\) $$(notdir $$@)
 	$(CMDPREFIX)$(CXX)                                              \
-      $(filter-out $($(1)_remove_cxxflags),                         \
-        $(CXXFLAGSPRE) $(CXXFLAGS)                                  \
-        $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags) \
-      )                                                             \
-      $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost) \
-      $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)            \
+      $(filter-out $($(1)_remove_cxxflags),                              \
+        $(CXXSYSTEMFLAGS) $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags) \
+        $($(1)_cxxflags) $($(1)_local_cxxflags)                          \
+      )                                                                  \
+      $(if $(DISABLE_DEP_GEN),,                                          \
+        $(cdeps) $4 $(cdeptarget) $(cdeptargetpre)$4$(cdeptargetpost)    \
+        $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)               \
+      )                                                                  \
       $(addprefix -I,$($(1)_incdirs))                               \
       $(addprefix -I,$($(1)_depincdirs))                            \
       $(addprefix -I,$($(1)_ext_incdirs))                           \
@@ -499,7 +501,7 @@ define _make_pch_rule
         $(CXXFLAGSPOST) $($(call file_flags,$(2)))                  \
       )                                                             \
       $(PCHFLAGS)                                                   \
-      $$< $(cout) $$@
+      $(cout)$$@ $(csrc) $$< || ($(RM) -f $(3) $(4) && exit 1)
 
 endef
 
@@ -579,7 +581,6 @@ define _make_cxx_object_rule
         $(cdeptarget) $(cdeptargetpre)$$@$(cdeptargetpost)               \
         $(cdeptarget) $(cdeptargetpre)$(3).clang-tidy$(cdeptargetpost)   \
       )                                                                  \
-      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)        \
       $(addprefix -I,$($(1)_incdirs))                                    \
       $(addprefix -I,$($(1)_depincdirs))                                 \
       $(addprefix -I,$($(1)_ext_incdirs))                                \
