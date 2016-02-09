@@ -554,8 +554,10 @@ define _make_c_object_rule
         cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
       fi
 
-  $(1)_tidy : $(3).clang-tidy
-  $(1)_cleanfiles += $(3).clang-tidy
+  ifneq (1,$($(1)_no_tidy))
+    $(1)_tidy : $(3).clang-tidy
+    $(1)_cleanfiles += $(3).clang-tidy
+  endif
 
 endef
 
@@ -621,8 +623,10 @@ define _make_cxx_object_rule
         cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
       fi
 
-  $(1)_tidy : $(3).clang-tidy
-  $(1)_cleanfiles += $(3).clang-tidy
+  ifneq (1,$($(1)_no_tidy))
+    $(1)_tidy : $(3).clang-tidy
+    $(1)_cleanfiles += $(3).clang-tidy
+  endif
 
 endef
 
