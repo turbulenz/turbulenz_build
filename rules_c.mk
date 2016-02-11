@@ -307,16 +307,18 @@ endif #($(UNITY),1)
 #
 
 # for each module, if _pch is set, we need vars:
-$(foreach mod,$(C_MODULES), \
-  $(if $($(mod)_pch), \
-    $(eval \
-      _$(mod)_pchfile := $($(mod)_OBJDIR)/$(notdir $($(mod)_pch:.h=.h.gch)) \
+ifeq (1,$(PCH))
+  $(foreach mod,$(C_MODULES), \
+    $(if $($(mod)_pch), \
+      $(eval \
+        _$(mod)_pchfile := $($(mod)_OBJDIR)/$(notdir $($(mod)_pch:.h=.h.gch)) \
+      ) \
+      $(eval \
+        _$(mod)_pchdep := $($(mod)_DEPDIR)/$(notdir $($(mod)_pch:.h=.h.d)) \
+      ) \
     ) \
-    $(eval \
-      _$(mod)_pchdep := $($(mod)_DEPDIR)/$(notdir $($(mod)_pch:.h=.h.d)) \
-    ) \
-  ) \
-)
+  )
+endif
 
 #
 # For each module, create cxx_obj_dep list

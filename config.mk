@@ -12,6 +12,8 @@ CMDVERBOSE ?= 0
 CONFIG ?= release
 VALGRIND ?= 0
 ABSPATHS ?= 1
+UNITY ?= 1
+PCH ?= 1
 
 # Disable all build-in rules
 .SUFFIXES:
