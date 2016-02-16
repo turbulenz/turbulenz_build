@@ -5,6 +5,7 @@ import sys
 import glob
 import os
 import stat
+from os.path import exists
 
 def _verbose(msg):
     print msg
@@ -59,15 +60,26 @@ def main():
 
     verbose("CWD: %s" % os.getcwd())
 
+    all_files = []
     for src_pattern in src_args:
         verbose("PATTERN: %s" % src_pattern)
         src_files = glob.glob(src_pattern)
         for src in src_files:
             verbose("FILE: %s" % src)
+            all_files.append(src)
             if timestamp:
                 if not _check_timestamp(src, dest):
                     continue
+            if not exists(src):
+                print "Cannot find file: %s" % src
+                return 1
             shutil.copy(src, dest)
+
+    if 0 == len(all_files):
+        print "ERROR: no files found"
+        return 1
+
+    return 0
 
 if "__main__" == __name__:
     exit(main())
