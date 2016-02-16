@@ -412,7 +412,7 @@ define _make_cxx_flags_file
   #   $$(shell echo '$(strip $(3))' > $(2))
   # endif
 
-  $($(1)_OBJECTS) : $(2)
+  $($(1)_OBJECTS) $(_$(1)_pchfile) : $(2)
 endef
 
 ifneq (1,$(DISABLE_FLAG_CHECKS))
