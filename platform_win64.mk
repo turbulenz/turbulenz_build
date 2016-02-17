@@ -303,15 +303,21 @@ ifeq (i386,$(ARCH))
 endif
 
 ifeq (1,$(C_OPTIMIZE))
-  CXXFLAGSPRE += /O2 /MD -DNEDBUG
-  ifeq (i386,$(ARCH))
-    CXXFLAGSPRE += /Oy
-  endif
+  CXXFLAGSPRE += /Ob2ity -DNEDBUG
+  # ifeq (i386,$(ARCH))
+  #   CXXFLAGSPRE += /Oy
+  # endif
 else
-  CXXFLAGSPRE += /GS /Od /RTC1 /MDd -DDEBUG -D_DEBUG
+  CXXFLAGSPRE += /GS /Od /RTC1 -DDEBUG -D_DEBUG
   ifeq (i386,$(ARCH))
     CXXFLAGSPRE += /Oy-
   endif
+endif
+
+ifeq (release,$(WIN_DLL))
+  CXXFLAGSPRE += /MD
+else
+  CXXFLAGSPRE += /MDd
 endif
 
 # ifeq (1$(C_SYMBOLS))
