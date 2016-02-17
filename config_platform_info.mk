@@ -111,6 +111,17 @@ ifeq ($(TARGET),)
   TARGET ?= $(BUILDHOST)
 endif
 
+# Apply and defaults passed in as <VAR>_<target>
+
+ifneq (,$(COMPILER_$(TARGET)))
+  COMPILER?=$(COMPILER_$(TARGET))
+endif
+ifneq (,$(ARCH_$(TARGET)))
+  ARCH?=$(ARCH_$(TARGET))
+endif
+
+# Apply our own defaults for each platform
+
 ifeq ($(TARGET),macosx)
   COMPILER ?= clang
   TARGETNAME := macosx
