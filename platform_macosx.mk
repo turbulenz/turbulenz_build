@@ -23,6 +23,8 @@ else
   MACOSX_DLLFLAGS += -lc++
 endif
 
+MACOSX_EXT_DLL_RPATH ?= @loader_path
+
 # Language to compile all .c and .cpp files as
 MACOSX_C_DEFAULTLANG ?= objective-c
 MACOSX_CXX_DEFAULTLANG ?= objective-c++
@@ -178,11 +180,12 @@ DLLFLAGS_LIB := -l
 dllprefix :=
 dllsuffix := .dylib
 
+
 dll-post = \
   $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
     in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
     bn=`basename $$$$d`; \
-    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in @loader_path/$$$$bn $$@ ; \
+    $(MACOSX_XCODE_BIN_PATH)install_name_tool -change $$$$in $(MACOSX_EXT_DLL_RPATH)/$$$$bn $$@ ; \
   done
 
 #
