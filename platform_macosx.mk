@@ -106,6 +106,22 @@ ifeq (1,$(LD_OPTIMIZE))
   MACOSX_LDFLAGS += -O3 -flto
 endif
 
+ifeq (1,$(C_RUNTIME_CHECKS))
+  _RT_FLAGS :=                                   \
+    -fsanitize=address                           \
+
+    # -fsanitize=undefined                         \
+    # -fsanitize=safe-stack                        \
+    # -fsanitize=memory                            \
+    # -fsanitize=thread                            \
+    # -fsanitize=dataflow                          \
+    # -fsanitize=cfi                               \
+
+  CFLAGSPOST += $(_RT_FLAGS)
+  DLLFLAGSPOST += $(_RT_FLAGS)
+  LDFLAGSPOST += $(_RT_FLAGS)
+endif
+
 # -fno-rtti
 # -fno-exceptions
 # -fvisibility=hidden
@@ -164,7 +180,7 @@ DLL := MACOSX_DEPLOYMENT_TARGET=$(XCODE_MIN_OS_VER) \
   $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 DLLFLAGSPRE := \
   -isysroot $(XCODE_SDK_ROOT) -dynamiclib -arch $(ARCH) -g $(MACOSX_DLLFLAGS)
-DLLFLAGSPOST := \
+DLLFLAGSPOST += \
   -framework CoreFoundation \
   -framework OpenGL \
   -framework Carbon \
@@ -202,7 +218,7 @@ LDFLAGSPRE := \
     -isysroot $(XCODE_SDK_ROOT) \
     $(MACOSX_LDFLAGS)
 
-LDFLAGSPOST := \
+LDFLAGSPOST += \
     -mmacosx-version-min=$(XCODE_MIN_OS_VER) \
     -dead_strip \
     -Wl,-search_paths_first \

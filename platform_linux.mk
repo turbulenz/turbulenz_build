@@ -85,6 +85,29 @@ else
   # endif
 endif
 
+ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
+  _RT_FLAGS := -fsanitize=address
+    # -fsanitize=thread
+
+    # non-trivial to make work ...
+    # requires -frtti:
+    # -fsanitize=undefined
+    # link error:
+    # -fsanitize=dataflow
+    # unsupported:
+    # -fsanitize=safe-stack
+    # -fsanitize=cfi
+    # issues at startup
+    # _RT_FLAGS := -fsanitize=memory
+    # CFLAGSPOST += -fPIE
+    # DLLFLAGSPOST += -Wl,-pie
+    # LDFLAGSPOST += -Wl,-pie
+
+  CFLAGSPOST += $(_RT_FLAGS) -fPIE
+  DLLFLAGSPOST += $(_RT_FLAGS) -Wl,-pie
+  LDFLAGSPOST += $(_RT_FLAGS) -Wl,-pie
+endif
+
 CXXFLAGSPRE := \
   $(CFLAGSPRE) -Wno-overloaded-virtual -std=c++11 -Wno-reorder \
   -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
@@ -108,7 +131,7 @@ libsuffix := .a
 # DLLS
 #
 
-DLL := g++
+DLL := $(CXX)
 DLLFLAGSPRE += -shared
 DLLFLAGSPOST += $(_rpath_flags)
 
@@ -126,7 +149,7 @@ dllsuffix := .so
 LDFLAGS_LIBDIR := -L
 LDFLAGS_LIB := -l
 
-LD := g++
+LD := $(CXX)
 LDFLAGSPRE +=
 LDFLAGSPOST += -lpthread $(_rpath_flags)
 
