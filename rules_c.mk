@@ -1183,6 +1183,9 @@ project: $(PROJECT_GYP_FILE)
 
 ALLDEPFILES := $(foreach t,$(C_MODULES),$($(t)_DEPFILES))
 -include $(sort $(ALLDEPFILES))
+# $(foreach f,$(ALLDEPFILES),$(eval \
+#   $(f) : \
+# ))
 
 ############################################################
 

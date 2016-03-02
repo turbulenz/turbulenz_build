@@ -128,7 +128,7 @@ endif
 
 CXXSYSTEMFLAGS := $(CSYSTEMFLAGS)
 CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++11 -fno-exceptions \
-  -Wno-c++11-extensions -Wno-c++11-long-long -Wno-undeclared-selector \
+  -Wno-c++11-extensions -Wno-c++11-long-long -Wno-undeclared-selector  \
   $(CFLAGSPRE)
 CMMFLAGSPRE := $(CXXFLAGSPRE)
 CFLAGSPRE := -x $(MACOSX_C_DEFAULTLANG) $(CFLAGSPRE)
