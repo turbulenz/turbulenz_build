@@ -118,15 +118,19 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 ifeq (1,$(ABSPATHS))
 
   # <mod>_src
-  $(foreach mod,$(C_MODULES),$(eval                                         \
-    $(mod)_src := $(foreach s,$($(mod)_src),                                \
-      $(if $(realpath $(s)),$(realpath $(s)),$(s))                          \
-    )                                                                       \
-    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))       \
-  ))
+  $(foreach mod,$(C_MODULES),                                           \
+    $(eval                                                              \
+      $(mod)_src := $(foreach s,$($(mod)_src),                          \
+        $(if $(realpath $(s)),$(realpath $(s)),$(s))                    \
+      )                                                                 \
+    )                                                                   \
+    $(eval                                                              \
+      $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
+    )                                                                   \
+  )
 
-  $(foreach mod,$(EXT),$(eval                                               \
-    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))       \
+  $(foreach mod,$(EXT),$(eval                                           \
+    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))   \
   ))
 
 endif
