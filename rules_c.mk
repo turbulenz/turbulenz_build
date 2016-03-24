@@ -741,6 +741,7 @@ $(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
 $(foreach mod,$(C_MODULES),                                                 \
   $(info $(mod): $($(mod)_fulldeps))                                        \
   $(eval $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile))) \
+  $(eval $(mod)_depdlls := $(foreach d,$($(mod)_fulldeps),$($(d)_dllfile))) \
   $(eval $(mod)_deplibs_cmdline :=                                          \
     $(foreach d,$($(mod)_fulldeps),                                         \
       $(if $($(d)_keepsymbols),                                             \
