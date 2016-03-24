@@ -110,49 +110,47 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 
 ############################################################
 
+#
+# Path calculations for all modules types
+#
+
+# translate _src and _incdirs to absolute paths???
 ifeq (1,$(ABSPATHS))
-  # call full paths of all source files
-  # ifneq (1,$(C_SYNTAX_CHECK))
-  # $(call log,standalone_src = $(standalone_src))
-  $(foreach mod,$(C_MODULES),$(eval                          \
-	$(mod)_src := $(foreach s,$($(mod)_src),                 \
-	  $(if $(realpath $(s)),$(realpath $(s)),$(s))           \
-	)                                                        \
+
+  # <mod>_src
+  $(foreach mod,$(C_MODULES),$(eval                                         \
+    $(mod)_src := $(foreach s,$($(mod)_src),                                \
+      $(if $(realpath $(s)),$(realpath $(s)),$(s))                          \
+    )                                                                       \
+    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))       \
   ))
-  # endif
-  # $(call log,standalone_src = $(standalone_src))
+
+  $(foreach mod,$(EXT),$(eval                                               \
+    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))       \
+  ))
+
 endif
 
-# calc <mod>_headerfile all headers belonging to this module
-$(foreach mod,$(C_MODULES),$(eval \
+# calc <mod>_headerfiles - all headers for the module
+$(foreach mod,$(C_MODULES),$(eval                                           \
   $(mod)_headerfiles := $(foreach i,$($(mod)_incdirs),$(wildcard $(i)/*.h)) \
 ))
 
-ifeq (1,$(ABSPATHS))
-  # calc full paths of all incdirs and libdirs (including externals)
-  $(foreach mod,$(C_MODULES) $(EXT),$(eval \
-	$(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
-  ))
-  $(call log,javascriptcore_incdirs = $(javascriptcore_incdirs))
-endif
-
 # calc full path of each <ext>_libdir
-$(foreach ext,$(EXT), \
-  $(eval $(ext)_libdir:=$(strip $(foreach l,$($(ext)_libdir),$(realpath $(l)))))\
-)
-$(call log,javascriptcore_libdir = $(javascriptcore_libdir))
+$(foreach ext,$(EXT), $(eval                                                \
+  $(ext)_libdir:=$(strip $(foreach l,$($(ext)_libdir),$(realpath $(l))))  \
+))
 
 # calc full path of external dlls
-$(foreach ext,$(EXT),                                    \
-  $(eval $(ext)_dlls :=                                  \
-    $(foreach l,$($(ext)_lib),                           \
-      $(foreach d,$($(ext)_libdir),                      \
-        $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*)   \
-      )                                                  \
-    )                                                    \
-    $(filter-out %$(libsuffix) -l%,$($(ext)_libfile))    \
-  )                                                      \
-)
+$(foreach ext,$(EXT), $(eval                                                \
+  $(ext)_dlls :=                                                            \
+    $(foreach l,$($(ext)_lib),                                              \
+      $(foreach d,$($(ext)_libdir),                                         \
+        $(wildcard $(d)/$(libprefix)$(l)$(dllsuffix)*)                      \
+      )                                                                     \
+    )                                                                       \
+    $(filter-out %$(libsuffix) -l%,$($(ext)_libfile))                       \
+))
 
 # if it's a platform with .lib files accompanying .dlls (i.e. Windows)
 # where we don't include input .dlls int he link commnd line, filter
@@ -163,12 +161,6 @@ ifneq (,$(dlllibsuffix))
     $(ext)_libfile := $(filter-out %$(dllsuffix),$($(ext)_libfile)) \
   ))
 endif
-
-$(call log,javascriptcore_dlls = $(javascriptcore_dlls))
-$(call log,openal_libfile = $(openal_libfile))
-$(call log,dllsuffix = $(dllsuffix))
-$(call log,openal_libfile filtered = $(filter %$(dllsuffix),$(openal_libfile)))
-$(call log,openal_dlls = $(openal_dlls))
 
 # calc <mod>_depincdirs - include dirs from dependencies
 $(foreach mod,$(C_MODULES),$(eval \
@@ -268,39 +260,78 @@ $(foreach mod,$(C_MODULES),$(eval $(mod)_OBJDIR := $(OBJDIR)/$(mod)))
 # calc <mod>_DEPDIR
 $(foreach mod,$(C_MODULES),$(eval $(mod)_DEPDIR := $(DEPDIR)/$(mod)))
 
+ifeq (1,$(C_SYNTAX_CHECK))
+  UNITY := 0
+endif
+
 #
 # For unity builds, replace the src list with a single file, and a
 # rule to create it.
 #
 
-ifeq (1,$(C_SYNTAX_CHECK))
-  UNITY := 0
-endif
-
 ifeq ($(UNITY),1)
 
-# 1 - mod
-define _make_cxx_unity_file
+  # 1 - mod
+  define _make_cxx_unity_file
+    $($(1)_src) : $($(1)_unity_src)
+	  @$(MKDIR) -p $($(1)_OBJDIR)
+	  echo > $$@
+	  for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
+  endef
 
-  $($(1)_src) : $($(1)_unity_src)
-	@$(MKDIR) -p $($(1)_OBJDIR)
-	echo > $$@
-	for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
-
-endef
-
-$(foreach mod,$(C_MODULES),\
-  $(if $(filter 1,$($(mod)_unity)),                         \
-    $(eval $(mod)_unity_src := $($(mod)_src)) 	            \
-    $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp) \
-    $(eval $(call _make_cxx_unity_file,$(mod)))             \
-  )                                                         \
-)
-
-$(call log, core_unity_src = $(core_unity_src))
-$(call log, core_src = $(core_src))
+  $(foreach mod,$(C_MODULES),\
+    $(if $(filter 1,$($(mod)_unity)),                           \
+      $(eval $(mod)_unity_src := $($(mod)_src)) 	            \
+      $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp)   \
+      $(eval $(call _make_cxx_unity_file,$(mod)))               \
+    )                                                           \
+  )
 
 endif #($(UNITY),1)
+
+#
+# Output paths
+#
+
+# set <lib>_libfile - Final LIB file
+
+$(foreach lib,$(LIBS),$(eval                                 \
+  $(lib)_libfile ?= $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
+))
+
+# <dll>_dllfile    - Final DLL file
+# <dll>_dlllibfile - Lib file to link with (dllfile on *nix, dlllib on Windows)
+# <dll>_pdbfile    - PDB file (Windows only)
+# <app>_appfile - Final APP file
+# <app>_pdbfile - PDB file (Windows only)
+
+# _make_dll_paths, _make_app_paths
+# 1 - dll / app
+ifneq (,$(dlllibsuffix))
+  define _make_dll_paths
+    $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
+    $(1)_dlllibfile ?= $$($(1)_dllfile:$(dllsuffix)=$(dlllibsuffix))
+    $(1)_pdbfile ?= $$($(1)_dllfile:$(dllsuffix)=$(pdbsuffix))
+  endef
+  define _make_app_paths
+    $(1)_appfile ?= $(BINDIR)/$(app)$(binsuffix)
+    $(1)_pdbfile ?= $$($(1)_appfile:$(binsuffix)=$(pdbsuffix))
+  endef
+else
+  define _make_dll_paths
+    $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
+    $(1)_dlllibfile ?= $$($(1)_dllfile)
+  endef
+  define _make_app_paths
+    $(1)_appfile ?= $(BINDIR)/$(app)$(binsuffix)
+  endef
+endif
+
+# calc <dll>_dllfile
+$(foreach dll,$(DLLS),$(eval $(call _make_dll_paths,$(dll))))
+
+# calc <app>_appfile
+$(foreach app,$(APPS),$(eval $(call _make_app_paths,$(app))))
 
 #
 # Precopiled headers
@@ -701,30 +732,18 @@ $(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
 
 # LIBRARY
 
-# set <lib>_libfile
-$(foreach lib,$(LIBS),$(eval \
-  $(lib)_libfile ?= $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
-))
-
 # <mod>_deplibs = all libraries we depend upon
 # depend on the libs for all dependencies
 $(foreach mod,$(C_MODULES),                                                 \
+  $(info $(mod): $($(mod)_fulldeps))                                        \
   $(eval $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile))) \
   $(eval $(mod)_deplibs_cmdline :=                                          \
     $(foreach d,$($(mod)_fulldeps),                                         \
       $(if $($(d)_keepsymbols),                                             \
-        $(DLLKEEPSYM_PRE) $($(d)_libfile) $(DLLKEEPSYM_POST),               \
-        $($(d)_libfile))                                                    \
+        $(DLLKEEPSYM_PRE) $($(d)_libfile) $($(d)_dlllibfile) $(DLLKEEPSYM_POST),\
+        $($(d)_libfile) $($(d)_dlllibfile) )                                \
        ))                                                                   \
 )
-
-$(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_deplibs_cmdline := $(foreach d,$($(mod)_fulldeps),\
-    $(if $($(d)_keepsymbols), \
-      $(DLLKEEPSYM_PRE) $($(d)_libfile) $(DLLKEEPSYM_POST), \
-      $($(d)_libfile)) \
-  ) \
-))
 
 # each lib depends on the object files for that module
 
@@ -755,22 +774,6 @@ $(foreach lib,$(LIBS),$(eval \
 
 # DLLS
 
-# 1 - dll
-define _make_dll_paths
-  $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
-  $(1)_pdbfile ?= $$($(1)_dllfile:$(dllsuffix)=$(pdbsuffix))
-  $(1)_dlllibfile ?= $$($(1)_dllfile:$(dllsuffix)=$(dlllibsuffix))
-endef
-
-# calc <dll>_dllfile
-$(foreach dll,$(DLLS),$(eval \
-  $(call _make_dll_paths,$(dll)) \
-))
-
-# $(info core_dllfile = $(core_dllfile))
-# $(info core_pdbfile = $(core_pdbfile))
-# $(info core_dlllibfile = $(core_dlllibfile))
-
 # rules to copy the dependent dlls
 $(foreach dll,$(DLLS), \
   $(foreach d,$($(dll)_ext_dlls),$(eval \
@@ -786,9 +789,8 @@ define _make_dll_rule
 	@echo [DLL $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
-      $(dllout)$$@ \
-      $(if $(pdbsuffix),$(DLLFLAGS_PDB)$($(1)_pdbfile)) \
-      $(if $(dlllibsuffix),$(DLLFLAGS_DLLLIB)$($(1)_dlllibfile)) \
+      $(addprefix $(DLLFLAGS_PDB),$($(1)_pdbfile))       \
+      $(if $(dlllibsuffix),$(addprefix $(DLLFLAGS_DLLLIB),$($(1)_dlllibfile))) \
       $(if $(DLLFLAGS_LIBDIR), \
         $(addprefix $(DLLFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       ) \
@@ -796,7 +798,8 @@ define _make_dll_rule
       $($(1)_deplibs_cmdline) \
       $($(1)_ext_lib_flags) \
       $(DLLFLAGSPOST) \
-      $($(1)_DLLFLAGSPOST)
+      $($(1)_DLLFLAGSPOST) \
+      $(dllout)$$@
 	$(call dll-post,$(1))
 	$(if $($(1)_poststep),($($(1)_poststep)) || $(RM) -f $$@)
 
@@ -810,31 +813,9 @@ $(foreach dll,$(DLLS),$(eval \
   $(call _make_dll_rule,$(dll)) \
 ))
 
-# $(warning therun_ext_lib_files = $(therun_ext_lib_files))
-# $(warning therun_ext_lib_flags = $(therun_ext_lib_flags))
-
 ############################################################
 
 # APPLICATIONS
-
-# 1 - app
-define _make_app_paths
-  $(1)_appfile ?= $(BINDIR)/$(app)$(binsuffix)
-  $(1)_pdbfile ?= $$($(1)_appfile:$(binsuffix)=$(pdbsuffix))
-endef
-
-# calc <app>_appfile
-$(foreach app,$(APPS),$(eval \
-  $(call _make_app_paths,$(app)) \
-))
-
-# calc <app>_depdlls (for platforms that dont have export libs
-# associated with DLLS)
-ifeq (,$(dlllibsuffix))
-  $(foreach app,$(APPS),$(eval \
-    $(app)_depdlls := $(foreach d,$($(app)_fulldeps),$($(d)_dllfile)) \
-  ))
-endif
 
 # rules to copy the dependent dlls
 $(foreach app,$(APPS),                                                         \
@@ -852,13 +833,12 @@ define _make_app_rule
 	@echo [LD  $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
+      $(LDFLAGS_PDB)$($(1)_pdbfile) \
       $($(1)_OBJECTS) \
-      $($(1)_deplibs) \
-      $($(1)_depdlls) \
+      $($(1)_deplibs_cmdline) \
       $($(1)_ext_lib_flags) \
       $(LDFLAGSPOST) \
       $($(1)_LDFLAGS) \
-      $(if $(pdbsuffix),$(LDFLAGS_PDB)$($(1)_pdbfile)) \
       $(appout)$$@
 	$(call app-post,$(1))
 	$($(1)_poststep)
