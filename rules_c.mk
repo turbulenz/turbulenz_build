@@ -739,7 +739,6 @@ $(foreach mod,$(C_MODULES),$(eval $(call _make_object_rules,$(mod))))
 # <mod>_deplibs = all libraries we depend upon
 # depend on the libs for all dependencies
 $(foreach mod,$(C_MODULES),                                                 \
-  $(info $(mod): $($(mod)_fulldeps))                                        \
   $(eval $(mod)_deplibs := $(foreach d,$($(mod)_fulldeps),$($(d)_libfile))) \
   $(eval $(mod)_depdlls := $(foreach d,$($(mod)_fulldeps),$($(d)_dllfile))) \
   $(eval $(mod)_deplibs_cmdline :=                                          \
