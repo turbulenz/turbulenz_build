@@ -864,7 +864,7 @@ define _run_app_rule
 
   .PHONY : $(1)_run
   $(1)_run : $(1)
-	$(RUNPREFIX) $(call _run_prefix,$(1)) $($(1)_appfile)
+	$(RUNPREFIX) $(call _run_prefix,$(1)) $($(1)_appfile) $($(1)_runargs)
 
 endef
 
