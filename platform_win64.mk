@@ -435,4 +435,4 @@ LDFLAGS_PDB := /PDB:
 appout := /OUT:
 binsuffix := .exe
 
-$(info Entering directory `$(shell echo %CD%)')
+# $(info Entering directory `$(shell echo %CD%)')
