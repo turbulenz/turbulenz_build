@@ -580,7 +580,7 @@ define _make_c_object_rule
 	@echo [CC TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
-      $(CSYSTEMFLAGS) $(CFLAGSPRE) $(CFLAGS)                            \
+      $(CFLAGSPRE) $(CFLAGS)                            \
       $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
       $(addprefix -I,$($(1)_incdirs))                                   \
       $(addprefix -I,$($(1)_depincdirs))                                \
@@ -645,7 +645,7 @@ define _make_cxx_object_rule
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
       $(filter-out $($(1)_remove_cxxflags),                              \
-        $(CXXSYSTEMFLAGS) $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags) \
+        $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags) \
         $($(1)_cxxflags) $($(1)_local_cxxflags)                          \
       )                                                                  \
       $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)        \
