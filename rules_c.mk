@@ -580,7 +580,7 @@ define _make_c_object_rule
 	@echo [CC TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
-      $(CFLAGSPRE) $(CFLAGS)                                            \
+      $(CSYSTEMFLAGS) $(CFLAGSPRE) $(CFLAGS)                            \
       $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
       $(addprefix -I,$($(1)_incdirs))                                   \
       $(addprefix -I,$($(1)_depincdirs))                                \
@@ -642,22 +642,22 @@ define _make_cxx_object_rule
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
 	@echo [CXX TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
-	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
-      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
-      $(filter-out $($(1)_remove_cxxflags),                             \
-        $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags)                  \
-        $($(1)_cxxflags) $($(1)_local_cxxflags)                         \
-      )                                                                 \
-      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)       \
-      $(addprefix -I,$($(1)_incdirs))                                   \
-      $(addprefix -I,$($(1)_depincdirs))                                \
-      $(addprefix -I,$($(1)_ext_incdirs))                               \
-      $(filter-out $($(1)_remove_cxflags),                              \
-        $(CXXFLAGSPOST) $($(call file_flags,$(2)))                      \
-      )                                                                 \
-      $(cout)$$@ $(csrc) $$< > $$@ 2>&1 ) ||                            \
-      grep -e 'warning:' -e 'error:' $$@ ; then                         \
-        cat $$@ ; rm $$@ ; $(FALSE) ;                                   \
+	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
+      $(filter-out $($(1)_remove_cxxflags),                              \
+        $(CXXSYSTEMFLAGS) $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags) \
+        $($(1)_cxxflags) $($(1)_local_cxxflags)                          \
+      )                                                                  \
+      $($(1)_depcxxflags) $($(1)_cxxflags) $($(1)_local_cxxflags)        \
+      $(addprefix -I,$($(1)_incdirs))                                    \
+      $(addprefix -I,$($(1)_depincdirs))                                 \
+      $(addprefix -I,$($(1)_ext_incdirs))                                \
+      $(filter-out $($(1)_remove_cxflags),                               \
+        $(CXXFLAGSPOST) $($(call file_flags,$(2)))                       \
+      )                                                                  \
+      $(cout)$$@ $(csrc) $$< > $$@ 2>&1 ) ||                             \
+      grep -e 'warning:' -e 'error:' $$@ ; then                          \
+        cat $$@ ; rm $$@ ; $(FALSE) ;                                    \
       fi
 
   ifneq (1,$($(1)_no_tidy))
