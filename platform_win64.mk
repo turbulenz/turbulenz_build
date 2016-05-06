@@ -219,12 +219,11 @@ ifeq (vs2015,$(COMPILER))
     VS140COMNTOOLS = "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\"
     $(warning VS140COMNTOOLS env var not set.  Is Visual Studio 2015 installed?)
     $(warning VS140COMNTOOLS: guessing $(VS140COMNTOOLS))
-  else
-    VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
-    # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
-    WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/8.1
-    UCRTDIR:=$(WINKITDIR)/../10/Include/10.0.10150.0/ucrt
   endif
+  VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
+  # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
+  WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/8.1
+  UCRTDIR:=$(WINKITDIR)/../10/Include/10.0.10150.0/ucrt
 endif
 
 ifeq (vs2013,$(COMPILER))
