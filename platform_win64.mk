@@ -216,9 +216,9 @@ endif
 
 ifeq (vs2015,$(COMPILER))
   ifeq (,$(VS140COMNTOOLS))
+    VS140COMNTOOLS = "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\"
     $(warning VS140COMNTOOLS env var not set.  Is Visual Studio 2015 installed?)
-	$(warning Falling back to Visual Studio 2013)
-    override COMPILER := vs2013
+    $(warning VS140COMNTOOLS: guessing $(VS140COMNTOOLS))
   else
     VCBASEDIR:=$(VS140COMNTOOLS)/../../VC
     # WINKITDIR:=$(VS140COMNTOOLS)/../../../Windows Kits/10
