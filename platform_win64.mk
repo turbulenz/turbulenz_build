@@ -235,7 +235,7 @@ ifeq (vs2013,$(COMPILER))
 endif
 
 ifeq (,$(VCBASEDIR))
-  $(error Unrecognized COMPILER version: $(COMPILER))
+  $(warning Cant find tools for COMPILER version: $(COMPILER))
 endif
 
 ifeq (win32,$(TARGET))
