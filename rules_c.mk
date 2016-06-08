@@ -432,7 +432,7 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 define _make_cxx_flags_file
   .FORCE:
   $(2) : .FORCE
-	@if [ "$(3)" != "`cat $(2) 2>/dev/null`" ] ; then \
+	@if [ '$(3)' != "`cat $(2) 2>/dev/null`" ] ; then \
       $(MKDIR) -p $($(1)_OBJDIR) ; \
       echo '$(3)' > $(2) ; \
     fi
