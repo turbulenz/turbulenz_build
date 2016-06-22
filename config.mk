@@ -5,6 +5,8 @@ ifeq ($(BUILDDIR),)
   $(error BUILDDIR not set)
 endif
 
+include $(BUILDDIR)/utils.mk
+
 ############################################################
 
 BUILDVERBOSE ?= 0

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2014 Turbulenz Limited.
+# Copyright (c) 2012-2016 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
 ############################################################
@@ -18,7 +18,6 @@ endif
 
 ############################################################
 
-space:= #
 cdeps?= -MP -MD -MF
 cout?=-o$(space)
 cobj?=.o
@@ -132,7 +131,6 @@ ifeq (1,$(ABSPATHS))
   $(foreach mod,$(EXT),$(eval                                           \
     $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))   \
   ))
-
 endif
 
 # calc <mod>_headerfiles - all headers for the module
@@ -359,24 +357,50 @@ endif
 # For each module, create cxx_obj_dep list
 #
 
+# 1 - module
+# 2 - src file
+ifeq (,$(SRCROOT))
+  _mk_cpp_obj=$($(1)_OBJDIR)/$(notdir $(2:.cpp=$(cobj)))
+  _mk_cpp_dep=$($(1)_DEPDIR)/$(notdir $(2:.cpp=.d))
+  _mk_c_obj=$($(1)_OBJDIR)/$(notdir $(2:.c=$(cobj)))
+  _mk_c_dep=$($(1)_DEPDIR)/$(notdir $(2:.c=.d))
+  _mk_cc_obj=$($(1)_OBJDIR)/$(notdir $(2:.cc=$(cobj)))
+  _mk_cc_dep=$($(1)_DEPDIR)/$(notdir $(2:.cc=.d))
+  _mk_mm_obj=$($(1)_OBJDIR)/$(notdir $(2:.mm=.mm$(cobj)))
+  _mk_mm_dep=$($(1)_DEPDIR)/$(notdir $(2:.mm=.mm.d))
+else
+  override SRCROOT:=$(call ensure_trailing_slash,$(SRCROOT))
+  _mk_obj_path=$(if $(filter $(subst $(SRCROOT),,$(1)),$(1)),$(notdir $(1)),$(subst $(SRCROOT),,$(1)))
+
+  _mk_cpp_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=$(cobj))))
+  _mk_cpp_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=.d)))
+  _mk_c_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.c=$(cobj))))
+  _mk_c_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.c=.d)))
+  _mk_cc_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=$(cobj))))
+  _mk_cc_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=.d)))
+  _mk_mm_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.mm=.mm$(cobj))))
+  _mk_mm_dep=$($(1)_DEPDIR)/$(subst ..,__,$(subst $(SRCROOT),,$(2:.mm=.mm.d)))
+endif
+
 # 1 - module name
 define _make_cxx_obj_dep_list
   $(1)_cxx_obj_dep := \
     $(foreach s,$(filter %.cpp,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cpp=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.cpp=.d)) \
+      $(s)!$(call _mk_cpp_obj,$(1),$(s))!$(call _mk_cpp_dep,$(1),$(s)) \
      ) \
     $(foreach s,$(filter %.c,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.c=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.c=.d)) \
+      $(s)!$(call _mk_c_obj,$(1),$(s))!$(call _mk_c_dep,$(1),$(s)) \
      ) \
     $(foreach s,$(filter %.cc,$($(1)_src)), \
-      $(s)!$($(1)_OBJDIR)/$(notdir $(s:.cc=$(cobj)))!$($(1)_DEPDIR)/$(notdir $(s:.cc=.d)) \
+      $(s)!$(call _mk_cc_obj,$(1),$(s))!$(call _mk_cc_dep,$(1),$(s))
      )
+
 endef
 
 # 1 - module name
 define _make_cmm_obj_dep_list
   $(1)_cmm_obj_dep := $(foreach s,$(filter %.mm,$($(1)_src)), \
-    $(s)!$($(1)_OBJDIR)/$(notdir $(s:.mm=.mm.o))!$($(1)_DEPDIR)/$(notdir $(s:.mm=.mm.d)) \
+    $(s)!$(call _mk_mm_obj,$(1),$(s))!$(call _mk_mm_dep,$(1),$(s)) \
   )
 endef
 
@@ -607,7 +631,7 @@ define _make_cxx_object_rule
   .PRECIOUS : $(3)
 
   $(3) : $(2) $(_$1_pchfile)
-	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	@echo [CXX $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                                   \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
@@ -640,7 +664,7 @@ define _make_cxx_object_rule
   $(1)_asm : $(3).S
 
   $(3).clang-tidy : $(2)
-	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
+	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
 	@echo [CXX TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
@@ -755,7 +779,7 @@ $(foreach mod,$(C_MODULES),                                                 \
 define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
-	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
 	@echo [AR  $(TARGET)-$(ARCH)] $$(notdir $$@)
 	$(CMDPREFIX)$(RM) -f $$@
 	$(CMDPREFIX)$(AR) \
