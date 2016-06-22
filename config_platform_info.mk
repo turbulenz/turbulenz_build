@@ -80,13 +80,12 @@ endif
 ifeq ($(UNAME),win32)
   override SHELL := cmd.exe
   BUILDHOST := win64
-  ABSPATHS := 0
+  ABSPATHS_EXT := 0
   UNITY := 0
 endif
 
 # $(info UNAME = $(UNAME))
 # $(info SHELL = $(SHELL))
-
 endif # ifeq (,$(BUILDHOST))
 
 ############################################################

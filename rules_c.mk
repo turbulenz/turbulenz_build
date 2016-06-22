@@ -113,23 +113,20 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 # Path calculations for all modules types
 #
 
-# translate _src and _incdirs to absolute paths???
+# translate _src and _incdirs to absolute paths
 ifeq (1,$(ABSPATHS))
-
   # <mod>_src
   $(foreach mod,$(C_MODULES),                                           \
-    $(eval                                                              \
-      $(mod)_src := $(foreach s,$($(mod)_src),                          \
-        $(if $(realpath $(s)),$(realpath $(s)),$(s))                    \
-      )                                                                 \
-    )                                                                   \
-    $(eval                                                              \
-      $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i))) \
-    )                                                                   \
+    $(eval \
+      $(mod)_src:=$(foreach s,$($(mod)_src),$(call abspath_or_orig,$(s)))) \
+    $(eval \
+      $(mod)_incdirs:=$(foreach i,$($(mod)_incdirs),$(call abspath_or_orig,$(i)))) \
   )
+endif
 
-  $(foreach mod,$(EXT),$(eval                                           \
-    $(mod)_incdirs := $(foreach i,$($(mod)_incdirs),$(realpath $(i)))   \
+ifeq (1,$(ABSPATHS_EXT))
+  $(foreach ext,$(EXT), $(eval \
+    $(ext)_incdirs:=$(foreach i,$($(ext)_incdirs),$(call abspath_or_orig,$(i)))\
   ))
 endif
 

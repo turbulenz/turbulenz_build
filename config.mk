@@ -14,6 +14,7 @@ CMDVERBOSE ?= 0
 CONFIG ?= release
 VALGRIND ?= 0
 ABSPATHS ?= 1
+ABSPATHS_EXT ?= 1
 UNITY ?= 1
 PCH ?= 1
 
@@ -71,14 +72,11 @@ include $(_platform_config)
 
 ############################################################
 
-ifeq (1,$(ABSPATHS))
-  ROOTDIR ?= $(realpath .)/
-endif
-OBJDIR = $(ROOTDIR)obj/$(TARGET)$(VARIANT)-$(CONFIG)
+OBJDIR = obj/$(TARGET)$(VARIANT)-$(CONFIG)
 DEPDIR = $(OBJDIR)
-LIBDIR = $(ROOTDIR)lib/$(TARGET)$(VARIANT)-$(CONFIG)
-BINDIR = $(ROOTDIR)bin/$(TARGET)$(VARIANT)-$(CONFIG)
-BINOUTDIR = $(ROOTDIR)bin/$(TARGET)-$(CONFIG)
+LIBDIR = lib/$(TARGET)$(VARIANT)-$(CONFIG)
+BINDIR = bin/$(TARGET)$(VARIANT)-$(CONFIG)
+BINOUTDIR = bin/$(TARGET)-$(CONFIG)
 
 ############################################################
 
@@ -86,7 +84,6 @@ ifeq ($(BUILDVERBOSE),1)
   log=$(warning $(1))
 endif
 $(call log,Verbose Mode Enabled...)
-# $(call log,ROOTDIR=$(ROOTDIR))
 # $(call log,OBJDIR=$(OBJDIR))
 # $(call log,LIBDIR=$(LIBDIR))
 # $(call log,BINDIR=$(BINDIR))
