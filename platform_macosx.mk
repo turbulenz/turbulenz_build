@@ -11,6 +11,13 @@ ifeq (1,$(MACOSX_USE_OLD_TOOLS))
   MACOSX_XCODE_BIN_PATH := $(wildcard /Developer/usr/bin/)
 endif
 
+#
+# DISTCC
+#
+ifeq (1,$(ENABLE_DISTCC))
+DISTCC:=$(shell test -f /usr/local/bin/distcc; if [ $$? -eq 0 ] ; then echo "distcc" ; fi)
+endif
+
 ifneq (,$(MACOSX_XCODE_BIN_PATH))
   # OLD TOOLS
   MACOSX_CXX := llvm-g++-4.2
@@ -64,7 +71,7 @@ $(call log,MACOSX BUILD CONFIGURATION)
 # CXX / CMM FLAGS
 #
 
-CC := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+CC := $(DISTCC) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CXX := $(CC)
 CMM := $(CXX)
 CLANG_TIDY := /usr/local/opt/llvm/bin/clang-tidy
