@@ -101,11 +101,13 @@ ifeq ($(VALGRIND),1)
   CXXFLAGS += -DTZ_VALGRIND
 endif
 
-CP := python $(BUILDDIR)/commands/cp.py
-CAT := python $(BUILDDIR)/commands/cat.py
-MKDIR := python $(BUILDDIR)/commands/mkdir.py
-FIND := python $(BUILDDIR)/commands/find.py
-RELPATH := python $(BUILDDIR)/commands/relpath.py
+BUILDDIR_ABS := $(realpath $(BUILDDIR))
+MV := python $(BUILDDIR_ABS)/commands/mv.py
+CP := python $(BUILDDIR_ABS)/commands/cp.py
+CAT := python $(BUILDDIR_ABS)/commands/cat.py
+MKDIR := python $(BUILDDIR_ABS)/commands/mkdir.py
+FIND := python $(BUILDDIR_ABS)/commands/find.py
+RELPATH := python $(BUILDDIR_ABS)/commands/relpath.py
 TSC ?= tsc
 MAKE_APK_PROJ := python $(BUILDDIR)/commands/make_android_project.py
 CLANG_TIDY ?= clang-tidy
