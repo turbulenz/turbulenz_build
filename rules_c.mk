@@ -163,7 +163,7 @@ endif
 
 # calc <mod>_depincdirs - include dirs from dependencies
 $(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_depincdirs := $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs)) \
+  $(mod)_depincdirs := $(sort $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs))) \
 ))
 
 # # calc <mod>_depheaderfiles - include files of dependencies
