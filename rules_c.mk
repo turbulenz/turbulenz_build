@@ -184,7 +184,8 @@ $(call log,npturbulenz_depextlibs = $(npturbulenz_depextlibs))
 
 # calc external include dirs
 $(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_ext_incdirs := $(foreach e,$($(mod)_extlibs) $($(mod)_depextlibs),$($(e)_incdirs)) \
+  $(mod)_ext_incdirs := \
+    $(foreach e,$(sort $($(mod)_extlibs) $($(mod)_depextlibs)),$($(e)_incdirs)) \
 ))
 
 # calc external lib dirs
