@@ -281,7 +281,7 @@ ifeq ($(UNITY),1)
 
   $(foreach mod,$(C_MODULES),\
     $(if $(filter 1,$($(mod)_unity)),                           \
-      $(eval $(mod)_unity_src := $($(mod)_src)) 	            \
+      $(eval $(mod)_unity_src := $(realpath $($(mod)_src)))     \
       $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp)   \
       $(eval $(call _make_cxx_unity_file,$(mod)))               \
     )                                                           \
