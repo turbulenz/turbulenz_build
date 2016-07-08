@@ -810,7 +810,7 @@ $(foreach dll,$(DLLS), \
 # 1 - module
 define _make_dll_rule
 
-  $($(1)_dllfile) : $($(1)_depdlls) $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files2cd)
+  $($(1)_dllfile) : $($(1)_depdlls) $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@$(MKDIR) -p $$(dir $$@)
 	@echo [DLL $(TARGET)-$(ARCH)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
