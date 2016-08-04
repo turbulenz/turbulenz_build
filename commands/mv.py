@@ -14,6 +14,11 @@ Usage:
 """
 
 def are_same(a, b):
+    from os.path import exists
+
+    if not exists(a) or not exists(b):
+        return False
+
     with open(a, "rb") as af:
         ad = af.read()
         with open(b, "rb") as bf:
