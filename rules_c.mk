@@ -359,11 +359,11 @@ endif
 # 2 - src file
 ifeq (,$(SRCROOT))
   _mk_cpp_obj=$($(1)_OBJDIR)/$(notdir $(2:.cpp=$(cobj)))
-  _mk_cpp_dep=$($(1)_DEPDIR)/$(notdir $(2:.cpp=.d))
+  _mk_cpp_dep=$($(1)_DEPDIR)/$(notdir $(2:.cpp=.cpp..d))
   _mk_c_obj=$($(1)_OBJDIR)/$(notdir $(2:.c=$(cobj)))
-  _mk_c_dep=$($(1)_DEPDIR)/$(notdir $(2:.c=.d))
+  _mk_c_dep=$($(1)_DEPDIR)/$(notdir $(2:.c=.c.d))
   _mk_cc_obj=$($(1)_OBJDIR)/$(notdir $(2:.cc=$(cobj)))
-  _mk_cc_dep=$($(1)_DEPDIR)/$(notdir $(2:.cc=.d))
+  _mk_cc_dep=$($(1)_DEPDIR)/$(notdir $(2:.cc=.cc.d))
   _mk_mm_obj=$($(1)_OBJDIR)/$(notdir $(2:.mm=.mm$(cobj)))
   _mk_mm_dep=$($(1)_DEPDIR)/$(notdir $(2:.mm=.mm.d))
 else
@@ -371,11 +371,11 @@ else
   _mk_obj_path=$(if $(filter $(subst $(SRCROOT),,$(1)),$(1)),$(notdir $(1)),$(subst $(SRCROOT),,$(1)))
 
   _mk_cpp_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=$(cobj))))
-  _mk_cpp_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=.d)))
+  _mk_cpp_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=.cpp.d)))
   _mk_c_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.c=$(cobj))))
-  _mk_c_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.c=.d)))
+  _mk_c_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.c=.cpp.d)))
   _mk_cc_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=$(cobj))))
-  _mk_cc_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=.d)))
+  _mk_cc_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=.cc.d)))
   _mk_mm_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.mm=.mm$(cobj))))
   _mk_mm_dep=$($(1)_DEPDIR)/$(subst ..,__,$(subst $(SRCROOT),,$(2:.mm=.mm.d)))
 endif
