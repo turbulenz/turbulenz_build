@@ -359,7 +359,7 @@ endif
 # 2 - src file
 ifeq (,$(SRCROOT))
   _mk_cpp_obj=$($(1)_OBJDIR)/$(notdir $(2:.cpp=$(cobj)))
-  _mk_cpp_dep=$($(1)_DEPDIR)/$(notdir $(2:.cpp=.cpp..d))
+  _mk_cpp_dep=$($(1)_DEPDIR)/$(notdir $(2:.cpp=.cpp.d))
   _mk_c_obj=$($(1)_OBJDIR)/$(notdir $(2:.c=$(cobj)))
   _mk_c_dep=$($(1)_DEPDIR)/$(notdir $(2:.c=.c.d))
   _mk_cc_obj=$($(1)_OBJDIR)/$(notdir $(2:.cc=$(cobj)))
