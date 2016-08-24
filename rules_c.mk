@@ -390,7 +390,7 @@ define _make_cxx_obj_dep_list
       $(s)!$(call _mk_c_obj,$(1),$(s))!$(call _mk_c_dep,$(1),$(s)) \
      ) \
     $(foreach s,$(filter %.cc,$($(1)_src)), \
-      $(s)!$(call _mk_cc_obj,$(1),$(s))!$(call _mk_cc_dep,$(1),$(s))
+      $(s)!$(call _mk_cc_obj,$(1),$(s))!$(call _mk_cc_dep,$(1),$(s)) \
      )
 
 endef
@@ -402,7 +402,7 @@ define _make_cmm_obj_dep_list
   )
 endef
 
-$(foreach mod,$(C_MODULES),                        \
+$(foreach mod,$(C_MODULES),                      \
   $(eval $(call _make_cxx_obj_dep_list,$(mod)))  \
 )
 
