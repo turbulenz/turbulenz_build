@@ -32,29 +32,33 @@ include $(BUILDDIR)/config_platform_info.mk
 # CONFIG default settings
 ############################################################
 
-ifeq ($(CONFIG),release)
-  C_SYMBOLS ?= 1
-  C_OPTIMIZE ?= 1
-  LD_OPTIMIZE ?= 0    # Keep LTO off by default
-  WIN_DLL=release
-endif
-ifeq ($(CONFIG),release-noltcg)
-  C_SYMBOLS ?= 1
-  C_OPTIMIZE ?= 1
-  LD_OPTIMIZE ?= 0    # Keep LTO off by default
-  WIN_DLL=release
-endif
 ifeq ($(CONFIG),debug)
   C_SYMBOLS ?= 1
   C_OPTIMIZE ?= 0
+  C_RUNTIME_CHECKS ?= 0
   LD_OPTIMIZE ?= 0
   WIN_DLL=debug
 endif
 ifeq ($(CONFIG),development)
   C_SYMBOLS ?= 1
   C_OPTIMIZE ?= 0
+  C_RUNTIME_CHECKS ?= 0
   LD_OPTIMIZE ?= 0
   WIN_DLL=debug
+endif
+ifeq ($(CONFIG),release-noltcg)
+  C_SYMBOLS ?= 1
+  C_OPTIMIZE ?= 1
+  C_RUNTIME_CHECKS ?= 0
+  LD_OPTIMIZE ?= 0
+  WIN_DLL=release
+endif
+ifeq ($(CONFIG),release)
+  C_SYMBOLS ?= 1
+  C_OPTIMIZE ?= 1
+  C_RUNTIME_CHECKS ?= 0
+  LD_OPTIMIZE ?= 0 # disabled by default for now
+  WIN_DLL=release
 endif
 
 ############################################################

@@ -102,11 +102,12 @@ else
 endif
 
 ifeq (1,$(LD_OPTIMIZE))
-  CFLAGSPRE += =flto
+  CFLAGSPRE += -flto
   MACOSX_LDFLAGS += -O3 -flto
 endif
 
 ifeq (1,$(C_RUNTIME_CHECKS))
+
   _RT_FLAGS :=                                   \
     -fsanitize=address                           \
 
@@ -117,9 +118,11 @@ ifeq (1,$(C_RUNTIME_CHECKS))
     # -fsanitize=dataflow                          \
     # -fsanitize=cfi                               \
 
-  CFLAGSPOST += $(_RT_FLAGS)
-  DLLFLAGSPOST += $(_RT_FLAGS)
-  LDFLAGSPOST += $(_RT_FLAGS)
+  $(warning -fsanitize=address not enable on Mac (not stable))
+  # CFLAGSPOST += $(_RT_FLAGS)
+  # DLLFLAGSPOST += $(_RT_FLAGS)
+  # LDFLAGSPOST += $(_RT_FLAGS)
+
 endif
 
 # -fno-rtti

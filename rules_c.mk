@@ -377,7 +377,7 @@ else
   _mk_cc_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=$(cobj))))
   _mk_cc_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cc=.cc.d)))
   _mk_mm_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.mm=.mm$(cobj))))
-  _mk_mm_dep=$($(1)_DEPDIR)/$(subst ..,__,$(subst $(SRCROOT),,$(2:.mm=.mm.d)))
+  _mk_mm_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.mm=.mm.d)))
 endif
 
 # 1 - module name
