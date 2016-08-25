@@ -85,6 +85,15 @@ else
   # endif
 endif
 
+ifeq (1,$(LD_OPTIMIZE))
+  # TODO: seems not to work as of clang 3.6, Ubuntu 14.04
+  #
+  #	Apparently, LLVMgold plugin is required got the linker
+
+  # CFLAGSPRE += -flto
+  # LDFLAGSPOST += -O3 -flto -fuse-ld=gold
+endif
+
 ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
   _RT_FLAGS := -fsanitize=address
     # -fsanitize=thread
@@ -102,16 +111,12 @@ ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
     # CFLAGSPOST += -fPIE
     # DLLFLAGSPOST += -Wl,-pie
     # LDFLAGSPOST += -Wl,-pie
-
-  CFLAGSPOST += $(_RT_FLAGS) -fPIE
-  DLLFLAGSPOST += $(_RT_FLAGS) -Wl,-pie
-  LDFLAGSPOST += $(_RT_FLAGS) -Wl,-pie
 endif
 
 CXXFLAGSPRE := \
   $(CFLAGSPRE) -Wno-overloaded-virtual -std=c++11 -Wno-reorder \
   -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
-CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions -fpermissive
+CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions -fpermissive $(_RT_FLAGS)
 
 PCHFLAGS := -x c++-header
 
@@ -133,7 +138,7 @@ libsuffix := .a
 
 DLL := $(CXX)
 DLLFLAGSPRE += -shared
-DLLFLAGSPOST += $(_rpath_flags)
+DLLFLAGSPOST += $(_rpath_flags) $(_RT_FLAGS)
 
 
 DLLFLAGS_LIBDIR := -L
@@ -151,8 +156,7 @@ LDFLAGS_LIB := -l
 
 LD := $(CXX)
 LDFLAGSPRE +=
-LDFLAGSPOST += -lpthread $(_rpath_flags)
-
+LDFLAGSPOST += -lpthread $(_rpath_flags) $(_RT_FLAGS)
 
 ############################################################
 
