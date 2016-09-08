@@ -56,6 +56,7 @@ _cxxflags_warnings := \
 # -Wconversion
 
 CFLAGSPRE := \
+    -D_GLIBCXX_USE_CXX11_ABI=0 \
     -fmessage-length=0 -pipe \
     $(_cxxflags_warnings) \
     -fPIC \
