@@ -367,8 +367,19 @@ ifeq (,$(SRCROOT))
   _mk_mm_obj=$($(1)_OBJDIR)/$(notdir $(2:.mm=.mm$(cobj)))
   _mk_mm_dep=$($(1)_DEPDIR)/$(notdir $(2:.mm=.mm.d))
 else
-  override SRCROOT:=$(call ensure_trailing_slash,$(SRCROOT))
-  _mk_obj_path=$(if $(filter $(subst $(SRCROOT),,$(1)),$(1)),$(notdir $(1)),$(subst $(SRCROOT),,$(1)))
+
+  # Convert all source paths to realpaths so we can filter on SRCROOT
+  $(foreach mod,$(C_MODULES), $(eval $(mod)_src=$(realpath $($(mod)_src))))
+  override SRCROOT:=$(call ensure_trailing_slash,$(realpath $(SRCROOT)))
+
+  # Keep any dir structure past SRCROOT, otherwise just use the
+  # basename.  Because we use realpath above, the subst ..,__ is
+  # probably unnecessary, but we keep it just to be safe.
+  _mk_obj_path=$(word 1,                         \
+    $(if $(findstring $(SRCROOT),$(1)),          \
+      $(subst ..,__,$(subst $(SRCROOT),,$(1))))  \
+    $(notdir $(1))                               \
+  )
 
   _mk_cpp_obj=$($(1)_OBJDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=$(cobj))))
   _mk_cpp_dep=$($(1)_DEPDIR)/$(subst ..,__,$(call _mk_obj_path,$(2:.cpp=.cpp.d)))
@@ -413,10 +424,6 @@ ifneq (,$(filter macosx ios,$(TARGETNAME)))
     $(call _make_cmm_obj_dep_list,$(mod)) \
   ))
 endif
-
-$(call log,standalone_src = $(npengine_src))
-$(call log,standalone_cxx_obj_dep = $(npengine_cxx_obj_dep))
-$(call log,standalone_cmm_obj_dep = $(npengine_cmm_obj_dep))
 
 #
 # Functions for getting src, obj and dep files
