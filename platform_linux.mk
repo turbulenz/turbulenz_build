@@ -7,7 +7,7 @@
 #
 ############################################################
 
-CLANG_VERSION ?= 3.6
+CLANG_VERSION ?= 3.7
 
 #
 # CCACHE
@@ -87,12 +87,9 @@ else
 endif
 
 ifeq (1,$(LD_OPTIMIZE))
-  # TODO: seems not to work as of clang 3.6, Ubuntu 14.04
-  #
-  #	Apparently, LLVMgold plugin is required got the linker
-
-  # CFLAGSPRE += -flto
-  # LDFLAGSPOST += -O3 -flto -fuse-ld=gold
+  # Enable lto, requires the use of the gold linker
+  CFLAGSPRE += -flto
+  LDFLAGSPOST += -O3 -flto -fuse-ld=gold
 endif
 
 ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
