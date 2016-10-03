@@ -456,14 +456,17 @@ $(call log,npengine_DEPFILES = $(npengine_DEPFILES))
 #
 
 # 1 - mod
-# 2 - flags file
-# 3 - flags string
+# 2 - flags string
 define _make_cxx_flags_file
+
+  $(1)_flags_file ?= $($(1)_OBJDIR)/.flags
+
   .FORCE:
-  $(2) : .FORCE
-	@if [ '$(3)' != "`cat $(2) 2>/dev/null`" ] ; then \
-      $(MKDIR) -p $($(1)_OBJDIR) ; \
-      echo '$(3)' > $(2) ; \
+  $$($(1)_flags_file) : .FORCE
+	@if [ '$(strip $(2))' != "`cat $$@ 2>/dev/null | tr -d '\n'`" ] ; then \
+      echo [FLAGS  ] \($1\) $$@      ; \
+      $(MKDIR) -p $$(dir $$@) ; \
+      echo '$(foreach f,$(2),\n$(f))' > $$@ ; \
     fi
 
   # Keeping the old version for reference:
@@ -476,20 +479,21 @@ define _make_cxx_flags_file
   #   $$(shell echo '$(strip $(3))' > $(2))
   # endif
 
-  $($(1)_OBJECTS) $(_$(1)_pchfile) : $(2)
+  $($(1)_OBJECTS) $(_$(1)_pchfile) : $$($(1)_flags_file)
 endef
 
 ifneq (1,$(DISABLE_FLAG_CHECKS))
-$(foreach mod,$(C_MODULES),$(eval \
-   $(call _make_cxx_flags_file,$(mod),$($(mod)_OBJDIR)/.flags,                \
-     $(strip $(filter-out $($(1)_remove_cxxflags),                            \
-       $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                       \
-       $($(mod)_cxxflags) $($(mod)_local_cxxflags)                            \
-       $(addprefix -I,$($(mod)_incdirs)) $(addprefix -I,$($(mod)_depincdirs)) \
-       $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)                  \
-     ))                                                                       \
-   )                                                                          \
-))
+  $(foreach mod,$(C_MODULES),$(eval                                            \
+     $(call _make_cxx_flags_file,$(mod),                                       \
+       $(strip $(filter-out $($(1)_remove_cxxflags),                           \
+         $(CSYSTEMFLAGS)                                                       \
+         $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                      \
+         $($(mod)_cxxflags) $($(mod)_local_cxxflags)                           \
+         $(addprefix -I,$($(mod)_incdirs)) $(addprefix -I,$($(mod)_depincdirs))\
+         $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)                 \
+       ))                                                                      \
+     )                                                                         \
+  ))
 endif
 
 #
