@@ -113,14 +113,21 @@ $(foreach mod,$(C_MODULES),$(call log,$(mod)_fulldeps = $($(mod)_fulldeps)))
 # Path calculations for all modules types
 #
 
-# translate _src and _incdirs to absolute paths
+# Conditionally translate _src and _incdirs to absolute paths.  Set
+# <mod>_incdirs_abs to always be the absolute paths.
+
 ifeq (1,$(ABSPATHS))
   # <mod>_src
-  $(foreach mod,$(C_MODULES),                                           \
-    $(eval \
+  $(foreach mod,$(C_MODULES),                                              \
+    $(eval                                                                 \
       $(mod)_src:=$(foreach s,$($(mod)_src),$(call abspath_or_orig,$(s)))) \
-    $(eval \
+    $(eval                                                                 \
       $(mod)_incdirs:=$(foreach i,$($(mod)_incdirs),$(call abspath_or_orig,$(i)))) \
+    $(eval $(mod)_incdirs_abs:=$($(mod)_incdirs))
+  )
+else
+  $(foreach mod,$(C_MODULES),                                                  \
+    $(eval $(mod)_incdirs_abs:=$(foreach i,$($(mod)_incdirs),$(abspath $(i)))) \
   )
 endif
 
@@ -161,10 +168,18 @@ ifneq (,$(dlllibsuffix))
   ))
 endif
 
-# calc <mod>_depincdirs - include dirs from dependencies
-$(foreach mod,$(C_MODULES),$(eval \
-  $(mod)_depincdirs := $(sort $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs))) \
-))
+# calc <mod>_depincdirs and <mod>_depincdirs_abs - include dirs from
+# dependencies
+$(foreach mod,$(C_MODULES),                                       \
+  $(eval                                                          \
+    $(mod)_depincdirs :=                                          \
+      $(sort $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs)))     \
+  )                                                               \
+  $(eval                                                          \
+    $(mod)_depincdirs_abs :=                                      \
+      $(sort $(foreach d,$($(mod)_fulldeps),$($(d)_incdirs_abs))) \
+  )                                                               \
+)
 
 # # calc <mod>_depheaderfiles - include files of dependencies
 # $(foreach mod,$(C_MODULES),$(eval \
@@ -483,16 +498,17 @@ define _make_cxx_flags_file
 endef
 
 ifneq (1,$(DISABLE_FLAG_CHECKS))
-  $(foreach mod,$(C_MODULES),$(eval                                            \
-     $(call _make_cxx_flags_file,$(mod),                                       \
-       $(strip $(filter-out $($(1)_remove_cxxflags),                           \
-         $(CSYSTEMFLAGS)                                                       \
-         $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                      \
-         $($(mod)_cxxflags) $($(mod)_local_cxxflags)                           \
-         $(addprefix -I,$($(mod)_incdirs)) $(addprefix -I,$($(mod)_depincdirs))\
-         $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)                 \
-       ))                                                                      \
-     )                                                                         \
+  $(foreach mod,$(C_MODULES),$(eval                                        \
+     $(call _make_cxx_flags_file,$(mod),                                   \
+       $(strip $(filter-out $($(1)_remove_cxxflags),                       \
+         $(CSYSTEMFLAGS)                                                   \
+         $(CXXFLAGSPRE) $(CXXFLAGS) $($(mod)_depcxxflags)                  \
+         $($(mod)_cxxflags) $($(mod)_local_cxxflags)                       \
+         $(addprefix -I,$($(mod)_incdirs_abs))                             \
+         $(addprefix -I,$($(mod)_depincdirs_abs))                          \
+         $(addprefix -I,$($(mod)_ext_incdirs)) $(CXXFLAGSPOST)             \
+       ))                                                                  \
+     )                                                                     \
   ))
 endif
 
