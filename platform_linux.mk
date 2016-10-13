@@ -7,7 +7,7 @@
 #
 ############################################################
 
-CLANG_VERSION ?= 3.7
+CLANG_VERSION ?= 3.8
 
 #
 # CCACHE
@@ -63,7 +63,7 @@ CFLAGSPRE := \
     -ftree-vectorize -msse3 -mssse3
 
 ifeq (clang,$(COMPILER))
-  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register
+  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move
 endif
 
 CFLAGSPOST := -c
