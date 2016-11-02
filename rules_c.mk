@@ -383,8 +383,8 @@ ifeq (,$(SRCROOT))
   _mk_mm_dep=$($(1)_DEPDIR)/$(notdir $(2:.mm=.mm.d))
 else
 
-  # Convert all source paths to realpaths so we can filter on SRCROOT
-  $(foreach mod,$(C_MODULES), $(eval $(mod)_src=$(realpath $($(mod)_src))))
+  # Convert all source paths to absolute so we can filter on SRCROOT
+  $(foreach mod,$(C_MODULES), $(eval $(mod)_src=$(abspath $($(mod)_src))))
   override SRCROOT:=$(call ensure_trailing_slash,$(realpath $(SRCROOT)))
 
   # Keep any dir structure past SRCROOT, otherwise just use the
