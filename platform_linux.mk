@@ -60,7 +60,11 @@ CFLAGSPRE := \
     -fmessage-length=0 -pipe \
     $(_cxxflags_warnings) \
     -fPIC \
-    -ftree-vectorize -msse3 -mssse3
+    -ftree-vectorize -msse3 -mssse3 \
+    -fdata-sections \
+    -ffunction-sections \
+    -fvisibility-inlines-hidden \
+    -fvisibility=hidden \
 
 ifeq (clang,$(COMPILER))
   CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move
@@ -154,7 +158,7 @@ LDFLAGS_LIB := -l
 
 LD := $(CXX)
 LDFLAGSPRE +=
-LDFLAGSPOST += -lpthread $(_rpath_flags) $(_RT_FLAGS)
+LDFLAGSPOST += -Wl,--gc-sections -lpthread $(_rpath_flags) $(_RT_FLAGS)
 
 ############################################################
 

@@ -85,7 +85,7 @@ CFLAGSPRE := \
     $(_cxxflags_warnings) \
     -fvisibility-inlines-hidden \
     -fvisibility=hidden \
-    -DXP_MACOSX=1 -DMACOSX=1
+    -DMACOSX=1
 
 CFLAGSPOST := -c
 
