@@ -33,7 +33,7 @@ endif
 
 ifeq (clang,$(COMPILER))
   CXXCOMPILER:=$(shell \
-    which clang++ || which clang++-$(CLANG_VERSION) || echo -n \
+    which clang++-$(CLANG_VERSION) || which clang++ || echo -n \
   )
   ifeq ($(CXXCOMPILER),)
     $(error Cannot find clang++)
