@@ -12,13 +12,13 @@ CLANG_VERSION ?= 3.8
 #
 # CCACHE
 #
-CCACHE:=$(shell test -n "`which ccache 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
+CCACHE:=$(shell test -n "`which ccache 2>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
 
 #
 # DISTCC
 #
 ifeq (1,$(ENABLE_DISTCC))
-DISTCC:=$(shell test -n "`which distcc 2&>/dev/null`"; if [ $$? -eq 0 ] ; then echo "distcc" ; fi)
+DISTCC:=$(shell test -n "`which distcc 2>/dev/null`"; if [ $$? -eq 0 ] ; then echo "distcc" ; fi)
 endif
 
 #

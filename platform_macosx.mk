@@ -58,13 +58,16 @@ endif
 
 ############################################################
 
-$(call log,MACOSX BUILD CONFIGURATION)
+#
+# CCACHE
+#
+CCACHE:=$(shell test -n "`which ccache 2>/dev/null`"; if [ $$? -eq 0 ] ; then echo "ccache" ; fi)
 
 #
 # CXX / CMM FLAGS
 #
 
-CC := $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
+CC := $(CCACHE) $(DISTCC) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CXX := $(CC)
 CMM := $(CXX)
 CLANG_TIDY := /usr/local/opt/llvm/bin/clang-tidy
