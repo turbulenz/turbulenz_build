@@ -326,11 +326,9 @@ ifneq (,$(dlllibsuffix))
   define _make_dll_paths
     $(1)_dllfile ?= $(BINDIR)/$(dllprefix)$(dll)$(dllsuffix)
     $(1)_dlllibfile ?= $$($(1)_dllfile:$(dllsuffix)=$(dlllibsuffix))
-    $(1)_pdbfile ?= $$($(1)_dllfile:$(dllsuffix)=$(pdbsuffix))
   endef
   define _make_app_paths
     $(1)_appfile ?= $(BINDIR)/$(app)$(binsuffix)
-    $(1)_pdbfile ?= $$($(1)_appfile:$(binsuffix)=$(pdbsuffix))
   endef
 else
   define _make_dll_paths
@@ -347,6 +345,16 @@ $(foreach dll,$(DLLS),$(eval $(call _make_dll_paths,$(dll))))
 
 # calc <app>_appfile
 $(foreach app,$(APPS),$(eval $(call _make_app_paths,$(app))))
+
+ifneq (,$(pdbsuffix))
+  $(foreach m,$(DLLS),$(eval \
+    $(m)_pdbfile ?= $$($(m)_dllfile:$(dllsuffix)=$(pdbsuffix)) \
+  ))
+
+  $(foreach m,$(APPS),$(eval \
+    $(m)_pdbfile ?= $$($(m)_appfile:$(binsuffix)=$(pdbsuffix)) \
+  ))
+endif
 
 #
 # Precopiled headers

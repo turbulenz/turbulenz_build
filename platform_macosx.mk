@@ -239,6 +239,14 @@ LDFLAGSPOST += \
 #    -Xlinker \
 #    --no-demangle \
 
+# Generate map files
+
+pdbsuffix := .map
+DLLFLAGS_PDB := -Wl,-map,
+LDFLAGS_PDB := $(DLLFLAGS_PDB)
+
+# Paths to local dlls
+
 app-post = \
   $(CMDPREFIX) for d in $($(1)_ext_dlls) ; do \
     in=`$(MACOSX_XCODE_BIN_PATH)otool -D $$$$d | grep -v :`; \
