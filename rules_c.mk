@@ -285,24 +285,14 @@ endif
 #
 
 ifeq ($(UNITY),1)
+  UNITY_MODULES := \
+    $(foreach mod,$(C_MODULES),$(if $(filter 1,$($(mod)_unity)),$(mod)))
+endif
 
-  # 1 - mod
-  define _make_cxx_unity_file
-    $($(1)_src) : $($(1)_unity_src)
-	  @$(MKDIR) -p $($(1)_OBJDIR)
-	  echo > $$@
-	  for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
-  endef
-
-  $(foreach mod,$(C_MODULES),\
-    $(if $(filter 1,$($(mod)_unity)),                           \
-      $(eval $(mod)_unity_src := $(realpath $($(mod)_src)))     \
-      $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp)   \
-      $(eval $(call _make_cxx_unity_file,$(mod)))               \
-    )                                                           \
-  )
-
-endif #($(UNITY),1)
+$(foreach mod,$(UNITY_MODULES),                                          \
+  $(eval $(mod)_unity_src := $(realpath $($(mod)_src)))                  \
+  $(eval $(mod)_src := $($(mod)_OBJDIR)/$(mod)_unity.cpp)                \
+)
 
 #
 # Output paths
@@ -455,6 +445,23 @@ endif
 _getsrc = $(word 1,$(subst !, ,$(1)))
 _getobj = $(word 2,$(subst !, ,$(1)))
 _getdep = $(word 3,$(subst !, ,$(1)))
+
+#
+# File names (absolute/relative/subdirs etc) fixed at this opint, so
+# it's safe to invoke rules for source generation
+#
+
+# 1 - mod
+define _make_cxx_unity_file
+  $($(1)_src) : $($(1)_unity_src)
+	$(MKDIR) -p $($(1)_OBJDIR)
+	echo > $$@
+	for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
+endef
+
+$(foreach mod,$(UNITY_MODULES),                                 \
+  $(eval $(call _make_cxx_unity_file,$(mod)))                   \
+)
 
 #
 # For each modules, calculate the full object list and full depfile list
@@ -733,7 +740,7 @@ define _make_cmm_object_rule
   .PRECIOUS : $(3)
 
   $(3) : $(2) $(_$1_pchfile)
-	@mkdir -p $($(1)_OBJDIR) $($(1)_DEPDIR)
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	@echo [CMM $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM)                                                   \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
