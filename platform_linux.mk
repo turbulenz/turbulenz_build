@@ -160,8 +160,15 @@ LD := $(CXX)
 LDFLAGSPRE +=
 LDFLAGSPOST += -Wl,--gc-sections -lpthread $(_rpath_flags) $(_RT_FLAGS)
 
-############################################################
+#
+# .map files
+#
 
+pdbsuffix := .map
+DLLFLAGS_PDB := -Wl,-Map,
+LDFLAGS_PDB := $(DLLFLAGS_PDB)
+
+############################################################
 
 # g++ \
 #  -shared \
