@@ -822,6 +822,7 @@ define _make_lib_rule
 	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
 	@echo [AR  $(TARGET)-$(ARCH)] $$(notdir $$@)
 	$(CMDPREFIX)$(RM) -f $$@
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	$(CMDPREFIX)$(AR) \
      $(ARFLAGSPRE) \
      $(arout)$$@ \
