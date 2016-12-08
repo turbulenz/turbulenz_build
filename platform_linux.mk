@@ -42,7 +42,12 @@ else
   CXXCOMPILER:=g++
 endif
 
+ifeq (ccachedistcc,$(CCACHE)$(DISTCC))
+export CCACHE_PREFIX := distcc
+CXX := $(CCACHE) $(CXXCOMPILER)
+else
 CXX := $(CCACHE) $(DISTCC) $(CXXCOMPILER)
+endif
 CC := $(CXX) -x c
 
 #
