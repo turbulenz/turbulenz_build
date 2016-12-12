@@ -633,9 +633,18 @@ define _make_c_object_rule
       $(cout)$$@ $(csrc) $$<
 	$(call cc-post,$(1),$(2),$(3),$(4))
 
-  $(3).S : $(3)
-	@echo [DISASS] \($(1)\) $$@
-	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+  $(3).S : $(2)
+	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
+	@echo [C2ASM $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$(notdir $$<)
+	$(CMDPREFIX)$(CC)                                                   \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
+      $(CSYSTEMFLAGS) $(CFLAGSPRE) $(CFLAGS)                            \
+      $($(1)_depcxxflags) $($(1)_cflags) $($(1)_local_cflags)           \
+      $(addprefix -I,$($(1)_incdirs))                                   \
+      $(addprefix -I,$($(1)_depincdirs))                                \
+      $(addprefix -I,$($(1)_ext_incdirs))                               \
+      $(CFLAGSPOST) $($(call file_flags,$(2)))                          \
+      $(cout)$$@ -S $$<
 
   $(1)_asm : $(3).S
 
@@ -697,9 +706,22 @@ define _make_cxx_object_rule
 
   $(4):
 
-  $(3).S : $(3)
-	@echo [DISASS] \($(1)\) $$@
-	$(OBJDUMP) $(OBJDUMP_DISASS) $$< > $$@
+  $(3).S : $(2)
+	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	@echo [CC2ASM $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$(notdir $$<)
+	$(CMDPREFIX)$(CXX)                                                   \
+      $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
+      $(filter-out $($(1)_remove_cxxflags),                              \
+        $(CXXSYSTEMFLAGS) $(CXXFLAGSPRE) $(CXXFLAGS) $($(1)_depcxxflags) \
+        $($(1)_cxxflags) $($(1)_local_cxxflags)                          \
+      )                                                                  \
+      $(addprefix -I,$($(1)_incdirs))                                    \
+      $(addprefix -I,$($(1)_depincdirs))                                 \
+      $(addprefix -I,$($(1)_ext_incdirs))                                \
+      $(filter-out $($(1)_remove_cxflags),                               \
+        $(CXXFLAGSPOST) $($(call file_flags,$(2)))                       \
+      )                                                                  \
+      $(cout)$$@ -S $$<
 
   $(1)_asm : $(3).S
 
