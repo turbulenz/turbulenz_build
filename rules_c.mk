@@ -494,7 +494,7 @@ define _make_cxx_flags_file
   .FORCE:
   $$($(1)_flags_file) : .FORCE
 	@if [ '$(strip $(2))' != "`cat $$@ 2>/dev/null | tr -d '\n'`" ] ; then \
-      echo [FLAGS  ] \($1\) $$@      ; \
+      echo [FLAGS $(TARGET)-$(ARCH)-$(CONFIG)] \($1\) $$@      ; \
       $(MKDIR) -p $$(dir $$@) ; \
       echo '$(foreach f,$(2),\n$(f))' > $$@ ; \
     fi
@@ -672,7 +672,7 @@ define _make_cxx_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
-	@echo [CXX $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CXX $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CXX)                                                   \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
       $(filter-out $($(1)_remove_cxxflags),                              \
@@ -820,7 +820,7 @@ define _make_lib_rule
 
   $($(1)_libfile) : $($(1)_OBJECTS)
 	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
-	@echo [AR  $(TARGET)-$(ARCH)] $$(notdir $$@)
+	@echo [AR  $(TARGET)-$(ARCH)-$(CONFIG)] $$(notdir $$@)
 	$(CMDPREFIX)$(RM) -f $$@
 	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
 	$(CMDPREFIX)$(AR) \
@@ -855,7 +855,7 @@ define _make_dll_rule
 
   $($(1)_dllfile) : $($(1)_depdlls) $($(1)_deplibs) $($(1)_OBJECTS) $($(1)_ext_lib_files)
 	@$(MKDIR) -p $$(dir $$@)
-	@echo [DLL $(TARGET)-$(ARCH)] $$@
+	@echo [DLL $(TARGET)-$(ARCH)-$(CONFIG)] $$@
 	$(CMDPREFIX)$(DLL) $(DLLFLAGSPRE) \
       $($(1)_DLLFLAGSPRE) \
       $(addprefix $(DLLFLAGS_PDB),$($(1)_pdbfile))       \
@@ -899,7 +899,7 @@ define _make_app_rule
   $($(1)_appfile) : $($(1)_deplibs) $($(1)_depdlls) $($(1)_OBJECTS) \
   $($(1)_ext_lib_files)
 	@$(MKDIR) -p $$(dir $$@)
-	@echo [LD  $(TARGET)-$(ARCH)] $$@
+	@echo [LD  $(TARGET)-$(ARCH)-$(CONFIG)] $$@
 	$(CMDPREFIX)$(LD) $(LDFLAGSPRE) \
       $(addprefix $(LDFLAGS_LIBDIR),$($(1)_ext_libdirs)) \
       $(LDFLAGS_PDB)$($(1)_pdbfile) \

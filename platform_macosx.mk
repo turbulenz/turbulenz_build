@@ -70,6 +70,8 @@ CCACHE:=$(shell test -n "`which ccache 2>/dev/null`"; if [ $$? -eq 0 ] ; then ec
 CC := $(CCACHE) $(DISTCC) $(MACOSX_XCODE_BIN_PATH)$(MACOSX_CXX)
 CXX := $(CC)
 CMM := $(CXX)
+OBJDUMP := $(MACOSX_XCODE_BIN_PATH)otool
+OBJDUMP_DISASS := -tv
 CLANG_TIDY := /usr/local/opt/llvm/bin/clang-tidy
 
 CSYSTEMFLAGS := \
