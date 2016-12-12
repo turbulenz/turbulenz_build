@@ -616,7 +616,7 @@ define _make_c_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CC $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CC $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CC)                                                   \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(CSYSTEMFLAGS) $(CFLAGSPRE) $(CFLAGS)                            \
@@ -650,7 +650,7 @@ define _make_c_object_rule
 
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) $($(1)_OBJDIR) $($(1)_DEPDIR)
-	@echo [CC TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
+	@echo [CC TIDY $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$<
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                              \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                \
       $(CFLAGSPRE) $(CFLAGS)                            \
@@ -727,7 +727,7 @@ define _make_cxx_object_rule
 
   $(3).clang-tidy : $(2)
 	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
-	@echo [CXX TIDY $(TARGET)-$(ARCH)] \($(1)\) $$<
+	@echo [CXX TIDY $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$<
 	$(CMDPREFIX)if (! $(CLANG_TIDY) $$< --                               \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
       $(filter-out $($(1)_remove_cxxflags),                              \
@@ -763,7 +763,7 @@ define _make_cmm_object_rule
 
   $(3) : $(2) $(_$1_pchfile)
 	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
-	@echo [CMM $(TARGET)-$(ARCH)] \($(1)\) $$(notdir $$<)
+	@echo [CMM $(TARGET)-$(ARCH)-$(CONFIG)] \($(1)\) $$(notdir $$<)
 	$(CMDPREFIX)$(CMM)                                                   \
       $(if $(_$1_pchfile),-include $(_$1_pchfile:.gch=))                 \
       $(filter-out $($(1)_remove_cxflags),                               \
