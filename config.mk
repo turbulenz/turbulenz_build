@@ -44,7 +44,7 @@ ifeq ($(CONFIG),development)
   C_OPTIMIZE ?= 0
   C_RUNTIME_CHECKS ?= 0
   LD_OPTIMIZE ?= 0
-  WIN_DLL=debug
+  WIN_DLL=release
 endif
 ifeq ($(CONFIG),release-noltcg)
   C_SYMBOLS ?= 1
