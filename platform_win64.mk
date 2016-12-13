@@ -302,7 +302,7 @@ ifeq (i386,$(ARCH))
 endif
 
 ifeq (1,$(C_OPTIMIZE))
-  CXXFLAGSPRE += /Ob2ity -DNEDBUG
+  CXXFLAGSPRE += /Ob2ity -DNDEBUG
   # ifeq (i386,$(ARCH))
   #   CXXFLAGSPRE += /Oy
   # endif
