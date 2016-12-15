@@ -170,3 +170,23 @@ _mkdir_rule =                                  \
       $(eval $(call _create_mkdir_rule,$(d)))  \
     )                                          \
   )
+
+############################################################
+# Resolve externals.
+#
+# EXT list and all external versions
+############################################################
+
+# Pull in all platform-specific externals
+
+EXT := $(sort $(EXT) $(EXT_$(TARGETNAME)) $(EXT_$(TARGET)))
+
+# Let platform-specific versions <external>_version_<targetname>
+# override defaults.
+
+$(foreach ext,$(EXT),$(eval                                              \
+  $(ext)_version := $(strip                                              \
+    $(if $($(ext)_version_$(TARGETNAME)),                                \
+         $($(ext)_version_$(TARGETNAME)),                                \
+         $($(ext)_version))                                              \
+  )))
