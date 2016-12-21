@@ -1,6 +1,5 @@
 
-Introduction
-============
+# Introduction
 
 A build description file uses Make syntax.  It is usually called
 `Makefile` and typically takes the form ::
@@ -23,8 +22,83 @@ which describe the modules to be built and dependencies between them.
 Finally, rules.mk is called, which generates all build rules based on
 the module delcarations.
 
-Modules
-=======
+A more complete `Makefile` example, including 'external' modules and
+conditionals is given below.  This should be a sufficient template for
+most build requirements ::
+
+    BUILDDIR := build/tzbuild
+
+    # (OPTIONAL) location of scripts that extend the build
+    # functionality.  Support for extra platforms can be added by
+    # placing a file names `platform_<target>.mk` in this directory.
+
+    CUSTOMSCRIPTS := build/scripts
+
+    # (OPTIONAL) first step in the tzbuild configuration process.
+    # This detects the build host and sets up some target variables
+    # given the command line parameters.  If not explicitly included,
+    # it will be included by `config.mk`, but can be specified here to
+    # allow the caller to make per-platform or external module
+    # settings.
+
+    include $(BUILDDIR)/config_platform_info.mk
+
+    # (OPTIONAL) custom configuration values that will be picked up by
+    # `config.mk`.
+
+    COMPILER_linux64  ?= clang
+    XCODE_SDK_VER := 10.12
+
+    # (OPTIONAL) 'external' modules (binary dependencies) should have
+    # their names and versions specified here.  The per-platform
+    # values will be resolved by `config.mk`.
+
+    curl_version := 7.48.0
+    curl_version_android := 7.27.0
+    curl_version_macosx := 7.33.0-tblz
+    EXT += curl
+
+    ifeq (debug,$(CONFIG))
+      EXT += testlib
+    endif
+
+    # (REQUIRED) remaining tzbuild configuration setup
+
+    include $(BUILDDIR)/config.mk
+
+    # (OPTIONAL) all other build configuration variables have now been
+    # given default values and can be modified here before build rules
+    # are generated.
+
+    VARIANT:=-$(COMPILER)-$(GRAPHICS_DRIVER)
+    UNITY ?= 1
+    CXXFLAGSPRE += -DMY_DEFINE
+    ifeq (win,$(TARGETNAME))
+      CXXFLAGSPRE += -DIS_WINDOWS=1
+    endif
+
+    # (OPTIONAL) external paths
+
+    CURLDIR := $(external_path)/curl/$(curl_version)
+    curl_incdirs := $(CURLDIR)/include $(CURLDIR)/include/$(EXTTARGET)
+    curl_libfile := $(CURLDIR)/lib/$(EXTTARGET)/libcurl$(libsuffix)
+
+    # (OPTIONAL) module definitions
+
+    mylib_src := $(wildcard mylib/*.cpp) mylib/$(TARGETNAME)/platform.cpp
+    mylib_incdirs := mylib
+    LIBS += mylib
+
+    myapp_src := $(wildcard myapp/*.cpp)
+    myapp_deps := mylib
+    APPS += myapp
+
+    # (REQUIRED) build rules
+
+    include $(BUILDDIR)/rules.mk
+
+
+# Modules
 
 Modules are just a set of variables describing properties such as the
 location of source code, or depedent modules.  Below is an example of
@@ -58,8 +132,7 @@ often specify project dependencies, include paths to dependencies and
 library files to link against by hand, often for each build
 configuration.
 
-Building
-========
+# Building
 
 Run `make` from the direectory containing your build description file.
 Variables can be set from the command line using `VAR=value`, and
@@ -71,8 +144,7 @@ Example ::
 
 runs a refcheck (see below) build on the `mymod` modules.
 
-TypeScript
-==========
+# TypeScript
 
 TypeScript modules are added to the `TSLIB` variable.  Each module can
 define the following variables:
@@ -143,11 +215,9 @@ Below are some advanced / internal variables.  All optional.
   Overrides the destination file for the given module.  Used only
   when `TS_MODULAR` is set.
 
-C++
-===
+# C++
 
-External Libraries
-------------------
+## External Libraries
 
 Used to reference pre built static or dynamic libraries.  Usually take
 one of 2 forms ::
@@ -174,8 +244,7 @@ in which case, link commands of dependent modules use the form ::
   path/to/extmod/lib/libext.a
 
 
-Local Modules
--------------
+## Local Modules
 
 C++ modules are added to one of `LIBS` (static lib), `DLLS` (dynamic
 lbi) or `APPS` (applications).  Each module may define:
@@ -221,8 +290,7 @@ lbi) or `APPS` (applications).  Each module may define:
   C instead of C++.
 
 
-Configuration Variables
-=======================
+## Configuration Variables
 
 `CONFIG`
 
