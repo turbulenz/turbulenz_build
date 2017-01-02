@@ -47,7 +47,7 @@ ifeq (macosx,$(TARGETNAME))
 
   # Check the SDK ROOT location
   ifeq (,$(wildcard $(XCODE_SDK_ROOT)))
-    $(error couldnt find SDK dir)
+    $(error couldnt find SDK dir $(XCODE_SDK_ROOT))
   endif
 
 endif
