@@ -190,3 +190,16 @@ $(foreach ext,$(EXT),$(eval                                              \
          $($(ext)_version_$(TARGETNAME)),                                \
          $($(ext)_version))                                              \
   )))
+
+ifeq (,$(CONFIG))
+  $(error CONFIG not defined)
+endif
+ifeq (,$(TARGETNAME))
+  $(error TARGETNAME not defined)
+endif
+ifeq (,$(COMPILER))
+  $(error COMPILER not defined)
+endif
+ifeq (,$(ARCH))
+  $(error ARCH not defined)
+endif
