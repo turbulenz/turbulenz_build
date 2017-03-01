@@ -456,7 +456,7 @@ define _make_cxx_unity_file
   $($(1)_src) : $($(1)_unity_src)
 	$(MKDIR) -p $($(1)_OBJDIR)
 	echo > $$@
-	for i in $$^ ; do echo \#include \"$$$$i\" >> $$@ ; done
+	for i in $($(1)_unity_src) ; do echo \#include \"$$$$i\" >> $$@ ; done
 endef
 
 $(foreach mod,$(UNITY_MODULES),                                 \
@@ -491,8 +491,7 @@ define _make_cxx_flags_file
 
   $(1)_flags_file ?= $($(1)_OBJDIR)/.flags
 
-  .FORCE:
-  $$($(1)_flags_file) : .FORCE
+  $$($(1)_flags_file) :
 	@if [ '$(strip $(2))' != "`cat $$@ 2>/dev/null | tr -d '\n'`" ] ; then \
       echo [FLAGS $(TARGET)-$(ARCH)-$(CONFIG)] \($1\) $$@      ; \
       $(MKDIR) -p $$(dir $$@) ; \
@@ -510,6 +509,8 @@ define _make_cxx_flags_file
   # endif
 
   $($(1)_OBJECTS) $(_$(1)_pchfile) : $$($(1)_flags_file)
+
+  $(1)_cleanfiles += $$($(1)_flags_file)
 endef
 
 ifneq (1,$(DISABLE_FLAG_CHECKS))
@@ -700,6 +701,11 @@ define _make_cxx_object_rule
         $(CXXFLAGSPOST) $($(call file_flags,$(2)))                       \
       )                                                                  \
       $(cout)$$@ $(csrc) $$< || ($(RM) -f $(3) $(4) && exit 1)
+
+	$(if $(DISABLE_DEP_GEN),, $(if $($(1)_unity_src), \
+      echo >> $4 ; echo $(2) : $($(1)_unity_src) >> $4 \
+    ))
+
 	$(call cxx-post,$(1),$(2),$(3),$(4))
 
   $(2):
