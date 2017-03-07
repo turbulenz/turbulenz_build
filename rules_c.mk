@@ -164,8 +164,8 @@ $(foreach ext,$(EXT), $(eval                                                \
 # to copy.
 ifneq (,$(dlllibsuffix))
   $(foreach ext,$(EXT),$(eval \
-    $(ext)_libfile := $(filter-out %$(dllsuffix),$($(ext)_libfile)) \
-  ))
+    $(ext)_libfile := $(filter-out %$(dllsuffix),$($(ext)_libfile))) \
+  )
 endif
 
 # calc <mod>_depincdirs and <mod>_depincdirs_abs - include dirs from
@@ -300,9 +300,9 @@ $(foreach mod,$(UNITY_MODULES),                                          \
 
 # set <lib>_libfile - Final LIB file
 
-$(foreach lib,$(LIBS),$(eval                                 \
-  $(lib)_libfile ?= $(LIBDIR)/$(libprefix)$(lib)$(libsuffix) \
-))
+$(foreach lib,$(LIBS),$(eval                                  \
+  $(lib)_libfile ?= $(LIBDIR)/$(libprefix)$(lib)$(libsuffix)) \
+)
 
 # <dll>_dllfile    - Final DLL file
 # <dll>_dlllibfile - Lib file to link with (dllfile on *nix, dlllib on Windows)
@@ -843,25 +843,49 @@ $(foreach mod,$(C_MODULES),                                                 \
 
 # each lib depends on the object files for that module
 
-# 1 - mod
-define _make_lib_rule
-
-  $($(1)_libfile) : $($(1)_OBJECTS)
-	$(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
-	@echo [AR  $(TARGET)-$(ARCH)-$(CONFIG)] $$(notdir $$@)
-	$(CMDPREFIX)$(RM) -f $$@
-	$(CMDPREFIX)$(MKDIR) $$(dir $$@)
-	$(CMDPREFIX)$(AR) \
-     $(ARFLAGSPRE) \
-     $(arout)$$@ \
-     $($(1)_OBJECTS) \
-      $(ARFLAGSPOST) \
-
-  .PHONY : $(1)
-
-  $(1) : $($(1)_libfile)
+# 1 - string
+# 2 - file
+define _append_line_to_file
+	$(CMDPREFIX)echo $1 >> "$2"
 
 endef
+
+# 1 - mod
+ifeq (1,$(LIB_LIST_FILES))
+  define _make_lib_rule
+
+    $($(1)_libfile).objects : $($(1)_OBJECTS)
+	  $(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
+	  $(CMDPREFIX)$(RM) -f $$@
+	  $$(foreach o,$($(1)_OBJECTS),$$(call _append_line_to_file,$$o,$$@))
+
+    $($(1)_libfile) : $($(1)_libfile).objects
+	  @echo [AR  $(TARGET)-$(ARCH)-$(CONFIG)] $$(notdir $$@)
+	  $(CMDPREFIX)$(RM) -f $$@
+	  $(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	  $(CMDPREFIX)$(AR) $(ARFLAGSPRE) $(arout)$$@ @$$< $(ARFLAGSPOST)
+
+    .PHONY : $(1)
+
+    $(1) : $($(1)_libfile)
+
+  endef
+else
+  define _make_lib_rule
+
+    $($(1)_libfile) : $($(1)_OBJECTS)
+	  $(CMDPREFIX)$(MKDIR) -p $$(dir $$@)
+	  @echo [AR  $(TARGET)-$(ARCH)-$(CONFIG)] $$(notdir $$@)
+	  $(CMDPREFIX)$(RM) -f $$@
+	  $(CMDPREFIX)$(MKDIR) $$(dir $$@)
+	  $(CMDPREFIX)$(AR) $(ARFLAGSPRE) $(arout)$$@ $($(1)_OBJECTS) $(ARFLAGSPOST)
+
+    .PHONY : $(1)
+
+    $(1) : $($(1)_libfile)
+
+  endef
+endif
 
 $(foreach lib,$(LIBS),$(eval \
   $(call _make_lib_rule,$(lib)) \
