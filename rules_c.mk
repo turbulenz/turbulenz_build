@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2016 Turbulenz Limited.
+# Copyright (c) 2012-2017 Turbulenz Limited.
 # Released under "Modified BSD License".  See COPYING for full text.
 
 ############################################################
@@ -123,7 +123,7 @@ ifeq (1,$(ABSPATHS))
       $(mod)_src:=$(foreach s,$($(mod)_src),$(call abspath_or_orig,$(s)))) \
     $(eval                                                                 \
       $(mod)_incdirs:=$(foreach i,$($(mod)_incdirs),$(call abspath_or_orig,$(i)))) \
-    $(eval $(mod)_incdirs_abs:=$($(mod)_incdirs))
+    $(eval $(mod)_incdirs_abs:=$($(mod)_incdirs)) \
   )
 else
   $(foreach mod,$(C_MODULES),                                                  \
