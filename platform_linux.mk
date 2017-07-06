@@ -99,6 +99,7 @@ ifeq (1,$(LD_OPTIMIZE))
   # Enable lto, requires the use of the gold linker
   CFLAGSPRE += -flto
   LDFLAGSPOST += -O3 -flto -fuse-ld=gold
+  DLLFLAGSPOST += -O3 -flto -fuse-ld=gold
   ARFLAGSPOST += --plugin /usr/lib/llvm-3.9/lib/LLVMgold.so
 endif
 
