@@ -7,7 +7,7 @@
 #
 ############################################################
 
-CLANG_VERSION ?= 3.8
+CLANG_VERSION ?= 3.9
 
 #
 # CCACHE
@@ -99,6 +99,7 @@ ifeq (1,$(LD_OPTIMIZE))
   # Enable lto, requires the use of the gold linker
   CFLAGSPRE += -flto
   LDFLAGSPOST += -O3 -flto -fuse-ld=gold
+  ARFLAGSPOST += --plugin /usr/lib/llvm-3.9/lib/LLVMgold.so
 endif
 
 ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
@@ -134,7 +135,7 @@ PCHFLAGS := -x c++-header
 AR := ar
 ARFLAGSPRE := cr
 arout :=
-ARFLAGSPOST :=
+ARFLAGSPOST +=
 
 libprefix := lib
 libsuffix := .a

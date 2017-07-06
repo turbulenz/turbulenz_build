@@ -57,7 +57,7 @@ ifeq ($(CONFIG),release)
   C_SYMBOLS ?= 1
   C_OPTIMIZE ?= 1
   C_RUNTIME_CHECKS ?= 0
-  LD_OPTIMIZE ?= 0 # disabled by default for now
+  LD_OPTIMIZE ?= 1
   WIN_DLL=release
 endif
 
