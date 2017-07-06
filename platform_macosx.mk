@@ -106,10 +106,10 @@ else
   CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
 endif
 
-ifeq (1,$(LD_OPTIMIZE))
-  CFLAGSPRE += -flto
-  MACOSX_LDFLAGS += -O3 -flto
-endif
+#ifeq (1,$(LD_OPTIMIZE))
+#  CFLAGSPRE += -flto
+#  MACOSX_LDFLAGS += -O3 -flto
+#endif
 
 ifeq (1,$(C_RUNTIME_CHECKS))
 
