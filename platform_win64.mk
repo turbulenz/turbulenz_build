@@ -286,9 +286,7 @@ CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
   -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS \
   -D_HAS_EXCEPTIONS=0
 CXXFLAGSPOST += \
-  -I"$(VCBASEDIR)/include" \
-  -I"$(WINKITDIR)/Include/shared" \
-  -I"$(WINKITDIR)/Include/um" \
+  -I"$(VCBASEDIR)/include"
 
 ifneq (,$(UCRTDIR))
   CXXFLAGSPOST += -I"$(UCRTDIR)"
