@@ -42,7 +42,10 @@ ifeq (macosx,$(TARGETNAME))
 
   # Check which SDK version we have available
   ifeq (,$(shell $(MACOSX_XCODE_BIN_PATH)xcodebuild -showsdks | grep macosx$(XCODE_SDK_VER)))
-    $(error Cant find SDK version $(XCODE_SDK_VER))
+    # This technique works if only the Command Line tools are available.
+    ifeq (,$(wildcard $(shell xcode-select --print-path)/SDKs/MacOSX$(XCODE_SDK_VER).sdk))
+      $(error Cant find SDK version $(XCODE_SDK_VER))
+    endif
   endif
 
   # Check the SDK ROOT location
