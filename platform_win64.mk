@@ -281,7 +281,7 @@ endif
 CC := "$(VCBINDIR)/cl.exe"
 CXX := "$(VCBINDIR)/cl.exe"
 CXXFLAGSPRE += /W4 /errorReport:prompt /nologo /analyze- /fp:fast /Gy \
-  /Zc:wchar_t /Zc:forScope /GR /Gm- /EHsc /FS \
+  /Zc:wchar_t /Zc:forScope /GR /Gm- /EHsc /FS /std:c++14 \
   -D_WINDOWS -D_USRDLL -DWIN32 -DWIN32_LEAN_AND_MEAN \
   -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS \
   -D_HAS_EXCEPTIONS=0
