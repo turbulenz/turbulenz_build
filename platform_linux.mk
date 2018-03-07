@@ -100,7 +100,7 @@ ifeq (1,$(LD_OPTIMIZE))
   CFLAGSPRE += -flto
   LDFLAGSPOST += -O3 -flto -fuse-ld=gold
   DLLFLAGSPOST += -O3 -flto -fuse-ld=gold
-  ARFLAGSPOST += --plugin /usr/lib/llvm-3.9/lib/LLVMgold.so
+  ARFLAGSPOST += --plugin /usr/lib/llvm-$(CLANG_VERSION)/lib/LLVMgold.so
 endif
 
 ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
@@ -176,12 +176,3 @@ DLLFLAGS_PDB := -Wl,-Map,
 LDFLAGS_PDB := $(DLLFLAGS_PDB)
 
 ############################################################
-
-# g++ \
-#  -shared \
-#  -Wl,-soname,turbulenz.so.0.13.0 \
-#  <objects> \
-#  -Wl,--rpath /usr/local/lib/turbulenz \
-#  -L/usr/local/lib/turbulenz -L../../external/v8/lib/linux64 -L../../external/bullet/lib/linux64 -L../../external/zlib/lib/linux64 -L../../external/png/lib/linux64 \
-#  -lv8 -lGL -lopenal -lvorbis -lvorbisfile -lpng -ljpeg -lbulletmultithreaded -lbulletdynamics -lbulletcollision -lbulletmath -ltbb `pkg-config --libs-only-l gtkglext-1.0` \
-#  -o turbulenz.so.0.13.0
