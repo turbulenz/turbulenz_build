@@ -7,7 +7,7 @@
 #
 ############################################################
 
-CLANG_VERSION ?= 4.0
+CLANG_VERSION ?= 3.9
 
 #
 # CCACHE
@@ -123,7 +123,7 @@ ifeq (1clang,$(C_RUNTIME_CHECKS)$(COMPILER))
 endif
 
 CXXFLAGSPRE := \
-  $(CFLAGSPRE) -Wno-overloaded-virtual -std=c++14 -Wno-reorder \
+  $(CFLAGSPRE) -Wno-overloaded-virtual -std=c++11 -Wno-reorder \
   -DXP_LINUX=1 -DXP_UNIX=1 -DMOZILLA_STRICT_API
 CXXFLAGSPOST := $(CFLAGSPOST) -fexceptions -fpermissive $(_RT_FLAGS)
 
