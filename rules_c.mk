@@ -494,7 +494,8 @@ define _make_cxx_flags_file
 
   $(1)_flags_file ?= $($(1)_OBJDIR)/.flags
 
-  $$($(1)_flags_file) :
+  .FORCE :
+  $$($(1)_flags_file) : .FORCE
 	@if [ '$(strip $(2))' != "`cat $$@ 2>/dev/null | tr -d '\n'`" ] ; then \
       echo [FLAGS $(TARGET)-$(ARCH)-$(CONFIG)] \($1\) $$@      ; \
       $(MKDIR) -p $$(dir $$@) ; \
