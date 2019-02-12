@@ -214,6 +214,15 @@ endif
 # Setup based on vs version
 ############################################################
 
+ifeq (vs2017,$(COMPILER))
+  # Ideally use $(wildcard) to find which out of Enterprise, Professional or Community are installed
+  VS2017VERSION?=Professional
+  VCINSTALLDIR=C:/Program Files (x86)/Microsoft Visual Studio/2017/$(VS2017VERSION)
+  VCBASEDIR:=$(VCINSTALLDIR)/VC/Tools/MSVC/14.16.27023
+  WINKITDIR:=C:/Program Files (x86)/Windows Kits/8.1
+  UCRTDIR:=C:/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt
+endif
+
 ifeq (vs2015,$(COMPILER))
   ifeq (,$(VS140COMNTOOLS))
     VS140COMNTOOLS = "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\"
@@ -238,28 +247,41 @@ ifeq (,$(VCBASEDIR))
   $(warning Cant find tools for COMPILER version: $(COMPILER))
 endif
 
-ifeq (win32,$(TARGET))
-  VCBINDIR:=$(VCBASEDIR)/bin
-  VCLIBDIR:=$(VCBASEDIR)/lib
-else
-  ifeq (win64,$(TARGET))
-    VCBINDIR:=$(VCBASEDIR)/bin/amd64
-    VCLIBDIR:=$(VCBASEDIR)/lib/amd64
-    # ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
-    #   # On a 64-bit machine, the x86_amd64 tools tend to require the
-    #   # vcvars variables to be set up in order to find the correct
-    #   # DLLs.  Try it as a last resort.
-
-    #   VCBINDIR:=$(VCBASEDIR)/bin/x86_amd64
-    #   # export PATH:="$(VS120COMNTOOLS)\\..\\..\\bin";$(PATH)
-    #   # $(warning PATH = $(PATH))
-    #   # export VCINSTALLDIR:="$(VCBASEDIR)"
-    # endif
+ifeq (vs2017,$(COMPILER))
+  ifeq (win32,$(TARGET))
+    VCBINDIR:=$(VCBASEDIR)/bin/Hostx64/x86
+    VCLIBDIR:=$(VCBASEDIR)/lib/x86
   else
-    $(error Target $(TARGET) not supported in this platform file)
+    ifeq (win64,$(TARGET))
+      VCBINDIR:=$(VCBASEDIR)/bin/Hostx64/x64
+      VCLIBDIR:=$(VCBASEDIR)/lib/x64
+    else
+      $(error Target $(TARGET) not supported in this platform file)
+    endif
+  endif
+else
+  ifeq (win32,$(TARGET))
+    VCBINDIR:=$(VCBASEDIR)/bin
+    VCLIBDIR:=$(VCBASEDIR)/lib
+  else
+    ifeq (win64,$(TARGET))
+      VCBINDIR:=$(VCBASEDIR)/bin/amd64
+      VCLIBDIR:=$(VCBASEDIR)/lib/amd64
+      # ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
+      #   # On a 64-bit machine, the x86_amd64 tools tend to require the
+      #   # vcvars variables to be set up in order to find the correct
+      #   # DLLs.  Try it as a last resort.
+
+      #   VCBINDIR:=$(VCBASEDIR)/bin/x86_amd64
+      #   # export PATH:="$(VS120COMNTOOLS)\\..\\..\\bin";$(PATH)
+      #   # $(warning PATH = $(PATH))
+      #   # export VCINSTALLDIR:="$(VCBASEDIR)"
+      # endif
+    else
+      $(error Target $(TARGET) not supported in this platform file)
+    endif
   endif
 endif
-
 # WINSDK_VERSION ?= 10.0A
 # ifeq (,$(WINSDKDIR))
 #   WINSDKDIR := $(VCBASEDIR)/
