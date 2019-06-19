@@ -104,7 +104,7 @@ ifeq (1,$(C_SYMBOLS))
 endif
 
 ifeq (1,$(C_OPTIMIZE))
-  CFLAGSPRE += -O3 -DNDEBUG
+  CFLAGSPRE += -O3 -DNDEBUG -Wno-unused-lambda-capture
 else
   CFLAGSPRE += -O0 -D_DEBUG -DDEBUG
 endif
