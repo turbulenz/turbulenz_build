@@ -56,7 +56,8 @@ CC := $(CXX) -x c
 
 _cxxflags_warnings := \
   -Wall -Wsign-compare -Wunused-parameter \
-  -Wno-pragmas -Wno-unknown-pragmas -Wno-trigraphs
+  -Wno-pragmas -Wno-unknown-pragmas -Wno-trigraphs \
+  -Wshadow
 
 # -Wconversion
 
@@ -72,7 +73,7 @@ CFLAGSPRE := \
     -fvisibility=hidden \
 
 ifeq (clang,$(COMPILER))
-  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move
+  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move -Wshadow-uncaptured-local
 endif
 
 CFLAGSPOST := -c
