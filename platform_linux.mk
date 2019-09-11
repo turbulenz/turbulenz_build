@@ -73,7 +73,7 @@ CFLAGSPRE := \
     -fvisibility=hidden \
 
 ifeq (clang,$(COMPILER))
-  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move -Wshadow-uncaptured-local
+  CFLAGSPRE += -Qunused-arguments -Wno-deprecated-register -Wpessimizing-move
 endif
 
 CFLAGSPOST := -c
