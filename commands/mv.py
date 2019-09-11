@@ -1,17 +1,19 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 def _verbose(msg):
-    print msg
+    print(msg)
 def _verbose_dummy(msg):
     pass
 
 def usage():
-    print """
+    print("""
 Usage:
 
     mv [--replace-if-different] src dst
 
-"""
+""")
 
 def are_same(a, b):
     from os.path import exists
@@ -49,12 +51,12 @@ def main():
         elif dst is None:
             dst = a
         else:
-            print "Invalid argument: %s" % a
+            print("Invalid argument: %s" % a)
             usage()
             return 1
 
     if not exists(src):
-        print "No such file '%s'" % src
+        print("No such file '%s'" % src)
         usage()
         exit(1)
 

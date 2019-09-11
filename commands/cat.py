@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 
@@ -8,19 +10,19 @@ def _read_file(filename):
         with open(filename, 'rb') as f:
             return f.read()
     except IOError:
-        print "Error reading file: %s" % filename
+        print("Error reading file: %s" % filename)
         exit(-1)
 
 def cat(infiles):
 
     if len(infiles) < 1:
-        print "No files specified"
+        print("No files specified")
         return 1
 
     # Dump all files to stdout
 
     for f in infiles:
-        print _read_file(f)
+        print(_read_file(f))
     return 0
 
 ############################################################

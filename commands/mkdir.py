@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from os import makedirs
 from os.path import exists
 from sys import argv
@@ -26,17 +28,17 @@ def mkdir():
     for d in dirs:
         if not exists(d):
             if verbose:
-                print "Making dir: %s" % d
+                print("Making dir: %s" % d)
 
             try:
                 makedirs(d)
-            except OSError, e:
+            except OSError as e:
                 # Directory may have already been created after the check
                 # above
                 pass
 
             if not exists(d):
-                print "Error creating dir: %s" % d
+                print("Error creating dir: %s" % d)
                 return 1
 
     return 0

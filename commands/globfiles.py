@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 import os.path
 import sys
 import glob
@@ -20,8 +22,8 @@ def main():
         else:
             _paths.append(a)
 
-    # print "_wildcard: %s" % _wildcard
-    # print "_paths: %s" % _paths
+    # print("_wildcard: %s" % _wildcard)
+    # print("_paths: %s" % _paths)
 
     files = []
     if 0 != len(_wildcards):
@@ -34,10 +36,10 @@ def main():
             files += [f.replace('\\', '/').replace(' ', '\\ ') \
                       for f in glob.glob(p)]
 
-    #print sys.argv[1]
+    #print(sys.argv[1])
     #sys.stderr.write("GLOB: %s,  RESULT: %s\n" % (sys.argv[1], result))
     result = " ".join(files)
-    print "%s" % result
+    print("%s" % result)
     return 0
 
 if "__main__" == __name__:
