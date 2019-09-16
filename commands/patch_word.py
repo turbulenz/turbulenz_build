@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # Copyright 2013 oyatsukai.com
 
 from __future__ import print_function
