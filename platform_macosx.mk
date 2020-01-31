@@ -138,7 +138,7 @@ endif
 # -fvisibility=hidden
 
 CXXSYSTEMFLAGS := $(CSYSTEMFLAGS)
-CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++14 -fno-exceptions \
+CXXFLAGSPRE := -x $(MACOSX_CXX_DEFAULTLANG) -std=c++14 \
   -Wno-undeclared-selector  \
   $(CFLAGSPRE)
 CMMFLAGSPRE := $(CXXFLAGSPRE)
