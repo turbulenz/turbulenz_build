@@ -7,6 +7,17 @@ endif
 # Setup based on vs version
 ############################################################
 
+ifeq (vs2019,$(COMPILER))
+  # Ideally use $(wildcard) to find which out of Enterprise, Professional or Community are installed
+  VCINSTALLDIR:=$(subst \ , ,$(shell python $(realpath $(BUILDDIR))/commands/globfiles.py "C:/Program Files (x86)/Microsoft Visual Studio/2019/*"))
+  ifeq ($(VCINSTALLDIR),)
+    $(error Could not detect Visual Studio 2019 installation)
+  endif
+  VCBASEDIR:=$(VCINSTALLDIR)/VC/Tools/MSVC/14.26.28801
+  WINKITDIR:=C:/Program Files (x86)/Windows Kits/8.1
+  UCRTDIR:=C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/ucrt
+endif
+
 ifeq (vs2017,$(COMPILER))
   # Ideally use $(wildcard) to find which out of Enterprise, Professional or Community are installed
   VCINSTALLDIR:=$(subst \ , ,$(shell python $(realpath $(BUILDDIR))/commands/globfiles.py "C:/Program Files (x86)/Microsoft Visual Studio/2017/*"))
