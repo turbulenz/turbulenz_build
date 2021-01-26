@@ -71,8 +71,8 @@ else
     VCLIBDIR:=$(VCBASEDIR)/lib
   else
     ifeq (win64,$(TARGET))
-      VCBINDIR:=$(VCBASEDIR)/bin/amd64
-      VCLIBDIR:=$(VCBASEDIR)/lib/amd64
+      VCBINDIR:=$(VCBASEDIR)/bin/Hostx64/x64
+      VCLIBDIR:=$(VCBASEDIR)/lib/x64
       # ifeq (,$(shell which "$(VCBINDIR)"/cl.exe 2>NUL))
       #   # On a 64-bit machine, the x86_amd64 tools tend to require the
       #   # vcvars variables to be set up in order to find the correct
